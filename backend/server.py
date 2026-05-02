@@ -79,11 +79,29 @@ ADDONS = {
     },
     "urgente": {
         "label": "Urgente (mismo día)",
-        "flat": 60.0,
+        "flat": 0.0,
         "route_pct": 0.0,
-        "multiplier": 1.30,
+        "multiplier": 1.40,  # +40% sobre el total
     },
 }
+
+# Franjas horarias para programar la entrega/recogida
+TIME_SLOTS = {
+    "manana": {"label": "Mañana · 8-11h", "hour": 9},
+    "mediodia": {"label": "Mediodía · 12-15h", "hour": 13},
+    "tarde": {"label": "Tarde · 15-17h", "hour": 16},
+    "nocturno": {"label": "Nocturno · 18h+ (+25%)", "hour": 19},
+}
+
+# Descuento progresivo por gran carga: cuanto más kg, menor el coste relativo del peso.
+def big_load_discount(chargeable_kg: float) -> float:
+    if chargeable_kg < 1000:
+        return 0.0
+    if chargeable_kg < 2500:
+        return 0.10
+    if chargeable_kg < 5000:
+        return 0.20
+    return 0.30
 
 # Recargo fin de semana: base ×2 + extras ×1.15
 WEEKEND_BASE_MULTIPLIER = 2.0
@@ -160,7 +178,12 @@ def calculate_price(
     vol = volume_m3 or 0
     volumetric_kg = vol * VOLUMETRIC_FACTOR
     chargeable_kg = max(weight_kg, volumetric_kg)
-    w_charge = weight_surcharge(chargeable_kg)
+    w_charge_full = weight_surcharge(chargeable_kg)
+
+    # Descuento por gran carga (favor cargas completas)
+    big_disc = big_load_discount(chargeable_kg)
+    w_discount = w_charge_full * big_disc
+    w_charge = w_charge_full - w_discount
 
     # Extras combinables
     addons_clean = [a for a in (addons or []) if a in ADDONS]
@@ -187,6 +210,9 @@ def calculate_price(
         "chargeable_kg": round(chargeable_kg, 1),
         "volumetric_kg": round(volumetric_kg, 1),
         "weight_surcharge": round(w_charge, 2),
+        "weight_full": round(w_charge_full, 2),
+        "big_load_discount_pct": round(big_disc * 100),
+        "big_load_discount_amount": round(w_discount, 2),
         "addons": [{"id": a, "label": ADDONS[a]["label"]} for a in addons_clean],
         "addons_flat": round(addon_flat, 2),
         "addons_route_pct_charge": round(route_pct_charge, 2),
@@ -237,6 +263,7 @@ class CalculateRequest(BaseModel):
     weight_kg: float = Field(ge=0, le=6000)
     volume_m3: float = Field(ge=0, le=34, default=0)
     addons: List[str] = []
+    time_slot: Optional[str] = None  # manana / mediodia / tarde / nocturno
     hour: int = Field(ge=0, le=23, default=10)
     weekday: int = Field(ge=0, le=6, default=2)
 
@@ -255,6 +282,7 @@ class QuoteCreate(BaseModel):
     peso_kg: Optional[float] = None
     volumen_m3: Optional[float] = None
     addons: Optional[List[str]] = None
+    time_slot: Optional[str] = None
     servicio: Optional[str] = None  # Legacy
     fecha_preferida: Optional[str] = None
     hora_preferida: Optional[int] = None
@@ -279,6 +307,7 @@ class Quote(BaseModel):
     peso_kg: Optional[float] = None
     volumen_m3: Optional[float] = None
     addons: Optional[List[str]] = None
+    time_slot: Optional[str] = None
     servicio: Optional[str] = None
     fecha_preferida: Optional[str] = None
     hora_preferida: Optional[int] = None
@@ -359,7 +388,11 @@ async def get_routes():
 
 @api_router.post("/calculate")
 async def calculate(req: CalculateRequest):
-    return calculate_price(req.origin_town, req.destination_town, req.weight_kg, req.addons, req.hour, req.weekday, req.volume_m3)
+    # Si viene time_slot, derivamos la hora desde el slot
+    hour = req.hour
+    if req.time_slot and req.time_slot in TIME_SLOTS:
+        hour = TIME_SLOTS[req.time_slot]["hour"]
+    return calculate_price(req.origin_town, req.destination_town, req.weight_kg, req.addons, hour, req.weekday, req.volume_m3)
 
 
 @api_router.get("/towns")
@@ -375,6 +408,11 @@ async def get_towns():
 @api_router.get("/addons")
 async def get_addons():
     return {"addons": [{"id": k, **v} for k, v in ADDONS.items()]}
+
+
+@api_router.get("/time-slots")
+async def get_time_slots():
+    return {"slots": [{"id": k, **v} for k, v in TIME_SLOTS.items()]}
 
 
 def _gen_reference() -> str:

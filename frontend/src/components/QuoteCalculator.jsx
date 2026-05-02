@@ -9,7 +9,14 @@ import {
 const ADDONS_LIST = [
   { id: "plataforma", label: "Plataforma elevadora", desc: "Carga/descarga sin muelle. +35€", icon: "package" },
   { id: "round_trip", label: "Entrega + recogida mismo día", desc: "Ida y vuelta en el día. +50% sobre ruta", icon: "truck" },
-  { id: "urgente", label: "Urgente (mismo día)", desc: "Servicio express. +60€ y +30%", icon: "clock" },
+  { id: "urgente", label: "Urgente (mismo día)", desc: "Servicio express. Total ×1,40", icon: "clock" },
+];
+
+const TIME_SLOTS = [
+  { id: "manana", label: "Mañana", range: "8 — 11h" },
+  { id: "mediodia", label: "Mediodía", range: "12 — 15h" },
+  { id: "tarde", label: "Tarde", range: "15 — 17h" },
+  { id: "nocturno", label: "Nocturno", range: "18h+", penalty: true },
 ];
 
 const WEEKDAYS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
@@ -41,7 +48,7 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
   const [weight, setWeight] = useState(800);
   const [volume, setVolume] = useState(4);
   const [addons, setAddons] = useState([]);
-  const [hour, setHour] = useState(10);
+  const [timeSlot, setTimeSlot] = useState("manana");
   const [weekday, setWeekday] = useState(2);
   const [calc, setCalc] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -70,7 +77,7 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
     }
   }, [initialPlan, onScrollToForm]);
 
-  const isAfterHours = hour >= 18 || hour < 7;
+  const isAfterHours = timeSlot === "nocturno";
   const isWeekend = weekday >= 5;
 
   const fetchCalc = useMemo(
@@ -90,9 +97,9 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
     fetchCalc({
       origin_town: origin, destination_town: destination,
       weight_kg: Number(weight) || 0, volume_m3: Number(volume) || 0,
-      service, hour: Number(hour), weekday: Number(weekday),
+      addons, time_slot: timeSlot, weekday: Number(weekday),
     });
-  }, [origin, destination, weight, volume, service, hour, weekday, fetchCalc]);
+  }, [origin, destination, weight, volume, addons, timeSlot, weekday, fetchCalc]);
 
   const originName = towns.find((t) => t.id === origin)?.name || "Girona";
   const destName = towns.find((t) => t.id === destination)?.name || "Barcelona";
@@ -115,8 +122,9 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
         peso_kg: tipo === "b2c" ? Number(weight) : null,
         volumen_m3: tipo === "b2c" ? Number(volume) : null,
         addons: tipo === "b2c" ? addons : null,
+        time_slot: tipo === "b2c" ? timeSlot : null,
         servicio: tipo === "b2c" && addons.length ? addons.join("+") : null,
-        hora_preferida: tipo === "b2c" ? Number(hour) : null,
+        hora_preferida: null,
         weekday: tipo === "b2c" ? Number(weekday) : null,
         descripcion: form.descripcion || null,
         estimated_price: tipo === "b2c" ? calc?.total_con_iva : null,
@@ -143,7 +151,7 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
             </h2>
           </div>
           <div className="lg:col-span-5">
-            <p className="text-slate-600">Selecciona origen y destino. Mínimo 85€ por salida de base. Combina extras (plataforma, ida+vuelta, urgente). Recargo nocturno automático ≥18h. Fin de semana: base ×2 y extras +15%.</p>
+            <p className="text-slate-600">Selecciona origen y destino. Mínimo 85€ por salida de base. Combina extras (plataforma, ida+vuelta, urgente). <strong className="text-[#0F172A]">Descuento por gran carga</strong>: −10% / −20% / −30% según peso. Fin de semana: base ×2 y extras +15%.</p>
           </div>
         </div>
 
@@ -239,24 +247,30 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
             </div>
 
             <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-5">
-              <Field label={`Hora de recogida · ${String(hour).padStart(2, "0")}:00`}>
-                <input
-                  type="range" min="0" max="23" step="1"
-                  value={hour} onChange={(e) => setHour(Number(e.target.value))}
-                  className="w-full accent-[#1E3A8A]"
-                  data-testid="calc-hour"
-                />
-                <div className="flex items-center gap-2 mt-2 text-xs">
-                  {isAfterHours ? (
-                    <span data-testid="badge-nocturno" className="inline-flex items-center gap-1 bg-[#FBBF24] text-[#0F172A] font-bold px-2 py-0.5">
-                      <MoonStarsIcon size={12} weight="fill" /> Recargo nocturno +25%
-                    </span>
-                  ) : (
-                    <span className="inline-flex items-center gap-1 text-slate-600">
-                      <SunIcon size={12} weight="fill" /> Horario diurno (07:00 – 17:59)
-                    </span>
-                  )}
+              <Field label="Franja horaria de recogida">
+                <div className="grid grid-cols-2 gap-px bg-slate-200 border border-slate-200" data-testid="calc-time-slots">
+                  {TIME_SLOTS.map((s) => {
+                    const active = timeSlot === s.id;
+                    return (
+                      <button
+                        key={s.id} type="button" onClick={() => setTimeSlot(s.id)}
+                        data-testid={`calc-slot-${s.id}`}
+                        className={`p-3 text-left transition-colors duration-150 ${active ? (s.penalty ? "bg-[#FBBF24] text-[#0F172A]" : "bg-[#1E3A8A] text-white") : "bg-white hover:bg-slate-50"}`}
+                      >
+                        <div className="flex items-center gap-1.5">
+                          {s.id === "nocturno" ? <MoonStarsIcon size={14} weight={active?"fill":"regular"} /> : <SunIcon size={14} weight={active?"fill":"regular"} />}
+                          <span className="font-bold text-sm">{s.label}</span>
+                        </div>
+                        <div className={`text-[11px] mt-0.5 font-mono ${active && !s.penalty ? "text-slate-300" : (active ? "text-[#0F172A]/70" : "text-slate-500")}`}>{s.range}</div>
+                      </button>
+                    );
+                  })}
                 </div>
+                {isAfterHours && (
+                  <div data-testid="badge-nocturno" className="mt-2 inline-flex items-center gap-1 bg-[#FBBF24] text-[#0F172A] text-xs font-bold px-2 py-0.5">
+                    <MoonStarsIcon size={12} weight="fill" /> Recargo nocturno +25%
+                  </div>
+                )}
               </Field>
               <Field label="Día de la semana">
                 <div className="grid grid-cols-7 gap-px bg-slate-200 border border-slate-200" data-testid="calc-weekday">
@@ -296,6 +310,9 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
                 {calc?.breakdown?.premium_barcelona > 0 && <Row k="Premium proximidad BCN" v={`${calc.breakdown.premium_barcelona.toFixed(2)}€`} />}
                 {calc?.breakdown?.premium_jonquera > 0 && <Row k="Premium frontera Jonquera" v={`${calc.breakdown.premium_jonquera.toFixed(2)}€`} />}
                 <Row k="Recargo peso/volumen" v={`${(calc?.breakdown?.weight_surcharge ?? 0).toFixed(2)}€`} />
+                {calc?.breakdown?.big_load_discount_pct > 0 && (
+                  <Row k={`Descuento gran carga (-${calc.breakdown.big_load_discount_pct}%)`} v={`-${calc.breakdown.big_load_discount_amount.toFixed(2)}€`} highlight />
+                )}
                 {calc?.breakdown?.addons_flat > 0 && <Row k="Extras (fijo)" v={`${calc.breakdown.addons_flat.toFixed(2)}€`} />}
                 {calc?.breakdown?.addons_route_pct_charge > 0 && <Row k="Ida + vuelta (+50% ruta)" v={`${calc.breakdown.addons_route_pct_charge.toFixed(2)}€`} />}
                 {calc?.breakdown?.addons_multiplier > 1 && <Row k={`Multiplicador (×${calc.breakdown.addons_multiplier.toFixed(2)})`} v="urgente" highlight />}
