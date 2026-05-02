@@ -1,0 +1,118 @@
+{
+  "theme": "light",
+  "archetype": "4 (Swiss & High-Contrast)",
+  "emotional_tone": "Authoritative, Transparent, Efficient, and Professional",
+  "design_philosophy": "The platform is an operational tool, not just a brochure. It emphasizes real-time functional features (instant quote calculator, tracking) and immediate value over generic marketing. High contrast, rigid grids, and objective clarity ensure users can accomplish their tasks quickly.",
+  "typography": {
+    "heading_font": "Cabinet Grotesk",
+    "body_font": "IBM Plex Sans",
+    "scales": {
+      "h1": "text-4xl sm:text-5xl lg:text-6xl tracking-tighter leading-none font-black text-slate-900",
+      "h2": "text-2xl sm:text-3xl lg:text-4xl tracking-tight leading-tight font-bold text-slate-900",
+      "h3": "text-xl sm:text-2xl tracking-tight font-bold text-slate-900",
+      "h4": "text-lg sm:text-xl font-semibold text-slate-800",
+      "body": "text-base leading-relaxed text-slate-700",
+      "small": "text-sm text-slate-500",
+      "label": "text-xs tracking-[0.2em] uppercase font-bold text-slate-500"
+    }
+  },
+  "colors": {
+    "background": {
+      "primary": "#FFFFFF",
+      "secondary": "#F8FAFC",
+      "tertiary": "#F1F5F9"
+    },
+    "text": {
+      "primary": "#0F172A",
+      "secondary": "#334155",
+      "tertiary": "#64748B",
+      "inverse": "#FFFFFF"
+    },
+    "brand": {
+      "primary": "#1E3A8A",
+      "primary_hover": "#1E40AF",
+      "secondary": "#FBBF24",
+      "secondary_hover": "#F59E0B"
+    },
+    "status": {
+      "success": "#16A34A",
+      "warning": "#EAB308",
+      "error": "#DC2626",
+      "info": "#2563EB"
+    },
+    "border": "#E2E8F0"
+  },
+  "spacing_and_layout": {
+    "general": "Generous spacing for marketing sections (p-12, p-16, p-24), dense and compact spacing for the calculator and admin dashboard (p-4, p-6).",
+    "marketing_grid": "MODE A: THE 'TETRIS' GRID (Asymmetry, Visual Tension). Use grid-cols-1 md:grid-cols-8 lg:grid-cols-12 with gap-8 to gap-12. Mix spans (e.g., col-span-8, col-span-4) for service highlights.",
+    "dashboard_grid": "MODE B: THE 'CONTROL ROOM' GRID. Strict grid-cols-1 md:grid-cols-3 lg:grid-cols-4 with gap-4 or gap-6. Every pixel must be utilized with h-full.",
+    "containers": "Maximum width mx-auto max-w-7xl for standard pages. Full width with internal padding for hero sections."
+  },
+  "components": {
+    "strategy": "Hybrid Approach. Pure HTML + Tailwind for marketing layouts (hero, bento grids, features) to allow overlapping and asymmetry. Heavily customized Shadcn UI components for the interactive logic (calculator form, tracking inputs, admin dashboard).",
+    "surfaces": {
+      "header": "Crystal Glass. backdrop-blur-xl bg-white/80 with a delicate 1px border-b border-slate-200. Ensures nav links remain readable while allowing the page underneath to peek through.",
+      "cards_marketing": "Flat background (bg-white or bg-slate-50), crisp 1px border (border-slate-200), zero shadow by default. On hover: slight lift (-translate-y-1) and subtle shadow (shadow-lg) to signal interactivity.",
+      "cards_dashboard": "Grid Borders ('Technical' Look). border-collapse style layout, border-r border-b border-slate-200 to expose the skeleton. Zero rounded corners for a rigid, functional feel (or max rounded-sm)."
+    },
+    "buttons": "Sharp corners or minimal rounding (rounded-md). High contrast. Primary buttons use brand Trust Blue (#1E3A8A) with white text. Secondary/Action buttons (like 'Calculate Quote') use Safety Yellow (#FBBF24) with dark text (#0F172A). Must have explicit focus and hover states.",
+    "forms": "Use Shadcn Form, Input, Select. Labels must be uppercase and tracked out (text-xs tracking-[0.2em]). Inputs should have crisp borders (border-slate-300 focus:border-blue-800 focus:ring-1 focus:ring-blue-800).",
+    "icons": "Phosphor Icons (@phosphor-icons/react) for a professional, slightly technical look."
+  },
+  "motion_and_interactions": {
+    "general": "Minimalist and purposeful. Micro-interactions for feedback.",
+    "hover_states": "Buttons and links must explicitly set hover colors (e.g., hover:bg-blue-800 hover:text-white). Cards lift slightly on hover.",
+    "transitions": "Use specific properties (transition-transform duration-200 ease-out). No transition-all.",
+    "loading": "Use indeterminate progress bars or spinning Phosphor icons for the quote calculator and tracking searches."
+  },
+  "image_urls": {
+    "hero_background": {
+      "url": "https://images.pexels.com/photos/27099096/pexels-photo-27099096.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "description": "A blue semi-truck driving on a rural highway under clear skies. Use as the main hero background with a gradient overlay (bg-gradient-to-r from-slate-900/80 via-slate-900/50 to-transparent) to ensure the white/yellow heading text pops."
+    },
+    "service_b2b": {
+      "url": "https://images.pexels.com/photos/34968619/pexels-photo-34968619.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+      "description": "Industrial loading bays with vibrant yellow walls. Use in the Bento Grid for the 'Weekly loads for professionals (B2B)' service block."
+    },
+    "service_b2c": {
+      "url": "https://images.unsplash.com/photo-1606722590635-747d0d915f3e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzR8MHwxfHNlYXJjaHwxfHxkZWxpdmVyeSUyMHZhbiUyMGJveGVzfGVufDB8fHx8MTc3Nzc1NjEyM3ww&ixlib=rb-4.1.0&q=85",
+      "description": "Man standing beside a white delivery van. Use in the Bento Grid for the 'Particular loads/unloads & door-to-door (B2C)' service block."
+    },
+    "fleet_showcase": {
+      "url": "https://images.unsplash.com/photo-1761479556231-570639303a51?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MTJ8MHwxfHNlYXJjaHwyfHxmcmVpZ2h0JTIwdHJ1Y2slMjBoaWdod2F5fGVufDB8fHx8MTc3Nzc1NjEyM3ww&ixlib=rb-4.1.0&q=85",
+      "description": "Truck on a highway with traffic lights. Use in the Fleet & Services section or About section."
+    }
+  },
+  "page_structures": {
+    "landing": [
+      "Navigation Bar (Logo, Services, Calculator, Tracking, FAQ, Contact)",
+      "Hero Section (Value proposition 'Girona-Barcelona', Trust indicators, CTA to Calculator)",
+      "Service Models (Bento Grid: B2B Weekly Cargas vs B2C Particulares)",
+      "Interactive Quote Calculator (Origin, Destination, Weight/Vol, Service Type, Time + Surcharge post-18h)",
+      "Coverage Map / Area (Girona - Barcelona focus)",
+      "Fleet & Reliability (Images of vehicles, Trust signals)",
+      "FAQ Section (Clear answers on pricing, out-of-hours, door-to-door)",
+      "Footer (Links, Contact info)"
+    ],
+    "admin_dashboard": [
+      "Sidebar Navigation (Dashboard, Quotes, Tracking, Settings)",
+      "Top Bar (User Profile, Quick Actions)",
+      "Overview Stats (Total Quotes, B2B vs B2C split)",
+      "Data Table (Recent quote requests with details: Origin, Dest, Price, Type, Status)"
+    ],
+    "tracking_page": [
+      "Centered Search Input (Enter reference number)",
+      "Status Timeline (Pick-up, In Transit, Delivered)"
+    ]
+  },
+  "instructions_to_main_agent": [
+    "Install required fonts: Cabinet Grotesk (headings) and IBM Plex Sans (body). Ensure they are loaded globally.",
+    "Install Phosphor Icons: yarn add @phosphor-icons/react",
+    "All interactive elements MUST include data-testid attributes (e.g., data-testid='quote-calculator-submit').",
+    "Build the Quote Calculator as a highly interactive, dense, single-view form (Control Room style). Do not split it into multiple pages. Ensure the post-18h surcharge logic is clearly visible when selected.",
+    "Do NOT use generic 'Card' components from Shadcn for the marketing sections. Build custom HTML/Tailwind grids (Bento style) to allow for image overlapping and distinct visual tension.",
+    "Ensure the hero image has a proper dark gradient overlay on the left side so the text achieves at least a 4.5:1 contrast ratio.",
+    "Implement the Floating WhatsApp/Telegram button in the bottom right corner with a subtle pulse animation.",
+    "Keep the entire UI strictly in Spanish as requested."
+  ]
+}
