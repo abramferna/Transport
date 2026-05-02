@@ -12,6 +12,7 @@ from pydantic import BaseModel, Field, EmailStr
 from typing import List, Optional, Literal
 import uuid
 from datetime import datetime, timezone
+from towns import TOWNS, get_town
 
 
 ROOT_DIR = Path(__file__).parent
@@ -37,62 +38,75 @@ logger = logging.getLogger(__name__)
 
 
 # ----------------- Pricing engine -----------------
-ROUTE_BASE = {
-    "girona-barcelona": 35.0,
-    "barcelona-girona": 35.0,
-    "girona-cercanias": 22.0,
-    "barcelona-cercanias": 22.0,
-    "intra-girona": 18.0,
-    "intra-barcelona": 18.0,
-    "otros": 55.0,
-}
+# Mínimo por salir de la base (Girona). Irrenunciable.
+BASE_MINIMUM = 100.0
+# Coste por km recorrido desde la base (Girona)
+COST_PER_KM = 0.60
+# Premium proximidad a Barcelona (zona alta demanda) — fade en 30 km
+BCN_PREMIUM_MAX = 30.0
+BCN_PREMIUM_FADE_KM = 30
+# Premium proximidad a La Jonquera (frontera, retorno en vacío) — fade en 15 km
+JQ_PREMIUM_MAX = 25.0
+JQ_PREMIUM_FADE_KM = 15
 
+# Tiers de peso facturable (max real, volumétrico). Camión 12T MMA con 6.000 kg payload.
 WEIGHT_TIERS = [
-    (50, 0.0),
-    (200, 15.0),
-    (500, 35.0),
-    (1000, 80.0),
-    (2000, 140.0),
-    (10000, 220.0),
+    (200, 0.0),
+    (500, 25.0),
+    (1000, 60.0),
+    (2000, 120.0),
+    (3500, 200.0),
+    (5000, 280.0),
+    (6000, 360.0),
 ]
+
+# Densidad volumétrica calibrada para nuestro 12T (6000 kg / 34 m³ ≈ 176 kg/m³).
+VOLUMETRIC_FACTOR = 176
 
 SERVICE_VARIANTS = {
     "estandar": {"label": "Estándar (muelle)", "surcharge": 0.0, "multiplier": 1.0},
-    "puerta": {"label": "Puerta a puerta", "surcharge": 12.0, "multiplier": 1.0},
-    "urgente": {"label": "Urgente (mismo día)", "surcharge": 25.0, "multiplier": 1.30},
+    "puerta": {"label": "Puerta a puerta (con plataforma)", "surcharge": 35.0, "multiplier": 1.0},
+    "urgente": {"label": "Urgente (mismo día)", "surcharge": 60.0, "multiplier": 1.30},
 }
+
+# Recargo fin de semana: base ×2 + extras ×1.15
+WEEKEND_BASE_MULTIPLIER = 2.0
+WEEKEND_EXTRAS_MULTIPLIER = 1.15
 
 WEEKLY_PLANS = [
     {
         "id": "basico",
         "name": "Plan Básico",
-        "price_week": 119,
+        "price_week": 199,
         "frequency": "1 día / semana",
-        "weight_limit_kg": 200,
+        "weight_limit_kg": 1500,
+        "volume_limit_m3": 8,
         "stops": 3,
-        "highlights": ["Ruta fija Girona ⇄ Barcelona", "Hasta 200 kg / viaje", "3 paradas incluidas", "Aviso 24h antes"],
-        "best_for": "Pymes y autónomos con envíos puntuales",
+        "highlights": ["Ruta fija Girona ⇄ Barcelona", "Hasta 1.500 kg / 8 m³", "3 paradas en polígonos", "Aviso 24h antes"],
+        "best_for": "Pymes y autónomos con envíos puntuales paletizados",
     },
     {
         "id": "estandar",
         "name": "Plan Estándar",
-        "price_week": 289,
+        "price_week": 449,
         "frequency": "2-3 días / semana",
-        "weight_limit_kg": 500,
+        "weight_limit_kg": 3000,
+        "volume_limit_m3": 18,
         "stops": 6,
-        "highlights": ["Días pactados (L-X-V)", "Hasta 500 kg / viaje", "6 paradas incluidas", "Reporte semanal"],
-        "best_for": "Tiendas y distribuidores recurrentes",
+        "highlights": ["Días pactados (L-X-V)", "Hasta 3.000 kg / 18 m³", "6 paradas en polígonos", "Reporte semanal"],
+        "best_for": "Distribuidores y operadores recurrentes",
         "popular": True,
     },
     {
         "id": "premium",
         "name": "Plan Premium",
-        "price_week": 599,
+        "price_week": 899,
         "frequency": "Diario L-V",
-        "weight_limit_kg": 1000,
+        "weight_limit_kg": 6000,
+        "volume_limit_m3": 34,
         "stops": 12,
-        "highlights": ["Servicio diario L-V", "Hasta 1.000 kg / viaje", "12 paradas incluidas", "Soporte prioritario"],
-        "best_for": "Operadores logísticos y e-commerce",
+        "highlights": ["Servicio diario L-V", "Camión 12T completo · 34 m³", "12 paradas en polígonos", "Soporte prioritario"],
+        "best_for": "Cargas completas / operadores logísticos",
     },
 ]
 
@@ -104,38 +118,74 @@ def weight_surcharge(weight_kg: float) -> float:
     return WEIGHT_TIERS[-1][1] + 60.0
 
 
-def calculate_price(route: str, weight_kg: float, service: str, hour: int, weekday: int, distance_km: Optional[float] = None) -> dict:
-    base = ROUTE_BASE.get(route, ROUTE_BASE["otros"])
-    w_charge = weight_surcharge(weight_kg)
+def calculate_price(
+    origin_town: str,
+    destination_town: str,
+    weight_kg: float,
+    service: str,
+    hour: int,
+    weekday: int,
+    volume_m3: float = 0,
+) -> dict:
+    origin = get_town(origin_town) or get_town("girona")
+    dest = get_town(destination_town) or get_town("barcelona")
+
+    # Ruta facturable basada en la pierna más larga desde la base (Girona).
+    # Sale-y-vuelve desde Girona, así que cobramos sobre el punto más alejado.
+    far_km_gi = max(origin["km_gi"], dest["km_gi"])
+    near_km_bcn = min(origin["km_bcn"], dest["km_bcn"])
+    near_km_jq = min(origin["km_jq"], dest["km_jq"])
+
+    distance_charge = far_km_gi * COST_PER_KM
+    bcn_premium = max(0.0, 1 - near_km_bcn / BCN_PREMIUM_FADE_KM) * BCN_PREMIUM_MAX
+    jq_premium = max(0.0, 1 - near_km_jq / JQ_PREMIUM_FADE_KM) * JQ_PREMIUM_MAX
+
+    route_base = BASE_MINIMUM + distance_charge + bcn_premium + jq_premium
+
+    # Peso facturable
+    vol = volume_m3 or 0
+    volumetric_kg = vol * VOLUMETRIC_FACTOR
+    chargeable_kg = max(weight_kg, volumetric_kg)
+    w_charge = weight_surcharge(chargeable_kg)
+
     variant = SERVICE_VARIANTS.get(service, SERVICE_VARIANTS["estandar"])
+    s_charge = variant["surcharge"]
 
-    subtotal = base + w_charge + variant["surcharge"]
-    if distance_km and distance_km > 80:
-        subtotal += (distance_km - 80) * 0.55
-
-    multiplier = variant["multiplier"]
+    is_weekend = weekday in (5, 6)
 
     breakdown = {
-        "base_route": round(base, 2),
+        "origen": origin["name"],
+        "destino": dest["name"],
+        "km_recorridos_aprox": far_km_gi,
+        "minimo_salida_base": BASE_MINIMUM,
+        "coste_km": round(distance_charge, 2),
+        "premium_barcelona": round(bcn_premium, 2),
+        "premium_jonquera": round(jq_premium, 2),
+        "ruta_base": round(route_base, 2),
+        "chargeable_kg": round(chargeable_kg, 1),
+        "volumetric_kg": round(volumetric_kg, 1),
         "weight_surcharge": round(w_charge, 2),
-        "service_surcharge": round(variant["surcharge"], 2),
-        "service_multiplier": multiplier,
+        "service_surcharge": round(s_charge, 2),
+        "service_multiplier": variant["multiplier"],
     }
+
+    if is_weekend:
+        route_base = route_base * WEEKEND_BASE_MULTIPLIER
+        breakdown["fin_de_semana_base_x2"] = round(route_base, 2)
+
+    extras = w_charge + s_charge
+    if is_weekend:
+        extras = extras * WEEKEND_EXTRAS_MULTIPLIER
+        breakdown["fin_de_semana_extras_x1_15"] = round(extras, 2)
+
+    subtotal = route_base + extras
 
     nocturno_extra = 0.0
     if hour >= 18 or hour < 7:
         nocturno_extra = subtotal * 0.25
         breakdown["nocturno_recargo_25"] = round(nocturno_extra, 2)
 
-    weekend_extra = 0.0
-    if weekday == 5:  # sábado
-        weekend_extra = 15.0
-        breakdown["sabado"] = 15.0
-    elif weekday == 6:  # domingo
-        weekend_extra = 30.0
-        breakdown["domingo_festivo"] = 30.0
-
-    total = (subtotal + nocturno_extra + weekend_extra) * multiplier
+    total = (subtotal + nocturno_extra) * variant["multiplier"]
     iva = total * 0.21
     total_iva = total + iva
 
@@ -147,17 +197,19 @@ def calculate_price(route: str, weight_kg: float, service: str, hour: int, weekd
         "iva_21": round(iva, 2),
         "total_con_iva": round(total_iva, 2),
         "service_label": variant["label"],
+        "is_weekend": is_weekend,
     }
 
 
 # ----------------- Models -----------------
 class CalculateRequest(BaseModel):
-    route: str
-    weight_kg: float = Field(ge=0, le=20000)
+    origin_town: str = "girona"
+    destination_town: str = "barcelona"
+    weight_kg: float = Field(ge=0, le=6000)
+    volume_m3: float = Field(ge=0, le=34, default=0)
     service: Literal["estandar", "puerta", "urgente"] = "estandar"
     hour: int = Field(ge=0, le=23, default=10)
     weekday: int = Field(ge=0, le=6, default=2)
-    distance_km: Optional[float] = None
 
 
 class QuoteCreate(BaseModel):
@@ -169,7 +221,8 @@ class QuoteCreate(BaseModel):
     telefono: str
     origen: str
     destino: str
-    route: Optional[str] = None
+    origin_town: Optional[str] = None
+    destination_town: Optional[str] = None
     peso_kg: Optional[float] = None
     volumen_m3: Optional[float] = None
     servicio: Optional[str] = None  # estandar/puerta/urgente
@@ -191,7 +244,8 @@ class Quote(BaseModel):
     telefono: str
     origen: str
     destino: str
-    route: Optional[str] = None
+    origin_town: Optional[str] = None
+    destination_town: Optional[str] = None
     peso_kg: Optional[float] = None
     volumen_m3: Optional[float] = None
     servicio: Optional[str] = None
@@ -268,14 +322,23 @@ async def get_plans():
 @api_router.get("/routes")
 async def get_routes():
     return {
-        "routes": [{"id": k, "label": k.replace("-", " ⇄ ").title()} for k in ROUTE_BASE.keys()],
         "services": [{"id": k, **v} for k, v in SERVICE_VARIANTS.items()],
     }
 
 
 @api_router.post("/calculate")
 async def calculate(req: CalculateRequest):
-    return calculate_price(req.route, req.weight_kg, req.service, req.hour, req.weekday, req.distance_km)
+    return calculate_price(req.origin_town, req.destination_town, req.weight_kg, req.service, req.hour, req.weekday, req.volume_m3)
+
+
+@api_router.get("/towns")
+async def get_towns():
+    # Agrupado por comarca
+    comarcas = {}
+    for t in TOWNS:
+        comarcas.setdefault(t["comarca"], []).append(t)
+    grouped = [{"comarca": c, "towns": v} for c, v in comarcas.items()]
+    return {"towns": TOWNS, "grouped": grouped}
 
 
 def _gen_reference() -> str:

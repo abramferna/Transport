@@ -1,13 +1,13 @@
 import { MapPinIcon, RoadHorizonIcon, ClockClockwiseIcon } from "@phosphor-icons/react";
 
 const ZONES = [
-  { name: "Girona ciudad", time: "0 km · base", color: "#1E3A8A" },
+  { name: "La Jonquera (frontera)", time: "55 min · norte", color: "#FBBF24" },
+  { name: "Figueres / Vilafant", time: "35 min", color: "#FBBF24" },
+  { name: "Girona (polígonos)", time: "0 km · base", color: "#1E3A8A" },
   { name: "Salt / Sarrià", time: "5 min", color: "#1E3A8A" },
-  { name: "Figueres", time: "35 min", color: "#1E40AF" },
-  { name: "La Bisbal", time: "30 min", color: "#1E40AF" },
-  { name: "Granollers", time: "55 min", color: "#2563EB" },
-  { name: "Mataró", time: "1h 5min", color: "#2563EB" },
-  { name: "Barcelona ciudad", time: "1h 15min", color: "#FBBF24" },
+  { name: "La Bisbal / Begur", time: "30-40 min · costa", color: "#1E40AF" },
+  { name: "Granollers / Mataró", time: "55-70 min", color: "#2563EB" },
+  { name: "Barcelona (polígonos)", time: "1h 15min", color: "#FBBF24" },
   { name: "Hospitalet / Cornellà", time: "1h 25min", color: "#FBBF24" },
 ];
 
@@ -18,12 +18,12 @@ export const Coverage = () => (
         <div className="lg:col-span-6">
           <div className="label-eyebrow mb-3">Zona de cobertura</div>
           <h2 className="font-display font-black tracking-tighter text-4xl sm:text-5xl text-[#0F172A] leading-[0.95]">
-            El corredor<br />Girona — Barcelona.
+            Dos corredores.<br />Un solo equipo.
           </h2>
         </div>
         <div className="lg:col-span-6">
           <p className="text-slate-600 leading-relaxed">
-            Especialización absoluta en el eje AP-7 / N-II. Conocemos los muelles, los horarios de carga de los polígonos y las restricciones del centro de Barcelona. Servimos también cercanías y poblaciones intermedias.
+            Especialización absoluta en dos ejes desde nuestra base en Girona: <strong className="text-[#0F172A]">Girona ⇄ Barcelona</strong> (AP-7 sur, +160 km) y <strong className="text-[#0F172A]">Girona ⇄ La Jonquera</strong> (AP-7 norte, frontera francesa). Flota propia de 12T entre polígonos industriales. <strong className="text-[#0F172A]">No realizamos reparto urbano</strong>.
           </p>
         </div>
       </div>
@@ -34,23 +34,41 @@ export const Coverage = () => (
           <div className="grid-bg absolute inset-0 opacity-50" />
           <div className="absolute inset-0">
             <svg viewBox="0 0 600 380" className="w-full h-full">
-              {/* AP-7 line */}
-              <line x1="80" y1="80" x2="520" y2="320" stroke="#0F172A" strokeWidth="3" strokeDasharray="6 4" />
-              {/* Yellow truck path */}
-              <line x1="80" y1="80" x2="520" y2="320" stroke="#FBBF24" strokeWidth="6" strokeOpacity="0.25" />
-              {/* Girona pin */}
-              <g transform="translate(80,80)">
-                <circle r="9" fill="#1E3A8A" />
-                <circle r="22" fill="#1E3A8A" fillOpacity="0.15" />
-                <text x="14" y="6" fontFamily="Cabinet Grotesk" fontSize="20" fontWeight="900" fill="#0F172A">GIRONA</text>
+              {/* AP-7 norte (Girona → La Jonquera) */}
+              <line x1="300" y1="200" x2="160" y2="50" stroke="#0F172A" strokeWidth="3" strokeDasharray="6 4" />
+              <line x1="300" y1="200" x2="160" y2="50" stroke="#FBBF24" strokeWidth="6" strokeOpacity="0.25" />
+              {/* AP-7 sur (Girona → Barcelona) */}
+              <line x1="300" y1="200" x2="540" y2="340" stroke="#0F172A" strokeWidth="3" strokeDasharray="6 4" />
+              <line x1="300" y1="200" x2="540" y2="340" stroke="#FBBF24" strokeWidth="6" strokeOpacity="0.25" />
+
+              {/* La Jonquera */}
+              <g transform="translate(160,50)">
+                <circle r="9" fill="#FBBF24" />
+                <circle r="22" fill="#FBBF24" fillOpacity="0.25" />
+                <text x="-118" y="6" fontFamily="Cabinet Grotesk" fontSize="18" fontWeight="900" fill="#0F172A">LA JONQUERA</text>
+                <text x="-32" y="22" fontFamily="IBM Plex Sans" fontSize="10" fill="#64748B">frontera</text>
               </g>
-              {/* Intermediate */}
-              <circle cx="220" cy="155" r="5" fill="#1E40AF" />
-              <text x="230" y="160" fontFamily="IBM Plex Sans" fontSize="11" fill="#334155">Granollers</text>
-              <circle cx="370" cy="240" r="5" fill="#1E40AF" />
-              <text x="380" y="245" fontFamily="IBM Plex Sans" fontSize="11" fill="#334155">Mataró</text>
+              <circle cx="220" cy="120" r="5" fill="#1E40AF" />
+              <text x="160" y="138" fontFamily="IBM Plex Sans" fontSize="11" fill="#334155">Figueres</text>
+
+              {/* Girona base */}
+              <g transform="translate(300,200)">
+                <circle r="11" fill="#1E3A8A" />
+                <circle r="26" fill="#1E3A8A" fillOpacity="0.18" />
+                <text x="16" y="6" fontFamily="Cabinet Grotesk" fontSize="22" fontWeight="900" fill="#0F172A">GIRONA</text>
+                <text x="16" y="22" fontFamily="IBM Plex Sans" fontSize="10" fill="#64748B" letterSpacing="2">BASE</text>
+              </g>
+
+              {/* Costa (lateral) */}
+              <circle cx="380" cy="220" r="4" fill="#1E40AF" />
+              <text x="388" y="224" fontFamily="IBM Plex Sans" fontSize="10" fill="#334155">Begur / Pals</text>
+
+              {/* Granollers / Mataró */}
+              <circle cx="430" cy="280" r="5" fill="#1E40AF" />
+              <text x="440" y="285" fontFamily="IBM Plex Sans" fontSize="11" fill="#334155">Granollers</text>
+
               {/* Barcelona */}
-              <g transform="translate(520,320)">
+              <g transform="translate(540,340)">
                 <circle r="9" fill="#FBBF24" />
                 <circle r="22" fill="#FBBF24" fillOpacity="0.25" />
                 <text x="-128" y="6" fontFamily="Cabinet Grotesk" fontSize="20" fontWeight="900" fill="#0F172A">BARCELONA</text>
@@ -60,8 +78,8 @@ export const Coverage = () => (
           <div className="absolute bottom-6 left-6 bg-[#0F172A] text-white px-4 py-3 flex items-center gap-3">
             <RoadHorizonIcon size={20} className="text-[#FBBF24]" weight="duotone" />
             <div>
-              <div className="font-display font-black tracking-tight text-lg leading-none">~ 100 km</div>
-              <div className="text-[10px] tracking-[0.2em] uppercase text-slate-400 mt-1">corredor principal</div>
+              <div className="font-display font-black tracking-tight text-lg leading-none">~ 60 + 100 km</div>
+              <div className="text-[10px] tracking-[0.2em] uppercase text-slate-400 mt-1">norte y sur desde Girona</div>
             </div>
           </div>
         </div>

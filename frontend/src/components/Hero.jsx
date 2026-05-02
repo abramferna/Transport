@@ -25,7 +25,7 @@ export const Hero = () => {
               cargas que <span className="underline decoration-[#FBBF24] decoration-[6px] underline-offset-[10px]">llegan a tiempo</span>.
             </h1>
             <p className="mt-7 text-lg text-slate-200 max-w-2xl leading-relaxed">
-              Cargas semanales con precio cerrado para profesionales y servicios puntuales puerta a puerta para particulares. Transparencia, horario flexible y recargos claros fuera de jornada.
+              Cargas semanales con precio cerrado para profesionales y servicios puntuales puerta a puerta para cargas paletizadas. Flota propia de camiones <strong className="text-white">12T</strong>, intercity entre polígonos. Recargos claros fuera de jornada.
             </p>
 
             <div className="mt-10 flex flex-wrap gap-3">
@@ -50,7 +50,7 @@ export const Hero = () => {
           <div className="lg:col-span-4 grid grid-cols-3 lg:grid-cols-1 gap-px bg-white/10 border border-white/10">
             {[
               { icon: <ClockIcon size={22} weight="duotone" />, k: "+98%", v: "puntualidad" },
-              { icon: <MapPinIcon size={22} weight="duotone" />, k: "120 km", v: "corredor cubierto" },
+              { icon: <MapPinIcon size={22} weight="duotone" />, k: "12 T", v: "MMA flota propia" },
               { icon: <ShieldCheckIcon size={22} weight="duotone" />, k: "100%", v: "asegurado" },
             ].map((s) => (
               <div key={s.v} className="bg-[#0F172A] p-5 lg:p-6">

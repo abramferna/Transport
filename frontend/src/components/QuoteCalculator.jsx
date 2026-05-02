@@ -3,43 +3,60 @@ import { api } from "@/lib/api";
 import { toast } from "sonner";
 import {
   CalculatorIcon, MoonStarsIcon, SunIcon, TruckIcon, PackageIcon, ClockIcon, ArrowRightIcon, SpinnerIcon,
+  MapPinIcon, FlagIcon,
 } from "@phosphor-icons/react";
 
 const SERVICES = [
   { id: "estandar", label: "Estándar (muelle a muelle)", desc: "Carga/descarga en muelle." },
-  { id: "puerta", label: "Puerta a puerta", desc: "Recogida y entrega en domicilio. +12€" },
-  { id: "urgente", label: "Urgente (mismo día)", desc: "Servicio express. +30%" },
-];
-
-const ROUTES = [
-  { id: "girona-barcelona", label: "Girona ⇄ Barcelona" },
-  { id: "barcelona-girona", label: "Barcelona ⇄ Girona" },
-  { id: "girona-cercanias", label: "Girona y cercanías" },
-  { id: "barcelona-cercanias", label: "Barcelona y cercanías" },
-  { id: "intra-girona", label: "Dentro de Girona" },
-  { id: "intra-barcelona", label: "Dentro de Barcelona" },
-  { id: "otros", label: "Otra ruta" },
+  { id: "puerta", label: "Puerta a puerta", desc: "Plataforma elevadora incluida. +35€" },
+  { id: "urgente", label: "Urgente (mismo día)", desc: "Servicio express. +60€ y +30%" },
 ];
 
 const WEEKDAYS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
 
+const TownSelect = ({ value, onChange, towns, label, testid }) => {
+  const grouped = useMemo(() => {
+    const map = {};
+    towns.forEach((t) => { (map[t.comarca] ||= []).push(t); });
+    return Object.entries(map);
+  }, [towns]);
+  return (
+    <label className="block">
+      <span className="label-eyebrow block mb-2">{label}</span>
+      <select value={value} onChange={(e) => onChange(e.target.value)} className="select-base" data-testid={testid}>
+        {grouped.map(([comarca, list]) => (
+          <optgroup key={comarca} label={comarca}>
+            {list.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+          </optgroup>
+        ))}
+      </select>
+    </label>
+  );
+};
+
 export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
-  const [route, setRoute] = useState("girona-barcelona");
-  const [weight, setWeight] = useState(150);
+  const [towns, setTowns] = useState([]);
+  const [origin, setOrigin] = useState("girona");
+  const [destination, setDestination] = useState("barcelona");
+  const [weight, setWeight] = useState(800);
+  const [volume, setVolume] = useState(4);
   const [service, setService] = useState("estandar");
   const [hour, setHour] = useState(10);
   const [weekday, setWeekday] = useState(2);
   const [calc, setCalc] = useState(null);
   const [loading, setLoading] = useState(false);
 
-  // Form state
   const [tipo, setTipo] = useState("b2c");
   const [planId, setPlanId] = useState("");
   const [form, setForm] = useState({
-    nombre: "", empresa: "", email: "", telefono: "", origen: "", destino: "", descripcion: "",
+    nombre: "", empresa: "", email: "", telefono: "", descripcion: "",
   });
   const [submitting, setSubmitting] = useState(false);
   const [submittedRef, setSubmittedRef] = useState(null);
+
+  useEffect(() => {
+    api.get("/towns").then((r) => setTowns(r.data.towns || [])).catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (initialPlan) {
@@ -50,6 +67,7 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
   }, [initialPlan, onScrollToForm]);
 
   const isAfterHours = hour >= 18 || hour < 7;
+  const isWeekend = weekday >= 5;
 
   const fetchCalc = useMemo(
     () => async (params) => {
@@ -62,13 +80,18 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
       } finally {
         setLoading(false);
       }
-    },
-    []
-  );
+    }, []);
 
   useEffect(() => {
-    fetchCalc({ route, weight_kg: Number(weight) || 0, service, hour: Number(hour), weekday: Number(weekday) });
-  }, [route, weight, service, hour, weekday, fetchCalc]);
+    fetchCalc({
+      origin_town: origin, destination_town: destination,
+      weight_kg: Number(weight) || 0, volume_m3: Number(volume) || 0,
+      service, hour: Number(hour), weekday: Number(weekday),
+    });
+  }, [origin, destination, weight, volume, service, hour, weekday, fetchCalc]);
+
+  const originName = towns.find((t) => t.id === origin)?.name || "Girona";
+  const destName = towns.find((t) => t.id === destination)?.name || "Barcelona";
 
   const submit = async (e) => {
     e.preventDefault();
@@ -81,10 +104,12 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
         empresa: form.empresa || null,
         email: form.email,
         telefono: form.telefono,
-        origen: form.origen || ROUTES.find((r) => r.id === route)?.label,
-        destino: form.destino || ROUTES.find((r) => r.id === route)?.label,
-        route,
+        origen: originName,
+        destino: destName,
+        origin_town: origin,
+        destination_town: destination,
         peso_kg: tipo === "b2c" ? Number(weight) : null,
+        volumen_m3: tipo === "b2c" ? Number(volume) : null,
         servicio: tipo === "b2c" ? service : null,
         hora_preferida: tipo === "b2c" ? Number(hour) : null,
         weekday: tipo === "b2c" ? Number(weekday) : null,
@@ -94,7 +119,7 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
       const r = await api.post("/quotes", payload);
       setSubmittedRef(r.data.reference);
       toast.success("Solicitud enviada", { description: `Referencia ${r.data.reference}` });
-      setForm({ nombre: "", empresa: "", email: "", telefono: "", origen: "", destino: "", descripcion: "" });
+      setForm({ nombre: "", empresa: "", email: "", telefono: "", descripcion: "" });
     } catch {
       toast.error("No se pudo enviar la solicitud. Inténtalo de nuevo.");
     } finally {
@@ -113,7 +138,7 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
             </h2>
           </div>
           <div className="lg:col-span-5">
-            <p className="text-slate-600">Configura tu envío. El precio incluye recargo nocturno (a partir de las 18h) y fines de semana de forma automática.</p>
+            <p className="text-slate-600">Selecciona origen y destino. Mínimo 100€ por salida de base. Precio crece según km y proximidad a Barcelona o La Jonquera. Recargo nocturno automático ≥18h. Fin de semana: base ×2 y extras +15%.</p>
           </div>
         </div>
 
@@ -126,32 +151,60 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <Field label="Ruta">
-                <select value={route} onChange={(e) => setRoute(e.target.value)} className="select-base" data-testid="calc-route">
-                  {ROUTES.map((r) => <option key={r.id} value={r.id}>{r.label}</option>)}
-                </select>
-              </Field>
-              <Field label={`Peso · ${weight} kg`}>
+              <TownSelect value={origin} onChange={setOrigin} towns={towns} label="Origen" testid="calc-origin" />
+              <TownSelect value={destination} onChange={setDestination} towns={towns} label="Destino" testid="calc-destination" />
+            </div>
+
+            {calc?.breakdown && (
+              <div className="mt-3 flex items-center gap-2 text-xs text-slate-600 font-mono">
+                <MapPinIcon size={14} className="text-[#1E3A8A]" weight="fill" />
+                <span><strong>{calc.breakdown.km_recorridos_aprox} km</strong> aprox. desde la base</span>
+                {calc.breakdown.premium_barcelona > 0 && (
+                  <span className="bg-[#1E3A8A] text-white px-2 py-0.5">+{calc.breakdown.premium_barcelona.toFixed(0)}€ proximidad BCN</span>
+                )}
+                {calc.breakdown.premium_jonquera > 0 && (
+                  <span className="bg-[#FBBF24] text-[#0F172A] px-2 py-0.5 inline-flex items-center gap-1"><FlagIcon size={11} weight="fill" /> +{calc.breakdown.premium_jonquera.toFixed(0)}€ frontera</span>
+                )}
+              </div>
+            )}
+
+            <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-5">
+              <Field label={`Peso · ${weight >= 1000 ? `${(weight / 1000).toFixed(1)} t` : `${weight} kg`}`}>
                 <input
-                  type="range" min="1" max="2000" step="1"
+                  type="range" min="50" max="6000" step="50"
                   value={weight} onChange={(e) => setWeight(e.target.value)}
                   className="w-full accent-[#1E3A8A]"
                   data-testid="calc-weight"
                 />
                 <div className="flex justify-between text-[11px] font-mono text-slate-500 mt-1">
-                  <span>1 kg</span><span>500</span><span>1000</span><span>2000 kg</span>
+                  <span>50 kg</span><span>2 t</span><span>4 t</span><span>6 t · máx.</span>
+                </div>
+              </Field>
+              <Field label={`Volumen · ${volume.toFixed(1)} m³ ${calc?.breakdown?.volumetric_kg ? `(equiv. ${calc.breakdown.volumetric_kg} kg)` : ""}`}>
+                <input
+                  type="range" min="0.5" max="34" step="0.5"
+                  value={volume} onChange={(e) => setVolume(Number(e.target.value))}
+                  className="w-full accent-[#FBBF24]"
+                  data-testid="calc-volume"
+                />
+                <div className="flex justify-between text-[11px] font-mono text-slate-500 mt-1">
+                  <span>0,5 m³</span><span>12</span><span>24</span><span>34 m³ · máx.</span>
                 </div>
               </Field>
             </div>
+
+            {calc?.breakdown?.chargeable_kg > Number(weight) && (
+              <div className="mt-3 text-xs text-[#1E3A8A] bg-[#1E3A8A]/5 border border-[#1E3A8A]/20 px-3 py-2">
+                El volumen manda: facturamos por <strong>{calc.breakdown.chargeable_kg} kg</strong> (peso volumétrico, 176 kg/m³ del 12T).
+              </div>
+            )}
 
             <div className="mt-5">
               <div className="label-eyebrow mb-2">Tipo de servicio</div>
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-slate-200 border border-slate-200">
                 {SERVICES.map((s) => (
                   <button
-                    key={s.id}
-                    type="button"
-                    onClick={() => setService(s.id)}
+                    key={s.id} type="button" onClick={() => setService(s.id)}
                     data-testid={`calc-service-${s.id}`}
                     className={`text-left p-4 transition-colors duration-150 ${service === s.id ? "bg-[#0F172A] text-white" : "bg-white hover:bg-slate-50"}`}
                   >
@@ -191,15 +244,16 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
                 <div className="grid grid-cols-7 gap-px bg-slate-200 border border-slate-200" data-testid="calc-weekday">
                   {WEEKDAYS.map((d, i) => (
                     <button
-                      key={d}
-                      type="button"
-                      onClick={() => setWeekday(i)}
+                      key={d} type="button" onClick={() => setWeekday(i)}
                       className={`py-2 text-xs font-bold transition-colors duration-150 ${weekday === i ? "bg-[#1E3A8A] text-white" : "bg-white hover:bg-slate-50"}`}
                     >{d}</button>
                   ))}
                 </div>
-                {weekday === 5 && <div className="mt-2 text-xs text-slate-600">+15€ recargo sábado</div>}
-                {weekday === 6 && <div className="mt-2 text-xs text-slate-600">+30€ recargo domingo / festivo</div>}
+                {isWeekend && (
+                  <div className="mt-2 text-xs bg-[#DC2626]/10 text-[#DC2626] border border-[#DC2626]/30 px-2 py-1.5 font-medium">
+                    Fin de semana: ruta ×2 y extras +15%
+                  </div>
+                )}
               </Field>
             </div>
           </div>
@@ -209,7 +263,8 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
             <div className="absolute -right-10 -top-10 w-56 h-56 bg-[#1E3A8A]/40 rounded-full blur-3xl" aria-hidden />
             <div className="relative">
               <div className="label-eyebrow text-[#FBBF24]">Estimación</div>
-              <div className="mt-3 flex items-baseline gap-2" data-testid="calc-total">
+              <div className="text-xs text-slate-400 mt-1">{originName} → {destName}</div>
+              <div className="mt-2 flex items-baseline gap-2" data-testid="calc-total">
                 <span className="font-display text-6xl font-black tracking-tighter">
                   {loading ? <SpinnerIcon className="inline animate-spin" size={48} /> : `${(calc?.total_con_iva ?? 0).toFixed(2)}€`}
                 </span>
@@ -218,14 +273,21 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
               <div className="text-sm text-slate-400 mt-1">Sin IVA: {(calc?.total_sin_iva ?? 0).toFixed(2)}€ · IVA 21%: {(calc?.iva_21 ?? 0).toFixed(2)}€</div>
 
               <div className="mt-6 border-t border-white/10 pt-5 space-y-2 text-sm">
-                <Row k="Ruta base" v={`${(calc?.breakdown?.base_route ?? 0).toFixed(2)}€`} />
-                <Row k="Recargo peso" v={`${(calc?.breakdown?.weight_surcharge ?? 0).toFixed(2)}€`} />
-                <Row k="Recargo servicio" v={`${(calc?.breakdown?.service_surcharge ?? 0).toFixed(2)}€`} />
+                <Row k="Mínimo salida base" v={`${(calc?.breakdown?.minimo_salida_base ?? 0).toFixed(2)}€`} />
+                <Row k={`Coste km (${calc?.breakdown?.km_recorridos_aprox ?? 0} km)`} v={`${(calc?.breakdown?.coste_km ?? 0).toFixed(2)}€`} />
+                {calc?.breakdown?.premium_barcelona > 0 && <Row k="Premium proximidad BCN" v={`${calc.breakdown.premium_barcelona.toFixed(2)}€`} />}
+                {calc?.breakdown?.premium_jonquera > 0 && <Row k="Premium frontera Jonquera" v={`${calc.breakdown.premium_jonquera.toFixed(2)}€`} />}
+                <Row k="Recargo peso/volumen" v={`${(calc?.breakdown?.weight_surcharge ?? 0).toFixed(2)}€`} />
+                {calc?.breakdown?.service_surcharge > 0 && <Row k="Recargo servicio" v={`${calc.breakdown.service_surcharge.toFixed(2)}€`} />}
+                {calc?.breakdown?.fin_de_semana_base_x2 != null && (
+                  <Row k="Fin de semana · ruta ×2" v={`${calc.breakdown.fin_de_semana_base_x2.toFixed(2)}€`} highlight />
+                )}
+                {calc?.breakdown?.fin_de_semana_extras_x1_15 != null && (
+                  <Row k="Fin de semana · extras +15%" v={`${calc.breakdown.fin_de_semana_extras_x1_15.toFixed(2)}€`} highlight />
+                )}
                 {calc?.breakdown?.nocturno_recargo_25 != null && (
                   <Row k="Nocturno (+25%)" v={`${calc.breakdown.nocturno_recargo_25.toFixed(2)}€`} highlight />
                 )}
-                {calc?.breakdown?.sabado != null && <Row k="Sábado" v={`${calc.breakdown.sabado.toFixed(2)}€`} highlight />}
-                {calc?.breakdown?.domingo_festivo != null && <Row k="Domingo/festivo" v={`${calc.breakdown.domingo_festivo.toFixed(2)}€`} highlight />}
                 {calc?.service_label && <Row k="Modalidad" v={calc.service_label} />}
               </div>
 
@@ -240,7 +302,7 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
               </a>
 
               <div className="mt-4 text-[11px] text-slate-400 leading-relaxed">
-                * Estimación orientativa. El precio final puede variar según volumen real, accesos y condiciones específicas. Confirmaremos el coste por escrito en menos de 4h.
+                * Estimación orientativa. Mínimo 100€ por salida de base. El precio final puede variar según volumen real, accesos y condiciones específicas. Confirmaremos por escrito en menos de 4h.
               </div>
             </div>
           </div>
@@ -285,12 +347,12 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
               <Field label="Teléfono *">
                 <input required value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })} className="input-base" data-testid="form-telefono" />
               </Field>
-              <Field label="Origen">
-                <input placeholder="Calle, ciudad" value={form.origen} onChange={(e) => setForm({ ...form, origen: e.target.value })} className="input-base" data-testid="form-origen" />
-              </Field>
-              <Field label="Destino">
-                <input placeholder="Calle, ciudad" value={form.destino} onChange={(e) => setForm({ ...form, destino: e.target.value })} className="input-base" data-testid="form-destino" />
-              </Field>
+            </div>
+
+            <div className="mt-4 bg-[#F8FAFC] border border-slate-200 p-3 text-xs text-slate-600 flex flex-wrap items-center gap-3">
+              <span className="label-eyebrow">Ruta seleccionada</span>
+              <span className="font-bold text-[#0F172A]">{originName} → {destName}</span>
+              <span className="font-mono">{calc?.breakdown?.km_recorridos_aprox ?? "—"} km</span>
             </div>
 
             <div className="mt-4">
@@ -312,9 +374,7 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
             )}
 
             <button
-              type="submit"
-              disabled={submitting}
-              data-testid="form-submit"
+              type="submit" disabled={submitting} data-testid="form-submit"
               className="mt-6 inline-flex items-center gap-2 bg-[#0F172A] hover:bg-[#1E3A8A] text-white font-bold px-6 h-12 disabled:opacity-60 transition-colors duration-150"
             >
               {submitting ? <><SpinnerIcon className="animate-spin" size={18} /> Enviando…</> : <>Enviar solicitud <ArrowRightIcon size={18} weight="bold" /></>}
