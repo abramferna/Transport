@@ -177,7 +177,7 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
                 />
                 <div className="flex items-center gap-2 mt-2 text-xs">
                   {isAfterHours ? (
-                    <span className="inline-flex items-center gap-1 bg-[#FBBF24] text-[#0F172A] font-bold px-2 py-0.5">
+                    <span data-testid="badge-nocturno" className="inline-flex items-center gap-1 bg-[#FBBF24] text-[#0F172A] font-bold px-2 py-0.5">
                       <MoonStarsIcon size={12} weight="fill" /> Recargo nocturno +25%
                     </span>
                   ) : (
@@ -209,7 +209,7 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
             <div className="absolute -right-10 -top-10 w-56 h-56 bg-[#1E3A8A]/40 rounded-full blur-3xl" aria-hidden />
             <div className="relative">
               <div className="label-eyebrow text-[#FBBF24]">Estimación</div>
-              <div className="mt-3 flex items-baseline gap-2">
+              <div className="mt-3 flex items-baseline gap-2" data-testid="calc-total">
                 <span className="font-display text-6xl font-black tracking-tighter">
                   {loading ? <SpinnerIcon className="inline animate-spin" size={48} /> : `${(calc?.total_con_iva ?? 0).toFixed(2)}€`}
                 </span>

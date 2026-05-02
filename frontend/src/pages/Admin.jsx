@@ -130,7 +130,7 @@ export default function Admin() {
         </div>
 
         {selected && (
-          <div className="fixed inset-0 z-50 bg-[#0F172A]/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-6" onClick={() => setSelected(null)} data-testid="admin-detail">
+          <div className="fixed inset-0 z-50 bg-[#0F172A]/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-6" onClick={() => setSelected(null)} data-testid="admin-detail-modal">
             <div className="bg-white w-full max-w-2xl border border-slate-200 max-h-[90vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
               <div className="bg-[#0F172A] text-white p-6 flex items-start justify-between gap-4">
                 <div>
