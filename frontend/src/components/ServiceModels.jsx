@@ -75,7 +75,7 @@ export const ServiceModels = ({ onSelectPlan }) => {
 
           <div className="mb-8 bg-[#0F172A] text-white px-5 py-3 flex items-center gap-3 flex-wrap">
             <span className="bg-[#FBBF24] text-[#0F172A] text-[10px] font-bold tracking-[0.2em] uppercase px-2 py-1">Promo</span>
-            <span className="text-sm">Reserva <strong className="text-[#FBBF24]">4 semanas seguidas</strong> y obtén un <strong className="text-[#FBBF24]">−5%</strong> en cualquier plan. Pregunta por la promo al solicitar tu presupuesto.</span>
+            <span className="text-sm">Reserva <strong className="text-[#FBBF24]">4 semanas seguidas</strong> y obtén un <strong className="text-[#FBBF24]">−10%</strong> en cualquier plan. Pregunta por la promo al solicitar tu presupuesto.</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-slate-200 border border-slate-200">

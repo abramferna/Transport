@@ -39,7 +39,7 @@ logger = logging.getLogger(__name__)
 
 # ----------------- Pricing engine -----------------
 # Mínimo por salir de la base (Girona). Irrenunciable.
-BASE_MINIMUM = 100.0
+BASE_MINIMUM = 85.0
 # Coste por km recorrido desde la base (Girona)
 COST_PER_KM = 0.60
 # Premium proximidad a Barcelona (zona alta demanda) — fade en 30 km
@@ -63,10 +63,26 @@ WEIGHT_TIERS = [
 # Densidad volumétrica calibrada para nuestro 12T (6000 kg / 34 m³ ≈ 176 kg/m³).
 VOLUMETRIC_FACTOR = 176
 
-SERVICE_VARIANTS = {
-    "estandar": {"label": "Estándar (muelle)", "surcharge": 0.0, "multiplier": 1.0},
-    "puerta": {"label": "Puerta a puerta (con plataforma)", "surcharge": 35.0, "multiplier": 1.0},
-    "urgente": {"label": "Urgente (mismo día)", "surcharge": 60.0, "multiplier": 1.30},
+# Extras combinables (el cliente puede activar varios a la vez)
+ADDONS = {
+    "plataforma": {
+        "label": "Plataforma elevadora",
+        "flat": 35.0,
+        "route_pct": 0.0,
+        "multiplier": 1.0,
+    },
+    "round_trip": {
+        "label": "Entrega + recogida mismo día",
+        "flat": 0.0,
+        "route_pct": 0.50,  # ida + vuelta en el día → +50% sobre ruta base
+        "multiplier": 1.0,
+    },
+    "urgente": {
+        "label": "Urgente (mismo día)",
+        "flat": 60.0,
+        "route_pct": 0.0,
+        "multiplier": 1.30,
+    },
 }
 
 # Recargo fin de semana: base ×2 + extras ×1.15
@@ -122,7 +138,7 @@ def calculate_price(
     origin_town: str,
     destination_town: str,
     weight_kg: float,
-    service: str,
+    addons: List[str],
     hour: int,
     weekday: int,
     volume_m3: float = 0,
@@ -130,8 +146,6 @@ def calculate_price(
     origin = get_town(origin_town) or get_town("girona")
     dest = get_town(destination_town) or get_town("barcelona")
 
-    # Ruta facturable basada en la pierna más larga desde la base (Girona).
-    # Sale-y-vuelve desde Girona, así que cobramos sobre el punto más alejado.
     far_km_gi = max(origin["km_gi"], dest["km_gi"])
     near_km_bcn = min(origin["km_bcn"], dest["km_bcn"])
     near_km_jq = min(origin["km_jq"], dest["km_jq"])
@@ -148,8 +162,16 @@ def calculate_price(
     chargeable_kg = max(weight_kg, volumetric_kg)
     w_charge = weight_surcharge(chargeable_kg)
 
-    variant = SERVICE_VARIANTS.get(service, SERVICE_VARIANTS["estandar"])
-    s_charge = variant["surcharge"]
+    # Extras combinables
+    addons_clean = [a for a in (addons or []) if a in ADDONS]
+    addon_flat = sum(ADDONS[a]["flat"] for a in addons_clean)
+    addon_route_pct = sum(ADDONS[a]["route_pct"] for a in addons_clean)
+    addon_multiplier = 1.0
+    for a in addons_clean:
+        addon_multiplier *= ADDONS[a]["multiplier"]
+
+    # Aplicar incremento porcentual sobre ruta base (round_trip)
+    route_pct_charge = route_base * addon_route_pct
 
     is_weekend = weekday in (5, 6)
 
@@ -165,15 +187,17 @@ def calculate_price(
         "chargeable_kg": round(chargeable_kg, 1),
         "volumetric_kg": round(volumetric_kg, 1),
         "weight_surcharge": round(w_charge, 2),
-        "service_surcharge": round(s_charge, 2),
-        "service_multiplier": variant["multiplier"],
+        "addons": [{"id": a, "label": ADDONS[a]["label"]} for a in addons_clean],
+        "addons_flat": round(addon_flat, 2),
+        "addons_route_pct_charge": round(route_pct_charge, 2),
+        "addons_multiplier": addon_multiplier,
     }
 
     if is_weekend:
         route_base = route_base * WEEKEND_BASE_MULTIPLIER
         breakdown["fin_de_semana_base_x2"] = round(route_base, 2)
 
-    extras = w_charge + s_charge
+    extras = w_charge + addon_flat + route_pct_charge
     if is_weekend:
         extras = extras * WEEKEND_EXTRAS_MULTIPLIER
         breakdown["fin_de_semana_extras_x1_15"] = round(extras, 2)
@@ -185,9 +209,14 @@ def calculate_price(
         nocturno_extra = subtotal * 0.25
         breakdown["nocturno_recargo_25"] = round(nocturno_extra, 2)
 
-    total = (subtotal + nocturno_extra) * variant["multiplier"]
+    total = (subtotal + nocturno_extra) * addon_multiplier
     iva = total * 0.21
     total_iva = total + iva
+
+    if addons_clean:
+        service_label = " + ".join(ADDONS[a]["label"] for a in addons_clean)
+    else:
+        service_label = "Estándar (muelle)"
 
     return {
         "currency": "EUR",
@@ -196,7 +225,7 @@ def calculate_price(
         "total_sin_iva": round(total, 2),
         "iva_21": round(iva, 2),
         "total_con_iva": round(total_iva, 2),
-        "service_label": variant["label"],
+        "service_label": service_label,
         "is_weekend": is_weekend,
     }
 
@@ -207,7 +236,7 @@ class CalculateRequest(BaseModel):
     destination_town: str = "barcelona"
     weight_kg: float = Field(ge=0, le=6000)
     volume_m3: float = Field(ge=0, le=34, default=0)
-    service: Literal["estandar", "puerta", "urgente"] = "estandar"
+    addons: List[str] = []
     hour: int = Field(ge=0, le=23, default=10)
     weekday: int = Field(ge=0, le=6, default=2)
 
@@ -225,7 +254,8 @@ class QuoteCreate(BaseModel):
     destination_town: Optional[str] = None
     peso_kg: Optional[float] = None
     volumen_m3: Optional[float] = None
-    servicio: Optional[str] = None  # estandar/puerta/urgente
+    addons: Optional[List[str]] = None
+    servicio: Optional[str] = None  # Legacy
     fecha_preferida: Optional[str] = None
     hora_preferida: Optional[int] = None
     weekday: Optional[int] = None
@@ -248,6 +278,7 @@ class Quote(BaseModel):
     destination_town: Optional[str] = None
     peso_kg: Optional[float] = None
     volumen_m3: Optional[float] = None
+    addons: Optional[List[str]] = None
     servicio: Optional[str] = None
     fecha_preferida: Optional[str] = None
     hora_preferida: Optional[int] = None
@@ -322,13 +353,13 @@ async def get_plans():
 @api_router.get("/routes")
 async def get_routes():
     return {
-        "services": [{"id": k, **v} for k, v in SERVICE_VARIANTS.items()],
+        "addons": [{"id": k, **v} for k, v in ADDONS.items()],
     }
 
 
 @api_router.post("/calculate")
 async def calculate(req: CalculateRequest):
-    return calculate_price(req.origin_town, req.destination_town, req.weight_kg, req.service, req.hour, req.weekday, req.volume_m3)
+    return calculate_price(req.origin_town, req.destination_town, req.weight_kg, req.addons, req.hour, req.weekday, req.volume_m3)
 
 
 @api_router.get("/towns")
@@ -339,6 +370,11 @@ async def get_towns():
         comarcas.setdefault(t["comarca"], []).append(t)
     grouped = [{"comarca": c, "towns": v} for c, v in comarcas.items()]
     return {"towns": TOWNS, "grouped": grouped}
+
+
+@api_router.get("/addons")
+async def get_addons():
+    return {"addons": [{"id": k, **v} for k, v in ADDONS.items()]}
 
 
 def _gen_reference() -> str:

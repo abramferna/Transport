@@ -6,10 +6,10 @@ import {
   MapPinIcon, FlagIcon,
 } from "@phosphor-icons/react";
 
-const SERVICES = [
-  { id: "estandar", label: "Estándar (muelle a muelle)", desc: "Carga/descarga en muelle." },
-  { id: "puerta", label: "Puerta a puerta", desc: "Plataforma elevadora incluida. +35€" },
-  { id: "urgente", label: "Urgente (mismo día)", desc: "Servicio express. +60€ y +30%" },
+const ADDONS_LIST = [
+  { id: "plataforma", label: "Plataforma elevadora", desc: "Carga/descarga sin muelle. +35€", icon: "package" },
+  { id: "round_trip", label: "Entrega + recogida mismo día", desc: "Ida y vuelta en el día. +50% sobre ruta", icon: "truck" },
+  { id: "urgente", label: "Urgente (mismo día)", desc: "Servicio express. +60€ y +30%", icon: "clock" },
 ];
 
 const WEEKDAYS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
@@ -40,11 +40,15 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
   const [destination, setDestination] = useState("barcelona");
   const [weight, setWeight] = useState(800);
   const [volume, setVolume] = useState(4);
-  const [service, setService] = useState("estandar");
+  const [addons, setAddons] = useState([]);
   const [hour, setHour] = useState(10);
   const [weekday, setWeekday] = useState(2);
   const [calc, setCalc] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const toggleAddon = (id) => {
+    setAddons((cur) => cur.includes(id) ? cur.filter((a) => a !== id) : [...cur, id]);
+  };
 
   const [tipo, setTipo] = useState("b2c");
   const [planId, setPlanId] = useState("");
@@ -110,7 +114,8 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
         destination_town: destination,
         peso_kg: tipo === "b2c" ? Number(weight) : null,
         volumen_m3: tipo === "b2c" ? Number(volume) : null,
-        servicio: tipo === "b2c" ? service : null,
+        addons: tipo === "b2c" ? addons : null,
+        servicio: tipo === "b2c" && addons.length ? addons.join("+") : null,
         hora_preferida: tipo === "b2c" ? Number(hour) : null,
         weekday: tipo === "b2c" ? Number(weekday) : null,
         descripcion: form.descripcion || null,
@@ -138,7 +143,7 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
             </h2>
           </div>
           <div className="lg:col-span-5">
-            <p className="text-slate-600">Selecciona origen y destino. Mínimo 100€ por salida de base. Precio crece según km y proximidad a Barcelona o La Jonquera. Recargo nocturno automático ≥18h. Fin de semana: base ×2 y extras +15%.</p>
+            <p className="text-slate-600">Selecciona origen y destino. Mínimo 85€ por salida de base. Combina extras (plataforma, ida+vuelta, urgente). Recargo nocturno automático ≥18h. Fin de semana: base ×2 y extras +15%.</p>
           </div>
         </div>
 
@@ -200,24 +205,37 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
             )}
 
             <div className="mt-5">
-              <div className="label-eyebrow mb-2">Tipo de servicio</div>
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-slate-200 border border-slate-200">
-                {SERVICES.map((s) => (
-                  <button
-                    key={s.id} type="button" onClick={() => setService(s.id)}
-                    data-testid={`calc-service-${s.id}`}
-                    className={`text-left p-4 transition-colors duration-150 ${service === s.id ? "bg-[#0F172A] text-white" : "bg-white hover:bg-slate-50"}`}
-                  >
-                    <div className="font-bold text-sm flex items-center gap-2">
-                      {s.id === "estandar" && <TruckIcon size={16} weight={service===s.id?"fill":"regular"} />}
-                      {s.id === "puerta" && <PackageIcon size={16} weight={service===s.id?"fill":"regular"} />}
-                      {s.id === "urgente" && <ClockIcon size={16} weight={service===s.id?"fill":"regular"} />}
-                      {s.label}
-                    </div>
-                    <div className={`text-xs mt-1 ${service === s.id ? "text-slate-300" : "text-slate-500"}`}>{s.desc}</div>
-                  </button>
-                ))}
+              <div className="label-eyebrow mb-2 flex items-center justify-between">
+                <span>Extras combinables (selecciona los que necesites)</span>
+                {addons.length > 0 && <span className="text-[10px] text-[#1E3A8A] font-bold">{addons.length} activo{addons.length>1?"s":""}</span>}
               </div>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-px bg-slate-200 border border-slate-200">
+                {ADDONS_LIST.map((s) => {
+                  const active = addons.includes(s.id);
+                  return (
+                    <button
+                      key={s.id} type="button"
+                      onClick={() => toggleAddon(s.id)}
+                      data-testid={`calc-addon-${s.id}`}
+                      className={`text-left p-4 transition-colors duration-150 relative ${active ? "bg-[#0F172A] text-white" : "bg-white hover:bg-slate-50"}`}
+                    >
+                      <div className="font-bold text-sm flex items-center gap-2">
+                        {s.icon === "truck" && <TruckIcon size={16} weight={active?"fill":"regular"} />}
+                        {s.icon === "package" && <PackageIcon size={16} weight={active?"fill":"regular"} />}
+                        {s.icon === "clock" && <ClockIcon size={16} weight={active?"fill":"regular"} />}
+                        {s.label}
+                      </div>
+                      <div className={`text-xs mt-1 ${active ? "text-slate-300" : "text-slate-500"}`}>{s.desc}</div>
+                      <div className={`absolute top-3 right-3 w-4 h-4 border-2 grid place-items-center ${active ? "bg-[#FBBF24] border-[#FBBF24]" : "border-slate-300"}`}>
+                        {active && <span className="text-[#0F172A] font-bold text-xs leading-none">✓</span>}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+              {addons.length === 0 && (
+                <div className="mt-2 text-xs text-slate-500">Sin extras: servicio estándar muelle a muelle.</div>
+              )}
             </div>
 
             <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -278,7 +296,9 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
                 {calc?.breakdown?.premium_barcelona > 0 && <Row k="Premium proximidad BCN" v={`${calc.breakdown.premium_barcelona.toFixed(2)}€`} />}
                 {calc?.breakdown?.premium_jonquera > 0 && <Row k="Premium frontera Jonquera" v={`${calc.breakdown.premium_jonquera.toFixed(2)}€`} />}
                 <Row k="Recargo peso/volumen" v={`${(calc?.breakdown?.weight_surcharge ?? 0).toFixed(2)}€`} />
-                {calc?.breakdown?.service_surcharge > 0 && <Row k="Recargo servicio" v={`${calc.breakdown.service_surcharge.toFixed(2)}€`} />}
+                {calc?.breakdown?.addons_flat > 0 && <Row k="Extras (fijo)" v={`${calc.breakdown.addons_flat.toFixed(2)}€`} />}
+                {calc?.breakdown?.addons_route_pct_charge > 0 && <Row k="Ida + vuelta (+50% ruta)" v={`${calc.breakdown.addons_route_pct_charge.toFixed(2)}€`} />}
+                {calc?.breakdown?.addons_multiplier > 1 && <Row k={`Multiplicador (×${calc.breakdown.addons_multiplier.toFixed(2)})`} v="urgente" highlight />}
                 {calc?.breakdown?.fin_de_semana_base_x2 != null && (
                   <Row k="Fin de semana · ruta ×2" v={`${calc.breakdown.fin_de_semana_base_x2.toFixed(2)}€`} highlight />
                 )}
@@ -302,7 +322,7 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
               </a>
 
               <div className="mt-4 text-[11px] text-slate-400 leading-relaxed">
-                * Estimación orientativa. Mínimo 100€ por salida de base. El precio final puede variar según volumen real, accesos y condiciones específicas. Confirmaremos por escrito en menos de 4h.
+                * Estimación orientativa. Mínimo 85€ por salida de base. El precio final puede variar según volumen real, accesos y condiciones específicas. Confirmaremos por escrito en menos de 4h.
               </div>
             </div>
           </div>
