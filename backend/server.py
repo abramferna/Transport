@@ -48,7 +48,7 @@ BCN_PREMIUM_FADE_KM = 30
 JQ_PREMIUM_MAX = 0.0
 JQ_PREMIUM_FADE_KM = 15
 
-# Tiers de peso facturable (max real, volumétrico). Camión 12T MMA con 6.000 kg payload.
+# Tiers de peso facturable (max real, volumétrico). Carga útil máxima 6.000 kg.
 WEIGHT_TIERS = [
     (200, 0.0),
     (500, 25.0),
@@ -350,7 +350,7 @@ def _build_client_html(q: dict) -> str:
         <p>Hemos recibido tu solicitud de presupuesto. Te contactaremos en menos de 4 horas hábiles.</p>
         <p><strong>Referencia:</strong> {q.get('reference')}</p>
         <p><strong>Ruta:</strong> {q.get('origen')} → {q.get('destino')}</p>
-        <p style='margin-top:24px;padding:16px;background:#FBBF24;color:#0F172A;font-weight:700'>Transportes Girona ⇄ Barcelona</p>
+        <p style='margin-top:24px;padding:16px;background:#FBBF24;color:#0F172A;font-weight:700'>Vianord · Transportes Catalunya</p>
       </div>
     </div>
     """
@@ -370,7 +370,7 @@ async def send_email_safe(to: str, subject: str, html: str):
 # ----------------- Routes -----------------
 @api_router.get("/")
 async def root():
-    return {"status": "ok", "service": "Transportes Girona-Barcelona API"}
+    return {"status": "ok", "service": "Vianord API"}
 
 
 @api_router.get("/plans")

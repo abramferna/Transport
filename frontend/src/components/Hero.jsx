@@ -25,9 +25,9 @@ export const Hero = () => {
               <span className="text-[#FBBF24]">Barcelona</span> y <span className="text-[#FBBF24]">La Jonquera</span>,<br />
               cargas <span className="underline decoration-[#FBBF24] decoration-[6px] underline-offset-[10px]">a punto</span>.
             </h1>
-            <p className="mt-7 text-lg text-slate-200 max-w-2xl leading-relaxed">
-              Transporte intercity con flota propia desde Girona. Sur hacia Barcelona y norte hacia la frontera francesa por La Jonquera. Cargas semanales con precio cerrado para profesionales y servicios puntuales paletizados. Recargos claros fuera de jornada.
-            </p>
+          <p className="mt-7 text-lg text-slate-200 max-w-2xl leading-relaxed">
+            Transporte intercity con flota propia desde Girona. Ruta express <strong className="text-white">La Jonquera ⇄ Barcelona</strong> y cargas regulares en todo el corredor norte. Otros destinos en el resto de España bajo consulta con antelación. Recargos claros fuera de jornada.
+          </p>
 
             <div className="mt-10 flex flex-wrap gap-3">
               <a

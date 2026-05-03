@@ -16,14 +16,14 @@ export const Coverage = () => (
     <div className="max-w-7xl mx-auto px-5 lg:px-8">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 mb-12">
         <div className="lg:col-span-6">
-          <div className="label-eyebrow mb-3">Zona de cobertura</div>
+          <div className="label-eyebrow mb-3">Cobertura</div>
           <h2 className="font-display font-black tracking-tighter text-4xl sm:text-5xl text-[#0F172A] leading-[0.95]">
-            Dos corredores.<br />Un solo equipo.
+            Express:<br />La Jonquera ⇄ Barcelona.
           </h2>
         </div>
         <div className="lg:col-span-6">
           <p className="text-slate-600 leading-relaxed">
-            Especialización absoluta en dos ejes desde nuestra base en Girona: <strong className="text-[#0F172A]">Girona ⇄ Barcelona</strong> (AP-7 sur, +160 km) y <strong className="text-[#0F172A]">Girona ⇄ La Jonquera</strong> (AP-7 norte, frontera francesa). Flota propia de 12T entre polígonos industriales. <strong className="text-[#0F172A]">No realizamos reparto urbano</strong>.
+            Nuestra ruta diaria pasa por <strong className="text-[#0F172A]">La Jonquera, Girona y Barcelona</strong>, conectando frontera y área metropolitana. Servicios regulares en todo el corredor norte de Catalunya. <strong className="text-[#0F172A]">Otros destinos en España bajo consulta</strong> con antelación. No realizamos reparto urbano.
           </p>
         </div>
       </div>
@@ -78,8 +78,8 @@ export const Coverage = () => (
           <div className="absolute bottom-6 left-6 bg-[#0F172A] text-white px-4 py-3 flex items-center gap-3">
             <RoadHorizonIcon size={20} className="text-[#FBBF24]" weight="duotone" />
             <div>
-              <div className="font-display font-black tracking-tight text-lg leading-none">~ 60 + 100 km</div>
-              <div className="text-[10px] tracking-[0.2em] uppercase text-slate-400 mt-1">norte y sur desde Girona</div>
+              <div className="font-display font-black tracking-tight text-lg leading-none">Express AP-7</div>
+              <div className="text-[10px] tracking-[0.2em] uppercase text-slate-400 mt-1">La Jonquera · Girona · Barcelona</div>
             </div>
           </div>
         </div>
@@ -100,6 +100,21 @@ export const Coverage = () => (
             ))}
           </div>
         </div>
+      </div>
+
+      {/* Resto de España bajo consulta */}
+      <div className="mt-4 bg-[#0F172A] text-white p-6 lg:p-8 flex items-center gap-5 flex-wrap">
+        <div className="bg-[#FBBF24] text-[#0F172A] w-12 h-12 grid place-items-center flex-shrink-0">
+          <RoadHorizonIcon size={22} weight="fill" />
+        </div>
+        <div className="flex-1 min-w-[220px]">
+          <div className="label-eyebrow text-[#FBBF24] mb-1">Otros destinos · resto de España</div>
+          <div className="font-display font-bold text-lg leading-snug">¿Necesitas mover algo fuera del corredor?</div>
+          <p className="text-sm text-slate-300 mt-1">Operamos rutas puntuales al resto de España bajo consulta, con antelación suficiente para planificar. Cuéntanos origen, destino y fecha y te confirmamos disponibilidad y precio cerrado.</p>
+        </div>
+        <a href="#solicitud" className="bg-[#FBBF24] hover:bg-[#F59E0B] text-[#0F172A] font-bold px-5 h-11 inline-flex items-center transition-colors duration-150">
+          Consultar ruta
+        </a>
       </div>
     </div>
   </section>

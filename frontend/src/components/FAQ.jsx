@@ -36,8 +36,12 @@ const FAQS = [
     a: "Aplicamos peso facturable = max(peso real, volumen × 333 kg/m³). Una carga ligera pero voluminosa (cajas grandes, mobiliario) ocupa espacio que impide aceptar otras cargas, por lo que el precio refleja el espacio realmente utilizado del camión. La calculadora lo aplica de forma transparente.",
   },
   {
+    q: "¿Cuáles son vuestros corredores?",
+    a: "Operamos como ruta express el eje La Jonquera ⇄ Barcelona pasando por Girona, con servicios regulares en todo el corredor norte de Catalunya: Alt Empordà, Selva, Maresme, Vallès, Barcelonès y Baix Llobregat (más de 60 municipios). No hacemos reparto urbano dentro de las ciudades, sí entregas en polígonos.",
+  },
+  {
     q: "¿Qué tamaño de camión usáis?",
-    a: "Trabajamos con flota propia. Carga útil máxima de 6.000 kg y 34 m³ por viaje. Disponibles en versión furgón cerrado, lonas (tautliner), plataforma elevadora e isotermo bajo demanda.",
+    a: "Trabajamos con flota propia. Carga útil máxima de 6.000 kg y 34 m³ por viaje. Disponibles en versión furgón cerrado, lonas (tautliner) y plataforma elevadora.",
   },
   {
     q: "¿Cómo recibo el seguimiento?",

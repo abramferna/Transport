@@ -1,4 +1,4 @@
-import { TruckIcon, ShieldCheckIcon, ThermometerIcon, ClockIcon } from "@phosphor-icons/react";
+import { TruckIcon, ShieldCheckIcon, RoadHorizonIcon, ClockIcon } from "@phosphor-icons/react";
 
 const FLEET_IMG = "https://images.unsplash.com/photo-1761479556231-570639303a51?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MTJ8MHwxfHNlYXJjaHwyfHxmcmVpZ2h0JTIwdHJ1Y2slMjBoaWdod2F5fGVufDB8fHx8MTc3Nzc1NjEyM3ww&ixlib=rb-4.1.0&q=85";
 
@@ -6,13 +6,12 @@ const VEHICLES = [
   { name: "Furgón cerrado", payload: "hasta 6.000 kg", volume: "34 m³", best: "Carga paletizada protegida" },
   { name: "Plataforma elevadora", payload: "hasta 6.000 kg", volume: "32 m³", best: "Puerta a puerta sin muelle" },
   { name: "Lonas / tautliner", payload: "hasta 6.000 kg", volume: "34 m³", best: "Cargas voluminosas o de gran longitud" },
-  { name: "Isotermo (bajo demanda)", payload: "hasta 5.500 kg", volume: "30 m³", best: "Mercancía sensible a temperatura" },
 ];
 
 const FEATURES = [
   { icon: <ShieldCheckIcon size={22} weight="duotone" />, title: "Mercancía asegurada", desc: "Cobertura íntegra en cada viaje, sin franquicia oculta." },
   { icon: <ClockIcon size={22} weight="duotone" />, title: "Mismo día o siguiente", desc: "Entregas planificadas en franjas horarias. Sin sorpresas." },
-  { icon: <ThermometerIcon size={22} weight="duotone" />, title: "Solo intercity", desc: "Eje Girona ⇄ Barcelona y Girona ⇄ La Jonquera. No hacemos reparto urbano." },
+  { icon: <RoadHorizonIcon size={22} weight="duotone" />, title: "Express y bajo consulta", desc: "Ruta express La Jonquera ⇄ Barcelona. Resto de España con antelación." },
 ];
 
 export const Fleet = () => (

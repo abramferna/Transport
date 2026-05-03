@@ -11,11 +11,11 @@ export const Footer = () => (
               <TruckIcon weight="fill" size={20} />
             </span>
             <div>
-              <div className="font-display font-black tracking-tighter text-white text-lg leading-none">TransGirBcn</div>
+              <div className="font-display font-black tracking-tighter text-white text-lg leading-none">vianord</div>
               <div className="text-[10px] tracking-[0.2em] uppercase text-slate-500 font-bold mt-1">Girona ⇄ Barcelona</div>
             </div>
           </div>
-          <p className="text-sm text-slate-400 max-w-md">Transporte de mercancías especializado en el corredor Girona — Barcelona y cercanías. Cargas semanales para profesionales y servicios puntuales puerta a puerta.</p>
+          <p className="text-sm text-slate-400 max-w-md">Vianord. Transporte de mercancías especializado en el corredor norte de Catalunya: Girona, Barcelona y La Jonquera. Cargas semanales para profesionales y servicios puntuales paletizados con flota propia.</p>
         </div>
 
         <div>
@@ -33,14 +33,14 @@ export const Footer = () => (
           <div className="label-eyebrow text-slate-500 mb-4">Contacto</div>
           <ul className="space-y-2.5 text-sm">
             <li className="flex items-center gap-2"><PhoneIcon size={14} /> +34 600 000 000</li>
-            <li className="flex items-center gap-2"><EnvelopeIcon size={14} /> hola@transgirbcn.cat</li>
+            <li className="flex items-center gap-2"><EnvelopeIcon size={14} /> hola@vianord.cat</li>
             <li className="flex items-center gap-2"><MapPinIcon size={14} /> Girona · Barcelona</li>
           </ul>
         </div>
       </div>
 
       <div className="border-t border-white/10 mt-12 pt-6 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
-        <div>© {new Date().getFullYear()} TransGirBcn. Todos los derechos reservados.</div>
+        <div>© {new Date().getFullYear()} Vianord. Todos los derechos reservados.</div>
         <div className="font-mono">v1.0 · construido en Catalunya</div>
       </div>
     </div>
@@ -48,3 +48,4 @@ export const Footer = () => (
 );
 
 export default Footer;
+lt Footer;
