@@ -3,7 +3,7 @@ import { api } from "@/lib/api";
 import { toast } from "sonner";
 import {
   CalculatorIcon, MoonStarsIcon, SunIcon, TruckIcon, PackageIcon, ClockIcon, ArrowRightIcon, SpinnerIcon,
-  MapPinIcon, FlagIcon,
+  MapPinIcon, FlagIcon, PencilSimpleIcon, CheckCircleIcon,
 } from "@phosphor-icons/react";
 
 const ADDONS_LIST = [
@@ -56,20 +56,25 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
   const [calc, setCalc] = useState(null);
   const [loading, setLoading] = useState(false);
 
+  const [tipo, setTipo] = useState("b2c");
+  const [planId, setPlanId] = useState("");
+  const [plans, setPlans] = useState([]);
+  const [form, setForm] = useState({ nombre: "", empresa: "", email: "", telefono: "", descripcion: "" });
+  const [stops, setStops] = useState([{ direccion: "", franja: "manana" }]);
+  const [step, setStep] = useState(1);
+  const [submitting, setSubmitting] = useState(false);
+  const [submittedRef, setSubmittedRef] = useState(null);
+
   const toggleAddon = (id) => {
     setAddons((cur) => cur.includes(id) ? cur.filter((a) => a !== id) : [...cur, id]);
   };
 
-  const [tipo, setTipo] = useState("b2c");
-  const [planId, setPlanId] = useState("");
-  const [form, setForm] = useState({
-    nombre: "", empresa: "", email: "", telefono: "", descripcion: "",
-  });
-  const [submitting, setSubmitting] = useState(false);
-  const [submittedRef, setSubmittedRef] = useState(null);
+  const updateStop = (i, field, val) =>
+    setStops((cur) => cur.map((s, idx) => idx === i ? { ...s, [field]: val } : s));
 
   useEffect(() => {
     api.get("/towns").then((r) => setTowns(r.data.towns || [])).catch(() => {});
+    api.get("/plans").then((r) => setPlans(r.data.plans || [])).catch(() => {});
   }, []);
 
   useEffect(() => {
@@ -79,6 +84,16 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
       setTimeout(() => onScrollToForm?.(), 50);
     }
   }, [initialPlan, onScrollToForm]);
+
+  useEffect(() => {
+    if (tipo === "b2c") {
+      setStops((prev) => [{ direccion: prev[0]?.direccion || "", franja: prev[0]?.franja || "manana" }]);
+    } else {
+      const plan = plans.find((p) => p.id === planId);
+      const count = plan?.stops || 1;
+      setStops((prev) => Array.from({ length: count }, (_, i) => prev[i] || { direccion: "", franja: "manana" }));
+    }
+  }, [tipo, planId, plans]);
 
   const isAfterHours = timeSlot === "nocturno";
   const isWeekend = weekday >= 5;
@@ -106,9 +121,9 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
 
   const originName = towns.find((t) => t.id === origin)?.name || "Girona";
   const destName = towns.find((t) => t.id === destination)?.name || "Barcelona";
+  const selectedPlan = plans.find((p) => p.id === planId);
 
-  const submit = async (e) => {
-    e.preventDefault();
+  const doSubmit = async () => {
     setSubmitting(true);
     try {
       const payload = {
@@ -131,17 +146,28 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
         weekday: tipo === "b2c" ? Number(weekday) : null,
         descripcion: form.descripcion || null,
         estimated_price: tipo === "b2c" ? calc?.total_con_iva : null,
+        paradas: stops.map((s, i) => ({ numero: i + 1, direccion: s.direccion, franja: s.franja })),
       };
       const r = await api.post("/quotes", payload);
       setSubmittedRef(r.data.reference);
+      setStep(1);
       toast.success("Solicitud enviada", { description: `Referencia ${r.data.reference}` });
       setForm({ nombre: "", empresa: "", email: "", telefono: "", descripcion: "" });
+      setStops([{ direccion: "", franja: "manana" }]);
     } catch {
       toast.error("No se pudo enviar la solicitud. Inténtalo de nuevo.");
     } finally {
       setSubmitting(false);
     }
   };
+
+  const handleReview = (e) => {
+    e.preventDefault();
+    setStep(2);
+    setTimeout(() => document.getElementById("solicitud")?.scrollIntoView({ behavior: "smooth" }), 50);
+  };
+
+  const slotLabel = (id) => TIME_SLOTS.find((s) => s.id === id)?.label + " · " + TIME_SLOTS.find((s) => s.id === id)?.range;
 
   return (
     <section id="calculadora" className="py-20 lg:py-28 bg-[#F1F5F9] border-y border-slate-200" data-testid="calculator-section">
@@ -355,72 +381,193 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
               <div>· Confirmación por email + WhatsApp</div>
               <div>· Referencia para seguimiento online</div>
             </div>
+
+            {/* Step indicator */}
+            <div className="mt-8 flex items-center gap-3">
+              <div className={`w-7 h-7 grid place-items-center font-bold text-sm border-2 ${step === 1 ? "bg-[#0F172A] text-white border-[#0F172A]" : "bg-white text-[#0F172A] border-[#0F172A]"}`}>1</div>
+              <div className="text-xs font-bold text-[#0F172A]">Datos del servicio</div>
+            </div>
+            <div className="ml-3.5 border-l-2 border-[#0F172A]/30 h-4" />
+            <div className="flex items-center gap-3">
+              <div className={`w-7 h-7 grid place-items-center font-bold text-sm border-2 ${step === 2 ? "bg-[#0F172A] text-white border-[#0F172A]" : "bg-white/60 text-[#0F172A]/50 border-[#0F172A]/30"}`}>2</div>
+              <div className={`text-xs font-bold ${step === 2 ? "text-[#0F172A]" : "text-[#0F172A]/50"}`}>Confirmación</div>
+            </div>
           </div>
 
-          <form onSubmit={submit} className="lg:col-span-8 bg-white p-7" data-testid="quote-form">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-slate-200 border border-slate-200 mb-5">
-              {[{ id: "b2c", label: "Soy particular / envío puntual" }, { id: "b2b", label: "Soy profesional / plan semanal" }].map((t) => (
+          {/* STEP 1 — FORM */}
+          {step === 1 && (
+            <form onSubmit={handleReview} className="lg:col-span-8 bg-white p-7" data-testid="quote-form">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-px bg-slate-200 border border-slate-200 mb-5">
+                {[{ id: "b2c", label: "Soy particular / envío puntual" }, { id: "b2b", label: "Soy profesional / plan semanal" }].map((t) => (
+                  <button
+                    key={t.id} type="button" onClick={() => { setTipo(t.id); setStep(1); }}
+                    data-testid={`form-tipo-${t.id}`}
+                    className={`p-4 text-left text-sm font-bold transition-colors duration-150 ${tipo === t.id ? "bg-[#0F172A] text-white" : "bg-white hover:bg-slate-50 text-[#0F172A]"}`}
+                  >{t.label}</button>
+                ))}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <Field label="Nombre completo *">
+                  <input required value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} className="input-base" data-testid="form-nombre" />
+                </Field>
+                <Field label={tipo === "b2b" ? "Empresa *" : "Empresa (opcional)"}>
+                  <input required={tipo === "b2b"} value={form.empresa} onChange={(e) => setForm({ ...form, empresa: e.target.value })} className="input-base" data-testid="form-empresa" />
+                </Field>
+                <Field label="Email *">
+                  <input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="input-base" data-testid="form-email" />
+                </Field>
+                <Field label="Teléfono *">
+                  <input required value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })} className="input-base" data-testid="form-telefono" />
+                </Field>
+              </div>
+
+              <div className="mt-4 bg-[#F8FAFC] border border-slate-200 p-3 text-xs text-slate-600 flex flex-wrap items-center gap-3">
+                <span className="label-eyebrow">Ruta</span>
+                <span className="font-bold text-[#0F172A]">{originName} → {destName}</span>
+                <span className="font-mono">{calc?.breakdown?.km_recorridos_aprox ?? "—"} km</span>
+                {tipo === "b2b" && selectedPlan && (
+                  <span className="ml-auto text-[#1E3A8A] font-bold uppercase tracking-wider">{selectedPlan.name}</span>
+                )}
+              </div>
+
+              {/* Paradas */}
+              <div className="mt-5">
+                <div className="label-eyebrow mb-3 flex items-center gap-2">
+                  <FlagIcon size={14} weight="fill" className="text-[#1E3A8A]" />
+                  {tipo === "b2c"
+                    ? "Dirección de entrega y franja horaria"
+                    : `Paradas del plan (${stops.length}) · dirección y franja horaria`}
+                </div>
+                <div className="space-y-3">
+                  {stops.map((stop, i) => (
+                    <div key={i} className="border border-slate-200 bg-[#F8FAFC] p-4">
+                      <div className="text-xs font-bold text-slate-500 mb-3 flex items-center gap-2">
+                        <span className="bg-[#0F172A] text-white w-5 h-5 grid place-items-center text-[10px] font-bold">{i + 1}</span>
+                        {tipo === "b2c" ? "Entrega" : `Parada ${i + 1}`}
+                      </div>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        <Field label="Dirección *">
+                          <input
+                            required
+                            placeholder="Calle, número, población"
+                            value={stop.direccion}
+                            onChange={(e) => updateStop(i, "direccion", e.target.value)}
+                            className="input-base"
+                          />
+                        </Field>
+                        <Field label="Franja horaria *">
+                          <select
+                            value={stop.franja}
+                            onChange={(e) => updateStop(i, "franja", e.target.value)}
+                            className="select-base"
+                          >
+                            {TIME_SLOTS.map((s) => (
+                              <option key={s.id} value={s.id}>{s.label} · {s.range}{s.penalty ? " (+25%)" : ""}</option>
+                            ))}
+                          </select>
+                        </Field>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="mt-4">
+                <Field label="Descripción de la mercancía / observaciones">
+                  <textarea rows={3} value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: e.target.value })} className="input-base resize-none" data-testid="form-descripcion" />
+                </Field>
+              </div>
+
+              {tipo === "b2c" && calc && (
+                <div className="mt-4 bg-[#F8FAFC] border border-slate-200 p-4 text-sm flex flex-wrap items-center justify-between gap-2">
+                  <span className="text-slate-600">Estimación actual:</span>
+                  <span className="font-display font-black text-xl text-[#0F172A]">{calc.total_con_iva.toFixed(2)}€ <span className="text-xs text-slate-500 font-sans font-normal">IVA incl.</span></span>
+                </div>
+              )}
+
+              <button
+                type="submit"
+                data-testid="form-review"
+                className="mt-6 inline-flex items-center gap-2 bg-[#0F172A] hover:bg-[#1E3A8A] text-white font-bold px-6 h-12 transition-colors duration-150"
+              >
+                Revisar solicitud <ArrowRightIcon size={18} weight="bold" />
+              </button>
+
+              {submittedRef && (
+                <div className="mt-5 bg-[#16A34A]/10 border border-[#16A34A] p-4 text-sm" data-testid="form-success">
+                  <div className="font-bold text-[#16A34A]">Solicitud recibida.</div>
+                  <div className="text-slate-700 mt-1">Tu referencia es <span className="font-mono font-bold">{submittedRef}</span>. Puedes consultarla en <a href={`/seguimiento/${submittedRef}`} className="underline">Seguimiento</a>.</div>
+                </div>
+              )}
+            </form>
+          )}
+
+          {/* STEP 2 — CONFIRMATION */}
+          {step === 2 && (
+            <div className="lg:col-span-8 bg-white p-7" data-testid="quote-confirm">
+              <div className="flex items-center gap-3 mb-6">
+                <CheckCircleIcon size={22} className="text-[#16A34A]" weight="fill" />
+                <h4 className="font-display font-black text-xl text-[#0F172A] tracking-tight">Revisa los datos antes de enviar</h4>
+              </div>
+
+              <div className="space-y-px border border-slate-200 divide-y divide-slate-200 text-sm mb-6">
+                <ConfirmRow label="Tipo" value={tipo === "b2c" ? "Particular / envío puntual" : "Profesional / plan semanal"} />
+                {tipo === "b2b" && selectedPlan && <ConfirmRow label="Plan" value={selectedPlan.name} />}
+                <ConfirmRow label="Nombre" value={form.nombre} />
+                {form.empresa && <ConfirmRow label="Empresa" value={form.empresa} />}
+                <ConfirmRow label="Email" value={form.email} />
+                <ConfirmRow label="Teléfono" value={form.telefono} />
+                <ConfirmRow label="Ruta" value={`${originName} → ${destName} (${calc?.breakdown?.km_recorridos_aprox ?? "—"} km)`} />
+                {tipo === "b2c" && (
+                  <>
+                    <ConfirmRow label="Peso / Volumen" value={`${weight} kg · ${volume} m³`} />
+                    {addons.length > 0 && <ConfirmRow label="Extras" value={addons.map((a) => ADDONS_LIST.find((x) => x.id === a)?.label).join(", ")} />}
+                    {calc && <ConfirmRow label="Estimación" value={`${calc.total_con_iva.toFixed(2)}€ IVA incl.`} highlight />}
+                  </>
+                )}
+                {form.descripcion && <ConfirmRow label="Observaciones" value={form.descripcion} />}
+              </div>
+
+              <div className="mb-6">
+                <div className="label-eyebrow mb-3">
+                  {stops.length === 1 ? "Dirección de entrega" : `Paradas (${stops.length})`}
+                </div>
+                <div className="space-y-2">
+                  {stops.map((stop, i) => (
+                    <div key={i} className="flex items-start gap-3 bg-[#F8FAFC] border border-slate-200 px-4 py-3 text-sm">
+                      <span className="bg-[#0F172A] text-white w-5 h-5 grid place-items-center text-[10px] font-bold flex-shrink-0 mt-0.5">{i + 1}</span>
+                      <div>
+                        <div className="font-medium text-[#0F172A]">{stop.direccion || <span className="text-slate-400 italic">Sin dirección</span>}</div>
+                        <div className="text-xs text-slate-500 mt-0.5">{slotLabel(stop.franja)}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="flex flex-wrap gap-3">
                 <button
-                  key={t.id} type="button" onClick={() => setTipo(t.id)}
-                  data-testid={`form-tipo-${t.id}`}
-                  className={`p-4 text-left text-sm font-bold transition-colors duration-150 ${tipo === t.id ? "bg-[#0F172A] text-white" : "bg-white hover:bg-slate-50 text-[#0F172A]"}`}
-                >{t.label}</button>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <Field label="Nombre completo *">
-                <input required value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} className="input-base" data-testid="form-nombre" />
-              </Field>
-              <Field label={tipo === "b2b" ? "Empresa *" : "Empresa (opcional)"}>
-                <input required={tipo === "b2b"} value={form.empresa} onChange={(e) => setForm({ ...form, empresa: e.target.value })} className="input-base" data-testid="form-empresa" />
-              </Field>
-              <Field label="Email *">
-                <input required type="email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} className="input-base" data-testid="form-email" />
-              </Field>
-              <Field label="Teléfono *">
-                <input required value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value })} className="input-base" data-testid="form-telefono" />
-              </Field>
-            </div>
-
-            <div className="mt-4 bg-[#F8FAFC] border border-slate-200 p-3 text-xs text-slate-600 flex flex-wrap items-center gap-3">
-              <span className="label-eyebrow">Ruta seleccionada</span>
-              <span className="font-bold text-[#0F172A]">{originName} → {destName}</span>
-              <span className="font-mono">{calc?.breakdown?.km_recorridos_aprox ?? "—"} km</span>
-            </div>
-
-            <div className="mt-4">
-              <Field label="Descripción de la mercancía / observaciones">
-                <textarea rows={3} value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: e.target.value })} className="input-base resize-none" data-testid="form-descripcion" />
-              </Field>
-            </div>
-
-            {tipo === "b2c" && calc && (
-              <div className="mt-4 bg-[#F8FAFC] border border-slate-200 p-4 text-sm flex flex-wrap items-center justify-between gap-2">
-                <span className="text-slate-600">Adjuntamos tu estimación actual:</span>
-                <span className="font-display font-black text-xl text-[#0F172A]">{calc.total_con_iva.toFixed(2)}€ <span className="text-xs text-slate-500 font-sans font-normal">IVA incl.</span></span>
+                  type="button"
+                  onClick={() => setStep(1)}
+                  className="inline-flex items-center gap-2 border border-slate-300 hover:bg-slate-50 text-[#0F172A] font-bold px-5 h-12 transition-colors duration-150"
+                >
+                  <PencilSimpleIcon size={16} weight="bold" /> Editar datos
+                </button>
+                <button
+                  type="button"
+                  onClick={doSubmit}
+                  disabled={submitting}
+                  data-testid="form-submit"
+                  className="inline-flex items-center gap-2 bg-[#16A34A] hover:bg-[#15803D] text-white font-bold px-6 h-12 disabled:opacity-60 transition-colors duration-150"
+                >
+                  {submitting
+                    ? <><SpinnerIcon className="animate-spin" size={18} /> Enviando…</>
+                    : <><CheckCircleIcon size={18} weight="bold" /> Confirmar y enviar</>}
+                </button>
               </div>
-            )}
-            {tipo === "b2b" && planId && (
-              <div className="mt-4 bg-[#F8FAFC] border border-slate-200 p-4 text-sm">
-                Plan seleccionado: <span className="font-bold uppercase tracking-wider">{planId}</span>
-              </div>
-            )}
-
-            <button
-              type="submit" disabled={submitting} data-testid="form-submit"
-              className="mt-6 inline-flex items-center gap-2 bg-[#0F172A] hover:bg-[#1E3A8A] text-white font-bold px-6 h-12 disabled:opacity-60 transition-colors duration-150"
-            >
-              {submitting ? <><SpinnerIcon className="animate-spin" size={18} /> Enviando…</> : <>Enviar solicitud <ArrowRightIcon size={18} weight="bold" /></>}
-            </button>
-
-            {submittedRef && (
-              <div className="mt-5 bg-[#16A34A]/10 border border-[#16A34A] p-4 text-sm" data-testid="form-success">
-                <div className="font-bold text-[#16A34A]">Solicitud recibida.</div>
-                <div className="text-slate-700 mt-1">Tu referencia es <span className="font-mono font-bold">{submittedRef}</span>. Puedes consultarla en <a href={`/seguimiento/${submittedRef}`} className="underline">Seguimiento</a>.</div>
-              </div>
-            )}
-          </form>
+            </div>
+          )}
         </div>
       </div>
 
@@ -444,6 +591,13 @@ const Field = ({ label, children }) => (
 const Row = ({ k, v, highlight }) => (
   <div className={`flex items-center justify-between ${highlight ? "text-[#FBBF24] font-bold" : "text-slate-300"}`}>
     <span>{k}</span><span className="font-mono">{v}</span>
+  </div>
+);
+
+const ConfirmRow = ({ label, value, highlight }) => (
+  <div className={`flex gap-3 px-4 py-2.5 ${highlight ? "bg-[#F0FDF4]" : "bg-white"}`}>
+    <span className="label-eyebrow text-slate-400 w-28 flex-shrink-0 pt-0.5">{label}</span>
+    <span className={`flex-1 ${highlight ? "font-bold text-[#16A34A]" : "text-[#0F172A]"}`}>{value}</span>
   </div>
 );
 

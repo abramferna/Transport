@@ -144,7 +144,7 @@ WEEKLY_PLANS = [
         "weight_limit_kg": 4000,
         "volume_limit_m3": 18,
         "stops": 4,
-        "highlights": ["2-3 días pactados (ej. L-X-V)", "Hasta 4 paradas por ruta", "Todo el Gironès + puntas BCN y Jonquera", "Con o sin plataforma · hasta 4.000 kg"],
+        "highlights": ["2-3 días pactados (ej. L-X-V)", "Hasta 4 paradas · radio ~20 km", "Todo el Gironès + puntas BCN y Jonquera", "Con o sin plataforma · hasta 4.000 kg"],
         "best_for": "Distribuidores y empresas con reparto regular",
         "popular": True,
     },
@@ -156,7 +156,7 @@ WEEKLY_PLANS = [
         "weight_limit_kg": 7000,
         "volume_limit_m3": 34,
         "stops": 6,
-        "highlights": ["Servicio diario de lunes a viernes", "Hasta 6 paradas por ruta", "Todo el Gironès + BCN y Jonquera", "Con o sin plataforma · hasta 7.000 kg"],
+        "highlights": ["Servicio diario de lunes a viernes", "Hasta 6 paradas · radio ~20 km", "Todo el Gironès + BCN y Jonquera", "Con o sin plataforma · hasta 7.000 kg"],
         "best_for": "Operadores logísticos y cargas completas diarias",
     },
 ]
