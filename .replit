@@ -43,6 +43,10 @@ outputType = "webview"
 localPort = 5000
 externalPort = 80
 
+[[ports]]
+localPort = 5001
+externalPort = 3001
+
 [deployment]
 deploymentTarget = "autoscale"
 run = ["bash", "-c", "mkdir -p /tmp/mongodb/data && /nix/store/3z9iq2gr9ddb0ncmxjlv81ngn6b4nm70-mongodb-6.0.5/bin/mongod --dbpath /tmp/mongodb/data --fork --logpath /tmp/mongodb/mongod.log --bind_ip 127.0.0.1 --port 27017 && cd /home/runner/workspace/backend && uvicorn server:app --host 0.0.0.0 --port 8001 &amp; cd /home/runner/workspace/frontend &amp;&amp; npx serve -s build -l 5000"]

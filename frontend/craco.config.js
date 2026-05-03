@@ -66,14 +66,6 @@ webpackConfig.devServer = (devServerConfig) => {
   devServerConfig.host = "0.0.0.0";
   devServerConfig.port = 5000;
 
-  // Proxy /api requests to backend
-  devServerConfig.proxy = {
-    "/api": {
-      target: "http://localhost:8001",
-      changeOrigin: true,
-    },
-  };
-
   // Add health check endpoints if enabled
   if (config.enableHealthCheck && setupHealthEndpoints && healthPluginInstance) {
     const originalSetupMiddlewares = devServerConfig.setupMiddlewares;

@@ -1,6 +1,10 @@
 #!/bin/bash
 set -e
 
+# Kill any existing processes on our ports
+fuser -k 5000/tcp 2>/dev/null || true
+fuser -k 8001/tcp 2>/dev/null || true
+
 # Start MongoDB if not already running
 MONGO_BIN="/nix/store/3z9iq2gr9ddb0ncmxjlv81ngn6b4nm70-mongodb-6.0.5/bin/mongod"
 MONGO_DATA="/tmp/mongodb/data"
@@ -18,14 +22,18 @@ else
 fi
 
 # Start backend in background
-echo "Starting backend..."
+echo "Starting backend on port 8001..."
 cd /home/runner/workspace/backend
 uvicorn server:app --host localhost --port 8001 --reload &
 BACKEND_PID=$!
 echo "Backend started (PID $BACKEND_PID)"
 
-cd /home/runner/workspace/frontend
+# Wait a moment for backend to be ready
+sleep 2
 
-# Start frontend
-echo "Starting frontend..."
+# Start frontend on port 5000
+cd /home/runner/workspace/frontend
+echo "Starting frontend on port 5000..."
+export PORT=5000
+export HOST=0.0.0.0
 exec yarn start
