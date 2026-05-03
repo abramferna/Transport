@@ -77,13 +77,13 @@ ADDONS = {
         "multiplier": 1.0,
     },
     "descarga_small": {
-        "label": "Descarga 1–3 palets (plataforma)",
+        "label": "Descarga con plataforma 1–3 palets",
         "flat": 35.0,
         "route_pct": 0.0,
         "multiplier": 1.0,
     },
     "descarga_media": {
-        "label": "Descarga hasta 8 palets (plataforma)",
+        "label": "Descarga con plataforma hasta 8 palets",
         "flat": 70.0,
         "route_pct": 0.0,
         "multiplier": 1.0,
@@ -91,6 +91,12 @@ ADDONS = {
     "full_truck": {
         "label": "Full truck",
         "flat": 110.0,
+        "route_pct": 0.0,
+        "multiplier": 1.0,
+    },
+    "descarga_muelle": {
+        "label": "Descarga muelle · conductor",
+        "flat": 40.0,
         "route_pct": 0.0,
         "multiplier": 1.0,
     },
@@ -153,10 +159,10 @@ WEEKLY_PLANS = [
         "name": "Plan Premium",
         "price_week": 899,
         "frequency": "Diario L-V",
-        "weight_limit_kg": 7000,
+        "weight_limit_kg": 6000,
         "volume_limit_m3": 34,
         "stops": 6,
-        "highlights": ["Servicio diario de lunes a viernes", "Hasta 6 paradas · radio ~20 km", "Todo el Gironès + BCN y Jonquera", "Con o sin plataforma · hasta 7.000 kg"],
+        "highlights": ["Servicio diario de lunes a viernes", "Hasta 6 paradas · radio ~20 km", "Todo el Gironès + BCN y Jonquera", "Con o sin plataforma · hasta 6.000 kg"],
         "best_for": "Operadores logísticos y cargas completas diarias",
     },
 ]

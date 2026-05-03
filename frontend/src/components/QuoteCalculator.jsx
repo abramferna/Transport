@@ -9,9 +9,10 @@ import {
 const ADDONS_LIST = [
   { id: "plataforma", label: "Plataforma elevadora", desc: "Carga/descarga sin muelle. +35€", icon: "package" },
   { id: "tauliner", label: "Tauliner", desc: "Camión tauliner. +35€", icon: "truck" },
-  { id: "descarga_small", label: "Descarga 1–3 palets", desc: "Con plataforma. +35€", icon: "package" },
-  { id: "descarga_media", label: "Descarga hasta 8 palets", desc: "Con plataforma. +70€", icon: "package" },
+  { id: "descarga_small", label: "Descarga con plataforma 1–3 palets", desc: "+35€", icon: "package" },
+  { id: "descarga_media", label: "Descarga con plataforma hasta 8 palets", desc: "+70€", icon: "package" },
   { id: "full_truck", label: "Full truck", desc: "Camión completo. +110€", icon: "truck" },
+  { id: "descarga_muelle", label: "Descarga muelle · conductor", desc: "+40€", icon: "package" },
   { id: "urgente", label: "Urgente · <24h", desc: "Sin previsión. ×1,20 sobre total", icon: "clock" },
 ];
 
