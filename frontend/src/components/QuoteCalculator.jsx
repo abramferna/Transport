@@ -9,7 +9,7 @@ import {
 const ADDONS_LIST = [
   { id: "plataforma", label: "Plataforma elevadora", desc: "Carga/descarga sin muelle. +35€", icon: "package" },
   { id: "round_trip", label: "Entrega + recogida mismo día", desc: "Ida y vuelta en el día. +50% sobre ruta", icon: "truck" },
-  { id: "urgente", label: "Urgente (mismo día)", desc: "Servicio express. Total ×1,40", icon: "clock" },
+  { id: "urgente", label: "Urgente · sin previsión", desc: "Solicitud con menos de 24h. ×1,20", icon: "clock" },
 ];
 
 const TIME_SLOTS = [
@@ -172,12 +172,6 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
               <div className="mt-3 flex items-center gap-2 text-xs text-slate-600 font-mono">
                 <MapPinIcon size={14} className="text-[#1E3A8A]" weight="fill" />
                 <span><strong>{calc.breakdown.km_recorridos_aprox} km</strong> aprox. desde la base</span>
-                {calc.breakdown.premium_barcelona > 0 && (
-                  <span className="bg-[#1E3A8A] text-white px-2 py-0.5">+{calc.breakdown.premium_barcelona.toFixed(0)}€ proximidad BCN</span>
-                )}
-                {calc.breakdown.premium_jonquera > 0 && (
-                  <span className="bg-[#FBBF24] text-[#0F172A] px-2 py-0.5 inline-flex items-center gap-1"><FlagIcon size={11} weight="fill" /> +{calc.breakdown.premium_jonquera.toFixed(0)}€ frontera</span>
-                )}
               </div>
             )}
 

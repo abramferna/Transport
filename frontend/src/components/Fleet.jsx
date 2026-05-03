@@ -3,16 +3,16 @@ import { TruckIcon, ShieldCheckIcon, ThermometerIcon, ClockIcon } from "@phospho
 const FLEET_IMG = "https://images.unsplash.com/photo-1761479556231-570639303a51?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MTJ8MHwxfHNlYXJjaHwyfHxmcmVpZ2h0JTIwdHJ1Y2slMjBoaWdod2F5fGVufDB8fHx8MTc3Nzc1NjEyM3ww&ixlib=rb-4.1.0&q=85";
 
 const VEHICLES = [
-  { name: "Camión rígido 12T", payload: "hasta 6.000 kg", volume: "34 m³", best: "Carga completa Girona ⇄ Barcelona" },
-  { name: "12T plataforma elevadora", payload: "hasta 6.000 kg", volume: "32 m³", best: "Puerta a puerta sin muelle · paletizado" },
-  { name: "12T lonas / tautliner", payload: "hasta 6.000 kg", volume: "34 m³", best: "Cargas voluminosas o de gran longitud" },
-  { name: "12T isotermo (bajo demanda)", payload: "hasta 5.500 kg", volume: "30 m³", best: "Mercancía sensible a temperatura" },
+  { name: "Furgón cerrado", payload: "hasta 6.000 kg", volume: "34 m³", best: "Carga paletizada protegida" },
+  { name: "Plataforma elevadora", payload: "hasta 6.000 kg", volume: "32 m³", best: "Puerta a puerta sin muelle" },
+  { name: "Lonas / tautliner", payload: "hasta 6.000 kg", volume: "34 m³", best: "Cargas voluminosas o de gran longitud" },
+  { name: "Isotermo (bajo demanda)", payload: "hasta 5.500 kg", volume: "30 m³", best: "Mercancía sensible a temperatura" },
 ];
 
 const FEATURES = [
-  { icon: <ShieldCheckIcon size={22} weight="duotone" />, title: "Mercancía asegurada", desc: "Cobertura íntegra hasta 6.000 kg / 34 m³ · sin franquicia oculta." },
-  { icon: <ClockIcon size={22} weight="duotone" />, title: "Ventana horaria garantizada", desc: "±30 min sobre la hora pactada o reembolso del recargo." },
-  { icon: <ThermometerIcon size={22} weight="duotone" />, title: "Solo intercity, no urbano", desc: "Especialistas en eje Girona ⇄ Barcelona y Girona ⇄ La Jonquera. No realizamos reparto urbano." },
+  { icon: <ShieldCheckIcon size={22} weight="duotone" />, title: "Mercancía asegurada", desc: "Cobertura íntegra en cada viaje, sin franquicia oculta." },
+  { icon: <ClockIcon size={22} weight="duotone" />, title: "Mismo día o siguiente", desc: "Entregas planificadas en franjas horarias. Sin sorpresas." },
+  { icon: <ThermometerIcon size={22} weight="duotone" />, title: "Solo intercity", desc: "Eje Girona ⇄ Barcelona y Girona ⇄ La Jonquera. No hacemos reparto urbano." },
 ];
 
 export const Fleet = () => (
@@ -25,7 +25,7 @@ export const Fleet = () => (
             Vehículos pensados<br />para tu carga.
           </h2>
           <p className="mt-5 text-slate-600 max-w-xl">
-            Flota propia de camiones rígidos de 12 toneladas (MMA) con carga útil máxima de <strong className="text-[#0F172A]">6.000 kg / 34 m³</strong> y plataforma elevadora opcional. No realizamos reparto urbano: foco intercity en los corredores Girona ⇄ Barcelona y Girona ⇄ La Jonquera (frontera). Mantenimiento preventivo cada 8.000 km, conductores con CAP en vigor.
+            Trabajamos con <strong className="text-[#0F172A]">flota propia</strong> y carga útil máxima de <strong className="text-[#0F172A]">6.000 kg / 34 m³</strong>. Recogida y entrega en el día o al día siguiente, planificadas con antelación. Cubrimos los dos corredores desde Girona: sur a Barcelona y norte a La Jonquera. Mantenimiento preventivo cada 8.000 km, conductores con CAP en vigor.
           </p>
           <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
             {FEATURES.map((f) => (

@@ -4,8 +4,12 @@ import {
 
 const FAQS = [
   {
+    q: "¿Qué significa 'urgente' y cuándo se aplica?",
+    a: "Todos los servicios se entregan en el mismo día o al día siguiente cuando se planifican con antelación. Se considera urgente cuando la solicitud llega con menos de 24h y requiere reorganizar la planificación: aplicamos un recargo del 20% sobre el total. Si además quieres entrega y recogida en el mismo día (round trip), añade ese extra por separado.",
+  },
+  {
     q: "¿Cómo funciona el recargo a partir de las 18h?",
-    a: "Cualquier servicio cuya hora de recogida sea a partir de las 18:00 o antes de las 07:00 lleva un recargo del 25% sobre el subtotal. La calculadora aplica este incremento de forma automática y transparente.",
+    a: "La franja nocturna (a partir de las 18h o antes de las 7h) lleva un recargo del 25% sobre el subtotal. La calculadora aplica este incremento de forma automática y transparente.",
   },
   {
     q: "¿Y los sábados, domingos o festivos?",
@@ -33,7 +37,7 @@ const FAQS = [
   },
   {
     q: "¿Qué tamaño de camión usáis?",
-    a: "Toda nuestra flota son camiones rígidos de 12 toneladas (MMA) — capacidad útil máxima de 6.000 kg y 34 m³. Disponibles en versión furgón cerrado, lonas (tautliner), plataforma elevadora e isotermo bajo demanda.",
+    a: "Trabajamos con flota propia. Carga útil máxima de 6.000 kg y 34 m³ por viaje. Disponibles en versión furgón cerrado, lonas (tautliner), plataforma elevadora e isotermo bajo demanda.",
   },
   {
     q: "¿Cómo recibo el seguimiento?",

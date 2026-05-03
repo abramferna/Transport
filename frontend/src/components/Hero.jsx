@@ -1,4 +1,4 @@
-import { ArrowRightIcon, ClockIcon, ShieldCheckIcon, MapPinIcon } from "@phosphor-icons/react";
+import { ArrowRightIcon, ClockIcon, ShieldCheckIcon, TruckIcon } from "@phosphor-icons/react";
 
 const HERO_IMG = "https://images.pexels.com/photos/27099096/pexels-photo-27099096.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940";
 
@@ -21,11 +21,12 @@ export const Hero = () => {
               <span className="label-eyebrow text-[#FBBF24]">Transporte de Mercancías · Catalunya</span>
             </div>
             <h1 className="font-display font-black tracking-tighter leading-[0.92] text-white text-5xl sm:text-6xl lg:text-7xl">
-              Girona <span className="text-[#FBBF24]">⇄</span> Barcelona,<br />
-              cargas que <span className="underline decoration-[#FBBF24] decoration-[6px] underline-offset-[10px]">llegan a tiempo</span>.
+              Girona, base.<br />
+              <span className="text-[#FBBF24]">Barcelona</span> y <span className="text-[#FBBF24]">La Jonquera</span>,<br />
+              cargas <span className="underline decoration-[#FBBF24] decoration-[6px] underline-offset-[10px]">a punto</span>.
             </h1>
             <p className="mt-7 text-lg text-slate-200 max-w-2xl leading-relaxed">
-              Cargas semanales con precio cerrado para profesionales y servicios puntuales puerta a puerta para cargas paletizadas. Flota propia de camiones <strong className="text-white">12T</strong>, intercity entre polígonos. Recargos claros fuera de jornada.
+              Transporte intercity con flota propia desde Girona. Sur hacia Barcelona y norte hacia la frontera francesa por La Jonquera. Cargas semanales con precio cerrado para profesionales y servicios puntuales paletizados. Recargos claros fuera de jornada.
             </p>
 
             <div className="mt-10 flex flex-wrap gap-3">
@@ -49,8 +50,8 @@ export const Hero = () => {
 
           <div className="lg:col-span-4 grid grid-cols-3 lg:grid-cols-1 gap-px bg-white/10 border border-white/10">
             {[
-              { icon: <ClockIcon size={22} weight="duotone" />, k: "+98%", v: "puntualidad" },
-              { icon: <MapPinIcon size={22} weight="duotone" />, k: "12 T", v: "MMA flota propia" },
+              { icon: <ClockIcon size={22} weight="duotone" />, k: "<4h", v: "respuesta presupuesto" },
+              { icon: <TruckIcon size={22} weight="duotone" />, k: "Propia", v: "flota · base Girona" },
               { icon: <ShieldCheckIcon size={22} weight="duotone" />, k: "100%", v: "asegurado" },
             ].map((s) => (
               <div key={s.v} className="bg-[#0F172A] p-5 lg:p-6">

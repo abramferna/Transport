@@ -42,11 +42,10 @@ logger = logging.getLogger(__name__)
 BASE_MINIMUM = 85.0
 # Coste por km recorrido desde la base (Girona)
 COST_PER_KM = 0.60
-# Premium proximidad a Barcelona (zona alta demanda) — fade en 30 km
-BCN_PREMIUM_MAX = 30.0
+# Premium de zona desactivado: todo se cobra por distancia.
+BCN_PREMIUM_MAX = 0.0
 BCN_PREMIUM_FADE_KM = 30
-# Premium proximidad a La Jonquera (frontera, retorno en vacío) — fade en 15 km
-JQ_PREMIUM_MAX = 25.0
+JQ_PREMIUM_MAX = 0.0
 JQ_PREMIUM_FADE_KM = 15
 
 # Tiers de peso facturable (max real, volumétrico). Camión 12T MMA con 6.000 kg payload.
@@ -78,10 +77,10 @@ ADDONS = {
         "multiplier": 1.0,
     },
     "urgente": {
-        "label": "Urgente (mismo día)",
+        "label": "Urgente · sin planificar (<24h)",
         "flat": 0.0,
         "route_pct": 0.0,
-        "multiplier": 1.40,  # +40% sobre el total
+        "multiplier": 1.20,  # +20% por solicitud con menos de 24h de antelación
     },
 }
 

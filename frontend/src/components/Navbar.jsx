@@ -24,7 +24,7 @@ export const Navbar = () => {
           </span>
           <div className="leading-none">
             <div className="font-display font-black tracking-tighter text-[#0F172A] text-lg">TransGirBcn</div>
-            <div className="text-[10px] tracking-[0.2em] uppercase text-slate-500 font-bold">Girona ⇄ Barcelona</div>
+            <div className="text-[10px] tracking-[0.2em] uppercase text-slate-500 font-bold">Girona · Barcelona · Jonquera</div>
           </div>
         </Link>
 
