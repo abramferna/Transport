@@ -21,12 +21,12 @@ export const Hero = () => {
               <span className="label-eyebrow text-[#FBBF24]">Transporte de Mercancías · Catalunya</span>
             </div>
             <h1 className="font-display font-black tracking-tighter leading-[0.92] text-white text-5xl sm:text-6xl lg:text-7xl">
-              Girona, base.<br />
-              <span className="text-[#FBBF24]">Barcelona</span> y <span className="text-[#FBBF24]">La Jonquera</span>,<br />
-              cargas <span className="underline decoration-[#FBBF24] decoration-[6px] underline-offset-[10px]">a punto</span>.
+              Camión con o sin<br />
+              <span className="text-[#FBBF24]">plataforma</span>,<br />
+              cuando lo <span className="underline decoration-[#FBBF24] decoration-[6px] underline-offset-[10px]">necesitas</span>.
             </h1>
-          <p className="mt-7 text-lg text-slate-200 max-w-2xl leading-relaxed">
-            Transporte intercity con flota propia desde Girona. Ruta express <strong className="text-white">La Jonquera ⇄ Barcelona</strong> y cargas regulares en todo el corredor norte. Otros destinos en el resto de España bajo consulta con antelación. Recargos claros fuera de jornada.
+          <p className="mt-7 text-lg text-slate-200 max-w-xl leading-relaxed">
+            Todo el Gironès · puntas a <strong className="text-white">Barcelona</strong> y <strong className="text-white">La Jonquera</strong>. Entrega en 24h o el mismo día. Fuera de zona, consulta disponibilidad y precio.
           </p>
 
             <div className="mt-10 flex flex-wrap gap-3">

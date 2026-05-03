@@ -151,7 +151,7 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
             </h2>
           </div>
           <div className="lg:col-span-5">
-            <p className="text-slate-600">Selecciona origen y destino. Mínimo 85€ por salida de base. Combina extras (plataforma, ida+vuelta, urgente). <strong className="text-[#0F172A]">Descuento por gran carga</strong>: −10% / −20% / −30% según peso. Fin de semana: base ×2 y extras +15%.</p>
+            <p className="text-slate-600">Selecciona origen y destino, peso y volumen. Añade plataforma si no tienes muelle. Mínimo 85€. <strong className="text-[#0F172A]">Fuera del Gironès o destinos especiales</strong>: precio a consultar.</p>
           </div>
         </div>
 

@@ -51,12 +51,12 @@ JQ_PREMIUM_FADE_KM = 15
 # Tiers de peso facturable (max real, volumétrico). Carga útil máxima 6.000 kg.
 WEIGHT_TIERS = [
     (200, 0.0),
-    (500, 25.0),
-    (1000, 60.0),
-    (2000, 120.0),
-    (3500, 200.0),
-    (5000, 280.0),
-    (6000, 360.0),
+    (500, 15.0),
+    (1000, 36.0),
+    (2000, 72.0),
+    (3500, 120.0),
+    (5000, 168.0),
+    (6000, 216.0),
 ]
 
 # Densidad volumétrica calibrada para nuestro 12T (6000 kg / 34 m³ ≈ 176 kg/m³).
