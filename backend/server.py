@@ -115,8 +115,8 @@ WEEKLY_PLANS = [
         "weight_limit_kg": 1500,
         "volume_limit_m3": 8,
         "stops": 3,
-        "highlights": ["Ruta fija Girona ⇄ Barcelona", "Hasta 1.500 kg / 8 m³", "3 paradas en polígonos", "Aviso 24h antes"],
-        "best_for": "Pymes y autónomos con envíos puntuales paletizados",
+        "highlights": ["1 día semanal pactado", "Todo el Gironès + punta BCN o Jonquera", "Con o sin plataforma elevadora", "Hasta 1.500 kg / 8 m³"],
+        "best_for": "Pymes y autónomos con necesidad semanal puntual",
     },
     {
         "id": "estandar",
@@ -126,8 +126,8 @@ WEEKLY_PLANS = [
         "weight_limit_kg": 3000,
         "volume_limit_m3": 18,
         "stops": 6,
-        "highlights": ["Días pactados (L-X-V)", "Hasta 3.000 kg / 18 m³", "6 paradas en polígonos", "Reporte semanal"],
-        "best_for": "Distribuidores y operadores recurrentes",
+        "highlights": ["2-3 días pactados (ej. L-X-V)", "Todo el Gironès + puntas BCN y Jonquera", "Con o sin plataforma elevadora", "Hasta 3.000 kg / 18 m³"],
+        "best_for": "Distribuidores y empresas con reparto regular",
         "popular": True,
     },
     {
@@ -138,8 +138,8 @@ WEEKLY_PLANS = [
         "weight_limit_kg": 6000,
         "volume_limit_m3": 34,
         "stops": 12,
-        "highlights": ["Servicio diario L-V", "Camión 12T completo · 34 m³", "12 paradas en polígonos", "Soporte prioritario"],
-        "best_for": "Cargas completas / operadores logísticos",
+        "highlights": ["Servicio diario de lunes a viernes", "Todo el Gironès + BCN y Jonquera", "Con o sin plataforma elevadora", "Camión completo hasta 6.000 kg / 34 m³"],
+        "best_for": "Operadores logísticos y cargas completas diarias",
     },
 ]
 

@@ -24,7 +24,7 @@ export const ServiceModels = ({ onSelectPlan }) => {
           </div>
           <div className="lg:col-span-7 lg:pt-3">
             <p className="text-slate-600 leading-relaxed">
-              Eliges entre cargas semanales con precio cerrado pensadas para profesionales recurrentes, o servicios sueltos puerta a puerta para particulares y empresas con envíos puntuales. Transparencia total en recargos por horario y servicios extra.
+              Camión con o sin plataforma elevadora según tus necesidades. Cobertura en todo el Gironès con puntas a Barcelona y La Jonquera. Entrega garantizada en 24h, o el mismo día si lo necesitas. Fuera de zona, disponibilidad y precio a consultar.
             </p>
           </div>
         </div>
@@ -39,8 +39,8 @@ export const ServiceModels = ({ onSelectPlan }) => {
                 <span className="bg-[#FBBF24] text-[#0F172A] w-10 h-10 grid place-items-center"><BuildingOfficeIcon size={22} weight="fill" /></span>
                 <span className="label-eyebrow text-[#FBBF24]">Profesionales · B2B</span>
               </div>
-              <h3 className="font-display text-3xl lg:text-4xl font-black tracking-tighter mb-3">Cargas semanales con precio cerrado</h3>
-              <p className="text-slate-300 max-w-md mb-6">Rutas pactadas, días fijos y tarifa plana. Para tiendas, distribuidores, e-commerce y operadores que necesitan previsibilidad.</p>
+              <h3 className="font-display text-3xl lg:text-4xl font-black tracking-tighter mb-3">Rutas fijas, precio cerrado cada semana</h3>
+              <p className="text-slate-300 max-w-md mb-6">Días pactados, tarifa fija y camión con o sin plataforma. Para empresas, distribuidores y operadores del Gironès que necesitan regularidad.</p>
               <a href="#planes" className="inline-flex items-center gap-2 text-[#FBBF24] font-bold hover:gap-3 transition-all">
                 Ver planes <ArrowRightIcon size={16} weight="bold" />
               </a>
@@ -54,8 +54,8 @@ export const ServiceModels = ({ onSelectPlan }) => {
                 <span className="bg-[#1E3A8A] text-white w-10 h-10 grid place-items-center"><HouseIcon size={22} weight="fill" /></span>
                 <span className="label-eyebrow text-[#1E3A8A]">Particulares · B2C</span>
               </div>
-              <h3 className="font-display text-3xl lg:text-4xl font-black tracking-tighter text-[#0F172A] mb-3">Cargas y descargas a la carta</h3>
-              <p className="text-slate-700 max-w-xs mb-6">Servicios puntuales con tarifa por viaje. Variantes: muelle, puerta a puerta, urgente. Recargos transparentes fuera de horario.</p>
+              <h3 className="font-display text-3xl lg:text-4xl font-black tracking-tighter text-[#0F172A] mb-3">Envío puntual, precio al momento</h3>
+              <p className="text-slate-700 max-w-xs mb-6">Calcula y solicita en segundos. Con o sin plataforma, urgente o planificado. Entrega en 24h o el mismo día en todo el Gironès.</p>
               <a href="#calculadora" className="inline-flex items-center gap-2 text-[#1E3A8A] font-bold hover:gap-3 transition-all">
                 Calcular tarifa <ArrowRightIcon size={16} weight="bold" />
               </a>
