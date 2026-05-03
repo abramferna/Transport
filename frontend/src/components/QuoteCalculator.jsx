@@ -8,8 +8,11 @@ import {
 
 const ADDONS_LIST = [
   { id: "plataforma", label: "Plataforma elevadora", desc: "Carga/descarga sin muelle. +35€", icon: "package" },
-  { id: "round_trip", label: "Entrega + recogida mismo día", desc: "Ida y vuelta en el día. +50% sobre ruta", icon: "truck" },
-  { id: "urgente", label: "Urgente · sin previsión", desc: "Solicitud con menos de 24h. ×1,20", icon: "clock" },
+  { id: "tauliner", label: "Tauliner", desc: "Camión tauliner. +35€", icon: "truck" },
+  { id: "descarga_small", label: "Descarga 1–3 palets", desc: "Con plataforma. +35€", icon: "package" },
+  { id: "descarga_media", label: "Descarga hasta 8 palets", desc: "Con plataforma. +70€", icon: "package" },
+  { id: "full_truck", label: "Full truck", desc: "Camión completo. +110€", icon: "truck" },
+  { id: "urgente", label: "Urgente · <24h", desc: "Sin previsión. ×1,20 sobre total", icon: "clock" },
 ];
 
 const TIME_SLOTS = [

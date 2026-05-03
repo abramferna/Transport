@@ -70,10 +70,28 @@ ADDONS = {
         "route_pct": 0.0,
         "multiplier": 1.0,
     },
-    "round_trip": {
-        "label": "Entrega + recogida mismo día",
-        "flat": 0.0,
-        "route_pct": 0.50,  # ida + vuelta en el día → +50% sobre ruta base
+    "tauliner": {
+        "label": "Tauliner",
+        "flat": 35.0,
+        "route_pct": 0.0,
+        "multiplier": 1.0,
+    },
+    "descarga_small": {
+        "label": "Descarga 1–3 palets (plataforma)",
+        "flat": 35.0,
+        "route_pct": 0.0,
+        "multiplier": 1.0,
+    },
+    "descarga_media": {
+        "label": "Descarga hasta 8 palets (plataforma)",
+        "flat": 70.0,
+        "route_pct": 0.0,
+        "multiplier": 1.0,
+    },
+    "full_truck": {
+        "label": "Full truck",
+        "flat": 110.0,
+        "route_pct": 0.0,
         "multiplier": 1.0,
     },
     "urgente": {

@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { api } from "@/lib/api";
-import { CheckCircleIcon, BuildingOfficeIcon, HouseIcon, ArrowRightIcon, StarIcon } from "@phosphor-icons/react";
+import { CheckCircleIcon, BuildingOfficeIcon, ArrowRightIcon, StarIcon, UserIcon } from "@phosphor-icons/react";
 
 const B2B_IMG = "https://images.pexels.com/photos/34968619/pexels-photo-34968619.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940";
-const B2C_IMG = "https://images.unsplash.com/photo-1606722590635-747d0d915f3e?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzR8MHwxfHNlYXJjaHwxfHxkZWxpdmVyeSUyMHZhbiUyMGJveGVzfGVufDB8fHx8MTc3Nzc1NjEyM3ww&ixlib=rb-4.1.0&q=85";
 
 export const ServiceModels = ({ onSelectPlan }) => {
   const [plans, setPlans] = useState([]);
@@ -19,7 +18,7 @@ export const ServiceModels = ({ onSelectPlan }) => {
           <div className="lg:col-span-5">
             <div className="label-eyebrow mb-3">Modelos de servicio</div>
             <h2 className="font-display font-black tracking-tighter text-4xl sm:text-5xl text-[#0F172A] leading-[0.95]">
-              Dos modelos.<br />Cero sorpresas.
+              Rutas fijas o<br />envío puntual.
             </h2>
           </div>
           <div className="lg:col-span-7 lg:pt-3">
@@ -29,37 +28,47 @@ export const ServiceModels = ({ onSelectPlan }) => {
           </div>
         </div>
 
-        {/* Bento: B2B vs B2C overview */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 mb-16">
-          <div className="lg:col-span-7 bg-[#0F172A] text-white p-8 lg:p-10 relative overflow-hidden group">
-            <div className="absolute right-0 top-0 bottom-0 w-1/2 bg-cover bg-center opacity-40 group-hover:opacity-60 transition-opacity duration-300" style={{ backgroundImage: `url(${B2B_IMG})` }} />
+        {/* B2B hero card — full width */}
+        <div className="mb-16">
+          <div className="bg-[#0F172A] text-white p-8 lg:p-12 relative overflow-hidden group">
+            <div className="absolute right-0 top-0 bottom-0 w-1/2 bg-cover bg-center opacity-30 group-hover:opacity-50 transition-opacity duration-300" style={{ backgroundImage: `url(${B2B_IMG})` }} />
             <div className="absolute inset-0 bg-gradient-to-r from-[#0F172A] via-[#0F172A]/95 to-transparent" />
-            <div className="relative">
-              <div className="flex items-center gap-3 mb-4">
-                <span className="bg-[#FBBF24] text-[#0F172A] w-10 h-10 grid place-items-center"><BuildingOfficeIcon size={22} weight="fill" /></span>
-                <span className="label-eyebrow text-[#FBBF24]">Profesionales · B2B</span>
+            <div className="relative grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+              <div>
+                <div className="flex items-center gap-3 mb-4">
+                  <span className="bg-[#FBBF24] text-[#0F172A] w-10 h-10 grid place-items-center"><BuildingOfficeIcon size={22} weight="fill" /></span>
+                  <span className="label-eyebrow text-[#FBBF24]">Empresas y profesionales</span>
+                </div>
+                <h3 className="font-display text-3xl lg:text-5xl font-black tracking-tighter mb-4">Rutas fijas, precio cerrado cada semana</h3>
+                <p className="text-slate-300 max-w-lg mb-6">Días pactados, tarifa fija y camión con o sin plataforma. Para empresas, distribuidores y operadores del Gironès que necesitan regularidad y previsibilidad.</p>
+                <a href="#planes" className="inline-flex items-center gap-2 bg-[#FBBF24] hover:bg-[#F59E0B] text-[#0F172A] font-bold px-5 h-11 transition-colors duration-150">
+                  Ver planes <ArrowRightIcon size={16} weight="bold" />
+                </a>
               </div>
-              <h3 className="font-display text-3xl lg:text-4xl font-black tracking-tighter mb-3">Rutas fijas, precio cerrado cada semana</h3>
-              <p className="text-slate-300 max-w-md mb-6">Días pactados, tarifa fija y camión con o sin plataforma. Para empresas, distribuidores y operadores del Gironès que necesitan regularidad.</p>
-              <a href="#planes" className="inline-flex items-center gap-2 text-[#FBBF24] font-bold hover:gap-3 transition-all">
-                Ver planes <ArrowRightIcon size={16} weight="bold" />
-              </a>
+              <div className="grid grid-cols-2 gap-px bg-white/10 border border-white/10">
+                {[
+                  { k: "24h", v: "plazo máximo de entrega" },
+                  { k: "Mismo día", v: "disponible bajo petición" },
+                  { k: "Con/sin", v: "plataforma elevadora" },
+                  { k: "Fuera zona", v: "precio a consultar" },
+                ].map((s) => (
+                  <div key={s.v} className="bg-[#0F172A]/60 p-5">
+                    <div className="font-display text-2xl font-black text-[#FBBF24] leading-none">{s.k}</div>
+                    <div className="label-eyebrow mt-2 text-slate-400 text-[10px]">{s.v}</div>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
 
-          <div className="lg:col-span-5 bg-[#F8FAFC] border border-slate-200 p-8 lg:p-10 relative overflow-hidden group">
-            <div className="absolute right-[-30px] bottom-[-30px] w-56 h-56 bg-cover bg-center opacity-90" style={{ backgroundImage: `url(${B2C_IMG})` }} />
-            <div className="relative">
-              <div className="flex items-center gap-3 mb-4">
-                <span className="bg-[#1E3A8A] text-white w-10 h-10 grid place-items-center"><HouseIcon size={22} weight="fill" /></span>
-                <span className="label-eyebrow text-[#1E3A8A]">Particulares · B2C</span>
-              </div>
-              <h3 className="font-display text-3xl lg:text-4xl font-black tracking-tighter text-[#0F172A] mb-3">Envío puntual, precio al momento</h3>
-              <p className="text-slate-700 max-w-xs mb-6">Calcula y solicita en segundos. Con o sin plataforma, urgente o planificado. Entrega en 24h o el mismo día en todo el Gironès.</p>
-              <a href="#calculadora" className="inline-flex items-center gap-2 text-[#1E3A8A] font-bold hover:gap-3 transition-all">
-                Calcular tarifa <ArrowRightIcon size={16} weight="bold" />
-              </a>
-            </div>
+          {/* Particulars notice */}
+          <div className="mt-3 bg-slate-50 border border-slate-200 px-5 py-3 flex items-center gap-3">
+            <UserIcon size={16} className="text-slate-500 flex-shrink-0" weight="fill" />
+            <p className="text-sm text-slate-600">
+              <strong className="text-[#0F172A]">También atendemos a particulares.</strong>{" "}
+              Usa la calculadora para obtener tu precio y envíanos la solicitud — te confirmamos en menos de 4h.{" "}
+              <a href="#calculadora" className="text-[#1E3A8A] font-semibold underline underline-offset-2 hover:text-[#0F172A]">Calcular precio</a>
+            </p>
           </div>
         </div>
 
