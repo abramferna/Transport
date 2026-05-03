@@ -89,7 +89,7 @@ ADDONS = {
         "multiplier": 1.0,
     },
     "full_truck": {
-        "label": "Full truck",
+        "label": "Descarga camión completo con plataforma",
         "flat": 110.0,
         "route_pct": 0.0,
         "multiplier": 1.0,
