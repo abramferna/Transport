@@ -1,5 +1,6 @@
-import { TruckIcon, EnvelopeIcon, PhoneIcon, MapPinIcon } from "@phosphor-icons/react";
+import { EnvelopeIcon, PhoneIcon, MapPinIcon } from "@phosphor-icons/react";
 import { Link } from "react-router-dom";
+import { Logo } from "@/components/Logo";
 
 export const Footer = () => (
   <footer className="bg-[#0F172A] text-slate-300" data-testid="main-footer">
@@ -7,12 +8,10 @@ export const Footer = () => (
       <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
         <div className="col-span-2">
           <div className="flex items-center gap-2.5 mb-5">
-            <span className="bg-[#FBBF24] text-[#0F172A] w-9 h-9 grid place-items-center">
-              <TruckIcon weight="fill" size={20} />
-            </span>
+            <Logo size={36} />
             <div>
               <div className="font-display font-black tracking-tighter text-white text-lg leading-none">vianord</div>
-              <div className="text-[10px] tracking-[0.2em] uppercase text-slate-500 font-bold mt-1">Girona ⇄ Barcelona</div>
+              <div className="text-[10px] tracking-[0.2em] uppercase text-slate-500 font-bold mt-1">Girona · Barcelona · Jonquera</div>
             </div>
           </div>
           <p className="text-sm text-slate-400 max-w-md">Vianord. Transporte de mercancías especializado en el corredor norte de Catalunya: Girona, Barcelona y La Jonquera. Cargas semanales para profesionales y servicios puntuales paletizados con flota propia.</p>
@@ -48,4 +47,3 @@ export const Footer = () => (
 );
 
 export default Footer;
-lt Footer;

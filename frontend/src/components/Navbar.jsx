@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
-import { TruckIcon, ListIcon } from "@phosphor-icons/react";
+import { ListIcon } from "@phosphor-icons/react";
 import { useState } from "react";
+import { Logo } from "@/components/Logo";
 
 const items = [
   { id: "modelos", label: "Servicios" },
@@ -19,9 +20,7 @@ export const Navbar = () => {
     >
       <div className="max-w-7xl mx-auto px-5 lg:px-8 h-16 flex items-center justify-between">
         <Link to="/" className="flex items-center gap-2.5 group" data-testid="nav-logo">
-          <span className="bg-[#0F172A] text-[#FBBF24] w-9 h-9 grid place-items-center">
-            <TruckIcon weight="fill" size={20} />
-          </span>
+          <Logo size={36} />
           <div className="leading-none">
             <div className="font-display font-black tracking-tighter text-[#0F172A] text-lg">vianord</div>
             <div className="text-[10px] tracking-[0.2em] uppercase text-slate-500 font-bold">Girona · Barcelona · Jonquera</div>
