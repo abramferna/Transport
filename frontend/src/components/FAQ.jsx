@@ -1,55 +1,56 @@
 import {
   Accordion, AccordionContent, AccordionItem, AccordionTrigger,
 } from "../components/ui/accordion";
+import { WarningCircleIcon } from "@phosphor-icons/react";
 
 const FAQS = [
   {
     q: "¿Qué significa 'urgente' y cuándo se aplica?",
-    a: "Todos los servicios se entregan en el mismo día o al día siguiente cuando se planifican con antelación. Se considera urgente cuando la solicitud llega con menos de 24h y requiere reorganizar la planificación: aplicamos un recargo del 20% sobre el total. Si además quieres entrega y recogida en el mismo día (round trip), añade ese extra por separado.",
+    a: "Se considera urgente cuando la solicitud llega con menos de 24h y requiere reorganizar la planificación. Aplicamos un recargo del 20% sobre el total. Los servicios planificados con antelación (mismo día o día siguiente) no llevan recargo.",
   },
   {
     q: "¿Cómo funciona el recargo a partir de las 18h?",
-    a: "La franja nocturna (a partir de las 18h o antes de las 7h) lleva un recargo del 25% sobre el subtotal. La calculadora aplica este incremento de forma automática y transparente.",
+    a: "La franja nocturna (a partir de las 18h) lleva un recargo del 25% sobre el subtotal. La calculadora aplica este incremento de forma automática y transparente.",
   },
   {
     q: "¿Y los sábados, domingos o festivos?",
-    a: "En fin de semana o festivos aplicamos doble recargo automático: la ruta base se multiplica ×2 (mínimo 200€ por salida) y todos los extras (peso, volumen, modalidad) suben un 15%. El recargo nocturno se aplica encima si la hora es ≥18h. La calculadora lo refleja en tiempo real.",
+    a: "En fin de semana o festivos la ruta base se multiplica ×2 (mínimo 200€ por salida) y todos los extras suben un 15% adicional. El recargo nocturno se acumula si la franja es ≥18h. La calculadora lo refleja en tiempo real.",
+  },
+  {
+    q: "¿Hacéis entregas dentro de ciudades grandes?",
+    a: "No realizamos reparto urbano ni entregamos en el interior de grandes ciudades (Barcelona ciudad, Girona centro…). Sí entregamos en polígonos industriales, pueblos y urbanizaciones con buen acceso para camión 12T. Si tienes dudas sobre la dirección de entrega, consúltanos antes de tramitar la solicitud.",
+  },
+  {
+    q: "¿Qué camión utilizáis? ¿Hay restricciones de acceso?",
+    a: "Trabajamos exclusivamente con camión rígido 12T. Carga útil máxima 6.000 kg / 34 m³. Disponemos de furgón cerrado, lonas (tautliner) y plataforma elevadora. Al ser 12T, no podemos acceder a zonas de carga limitada, centros históricos ni vías con restricción de altura o tonelaje.",
   },
   {
     q: "¿Cuál es la diferencia entre 'Plan semanal' y 'Servicio puntual'?",
-    a: "Los planes semanales (B2B) son tarifas planas con días pactados — ideales para profesionales con envíos recurrentes. El servicio puntual (B2C) se factura por viaje, con calculadora abierta y sin compromiso.",
+    a: "Los planes semanales (B2B) son tarifas planas con días y paradas pactadas, ideales para empresas con envíos recurrentes. El servicio puntual se factura por viaje usando la calculadora, sin compromiso de permanencia.",
   },
   {
     q: "¿Hacéis entregas puerta a puerta?",
-    a: "Sí, en polígonos y direcciones con acceso para camión 12T. Disponemos de plataforma elevadora para descarga sin muelle (+35€). No realizamos reparto urbano ni entregas en pisos.",
+    a: "Sí, en polígonos y direcciones con acceso para camión 12T. Con plataforma elevadora podemos descargar sin necesidad de muelle (+35€). No realizamos reparto en pisos ni zonas urbanas restringidas.",
   },
   {
-    q: "¿Cubrís solo Girona y Barcelona?",
-    a: "Operamos dos corredores principales desde nuestra base en Girona: hacia el sur (Girona ⇄ Barcelona, 100 km) y hacia el norte (Girona ⇄ La Jonquera, frontera francesa, 60 km). Servimos más de 50 municipios entre Alt Empordà, Selva, Maresme, Vallès, Barcelonès y Baix Llobregat. No hacemos reparto urbano dentro de las ciudades, sí entregas en polígonos.",
+    q: "¿Qué zona cubrís?",
+    a: "Operamos desde nuestra base en Girona dos corredores principales: sur hacia Barcelona (~100 km) y norte hacia La Jonquera / frontera francesa (~60 km). Cubrimos todo el Gironès más puntas a ambos extremos. Fuera de esta zona, consulta disponibilidad y precio — no descartamos nada sin valorarlo.",
   },
   {
     q: "¿Qué pasa si necesito el envío para hoy?",
-    a: "Selecciona la opción 'Urgente' en la calculadora. Disponibilidad sujeta a confirmación en menos de 30 minutos. Recargo del 30%.",
+    a: "Selecciona la opción 'Urgente' en la calculadora y envía la solicitud. Confirmamos disponibilidad en menos de 30 minutos. Se aplica un recargo del 20% por reorganización de ruta.",
   },
   {
     q: "¿Por qué se factura por volumen y no solo por peso?",
-    a: "Aplicamos peso facturable = max(peso real, volumen × 333 kg/m³). Una carga ligera pero voluminosa (cajas grandes, mobiliario) ocupa espacio que impide aceptar otras cargas, por lo que el precio refleja el espacio realmente utilizado del camión. La calculadora lo aplica de forma transparente.",
+    a: "Aplicamos peso facturable = max(peso real, volumen × 176 kg/m³), ajustado a la densidad de nuestro 12T (6.000 kg / 34 m³). Una carga ligera pero voluminosa ocupa espacio que impide aceptar otras cargas, por lo que el precio refleja el espacio realmente utilizado. La calculadora lo muestra de forma transparente.",
   },
   {
-    q: "¿Cuáles son vuestros corredores?",
-    a: "Operamos como ruta express el eje La Jonquera ⇄ Barcelona pasando por Girona, con servicios regulares en todo el corredor norte de Catalunya: Alt Empordà, Selva, Maresme, Vallès, Barcelonès y Baix Llobregat (más de 60 municipios). No hacemos reparto urbano dentro de las ciudades, sí entregas en polígonos.",
-  },
-  {
-    q: "¿Qué tamaño de camión usáis?",
-    a: "Trabajamos con flota propia. Carga útil máxima de 6.000 kg y 34 m³ por viaje. Disponibles en versión furgón cerrado, lonas (tautliner) y plataforma elevadora.",
-  },
-  {
-    q: "¿Cómo recibo el seguimiento?",
-    a: "Tras enviar la solicitud recibirás una referencia (ej. TR240312AB12). Con ella puedes consultar el estado en cualquier momento desde la página de Seguimiento.",
+    q: "¿Cómo recibo el seguimiento del envío?",
+    a: "Tras enviar la solicitud recibirás una referencia única (ej. TR240312AB12). Con ella puedes consultar el estado en cualquier momento desde la sección Seguimiento, y te notificamos por email y WhatsApp.",
   },
   {
     q: "¿Está la mercancía asegurada?",
-    a: "Sí, todos los servicios incluyen seguro de mercancías hasta el valor declarado. Para cargas de alto valor es necesario aviso previo.",
+    a: "Sí, todos los servicios incluyen seguro de mercancías hasta el valor declarado. Para cargas de alto valor es necesario aviso previo para ajustar la cobertura.",
   },
 ];
 
@@ -62,8 +63,20 @@ export const FAQ = () => (
           <h2 className="font-display font-black tracking-tighter text-4xl sm:text-5xl text-[#0F172A] leading-[0.95]">
             Todo claro,<br />sin letra pequeña.
           </h2>
-          <p className="mt-5 text-slate-600">¿No encuentras tu duda? Escríbenos por WhatsApp o Telegram, respondemos en minutos.</p>
+          <p className="mt-5 text-slate-600">¿No encuentras tu duda? Escríbenos por WhatsApp, respondemos en minutos.</p>
+
+          {/* 12T notice */}
+          <div className="mt-8 bg-[#0F172A] text-white p-5">
+            <div className="flex items-start gap-3">
+              <WarningCircleIcon size={20} className="text-[#FBBF24] flex-shrink-0 mt-0.5" weight="fill" />
+              <div>
+                <div className="font-bold text-sm text-[#FBBF24] mb-1">Camión 12T · acceso necesario</div>
+                <p className="text-xs text-slate-300 leading-relaxed">No entregamos dentro de grandes ciudades. Sí entregamos en polígonos, pueblos y urbanizaciones con acceso para 12T. Consúltanos si tienes dudas sobre tu dirección.</p>
+              </div>
+            </div>
+          </div>
         </div>
+
         <div className="lg:col-span-8">
           <Accordion type="single" collapsible className="border border-slate-200" data-testid="faq-accordion">
             {FAQS.map((f, i) => (

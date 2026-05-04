@@ -24,7 +24,7 @@ export const Fleet = () => (
             Vehículos pensados<br />para tu carga.
           </h2>
           <p className="mt-5 text-slate-600 max-w-xl">
-            Trabajamos con <strong className="text-[#0F172A]">flota propia</strong> y carga útil máxima de <strong className="text-[#0F172A]">6.000 kg / 34 m³</strong>. Recogida y entrega en el día o al día siguiente, planificadas con antelación. Cubrimos los dos corredores desde Girona: sur a Barcelona y norte a La Jonquera. Mantenimiento preventivo cada 8.000 km, conductores con CAP en vigor.
+            Trabajamos con <strong className="text-[#0F172A]">flota propia 12T</strong> y carga útil máxima de <strong className="text-[#0F172A]">6.000 kg / 34 m³</strong>. Recogida y entrega en el día o al día siguiente, planificadas con antelación. Cubrimos los dos corredores desde Girona: sur a Barcelona y norte a La Jonquera. Conductores con CAP en vigor y mercancía asegurada en cada servicio.
           </p>
           <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
             {FEATURES.map((f) => (

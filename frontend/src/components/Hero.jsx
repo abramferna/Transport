@@ -20,9 +20,13 @@ export const Hero = () => {
               <span className="inline-block w-10 h-[2px] bg-[#FBBF24]" />
               <span className="label-eyebrow text-[#FBBF24]">Transporte de Mercancías · Catalunya</span>
             </div>
-            <h1 className="font-display font-black tracking-tighter leading-[0.95] text-white text-4xl sm:text-5xl lg:text-6xl">
-              ViaNord resuelve envíos urgentes y necesidades recurrentes de <span className="text-[#FBBF24]">transporte para empresas</span>, con eficiencia, rapidez y <span className="underline decoration-[#FBBF24] decoration-[4px] underline-offset-[8px]">precios competitivos</span>.
+            <h1 className="font-display font-black tracking-tighter leading-[0.92] text-white text-5xl sm:text-6xl lg:text-7xl">
+              Camión listo<br />
+              cuando lo <span className="text-[#FBBF24]">necesitas</span>.
             </h1>
+            <p className="mt-3 font-display font-bold text-xl sm:text-2xl text-slate-300 tracking-tight">
+              Urgente o recurrente. Dedicado a tu empresa.
+            </p>
           <p className="mt-7 text-lg text-slate-200 max-w-xl leading-relaxed">
             Todo el Gironès · puntas a <strong className="text-white">Barcelona</strong> y <strong className="text-white">La Jonquera</strong>. Entrega en 24h o el mismo día. Fuera de zona, consulta disponibilidad y precio.
           </p>
