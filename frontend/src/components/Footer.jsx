@@ -10,11 +10,11 @@ export const Footer = () => (
           <div className="flex items-center gap-2.5 mb-5">
             <Logo size={36} />
             <div>
-              <div className="font-display font-black tracking-tighter text-white text-lg leading-none">vianord</div>
+              <div className="font-display font-black tracking-tighter text-white text-lg leading-none">ViaNord</div>
               <div className="text-[10px] tracking-[0.2em] uppercase text-slate-500 font-bold mt-1">Girona · Barcelona · Jonquera</div>
             </div>
           </div>
-          <p className="text-sm text-slate-400 max-w-md">Vianord. Transporte de mercancías especializado en el corredor norte de Catalunya: Girona, Barcelona y La Jonquera. Cargas semanales para profesionales y servicios puntuales paletizados con flota propia.</p>
+          <p className="text-sm text-slate-400 max-w-md">ViaNord. Transporte de mercancías especializado en el corredor norte de Catalunya: Girona, Barcelona y La Jonquera. Cargas semanales para profesionales y servicios puntuales paletizados con flota propia.</p>
         </div>
 
         <div>
@@ -31,8 +31,8 @@ export const Footer = () => (
         <div>
           <div className="label-eyebrow text-slate-500 mb-4">Contacto</div>
           <ul className="space-y-2.5 text-sm">
-            <li className="flex items-center gap-2"><PhoneIcon size={14} /> +34 600 000 000</li>
-            <li className="flex items-center gap-2"><EnvelopeIcon size={14} /> hola@vianord.cat</li>
+            <li className="flex items-center gap-2"><PhoneIcon size={14} /> +34 673 392 259</li>
+            <li className="flex items-center gap-2"><EnvelopeIcon size={14} /> ViaNord@gmail.com</li>
             <li className="flex items-center gap-2"><MapPinIcon size={14} /> Girona · Barcelona</li>
           </ul>
         </div>

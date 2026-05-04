@@ -228,6 +228,7 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
                 <div className="flex justify-between text-[11px] font-mono text-slate-500 mt-1">
                   <span>0,5 m³</span><span>12</span><span>24</span><span>34 m³ · máx.</span>
                 </div>
+                <div className="mt-1 text-[11px] text-slate-500">Referencia: <span className="font-semibold text-slate-600">1 palet europeo (80×120 cm) ≈ 1,45 m³</span> · carga estándar 4 palets ≈ 5,8 m³</div>
               </Field>
             </div>
 
@@ -271,7 +272,7 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
               )}
               <div className="mt-3 space-y-2">
                 <div className="bg-[#FFF9EC] border border-[#FBBF24]/40 px-3 py-2 text-xs text-[#78350F] leading-snug">
-                  <span className="font-bold">Descargas adicionales o situaciones especiales</span> — Contacta con nosotros antes de confirmar: <a href="https://wa.me/34600000000" target="_blank" rel="noopener noreferrer" className="font-bold underline hover:text-[#92400E]">WhatsApp</a> o <a href="mailto:hola@vianord.cat" className="font-bold underline hover:text-[#92400E]">Email</a>.
+                  <span className="font-bold">Descargas adicionales o situaciones especiales</span> — Contacta con nosotros antes de confirmar: <a href="https://wa.me/34673392259" target="_blank" rel="noopener noreferrer" className="font-bold underline hover:text-[#92400E]">WhatsApp</a> o <a href="mailto:ViaNord@gmail.com" className="font-bold underline hover:text-[#92400E]">Email</a>.
                 </div>
                 <div className="bg-slate-50 border border-slate-200 px-3 py-2 text-xs text-slate-600 leading-snug">
                   <span className="font-bold">Mercancía paletizada o preparada.</span> Toda la carga debe llegar paletizada o correctamente preparada para la descarga en destino. En caso contrario, consulta previamente con nosotros.

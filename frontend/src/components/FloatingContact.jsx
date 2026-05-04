@@ -10,7 +10,7 @@ export const FloatingContact = () => {
     api.get("/contact-info").then((r) => setInfo(r.data)).catch(() => {});
   }, []);
 
-  const wa = info.whatsapp || "34600000000";
+  const wa = info.whatsapp || "34673392259";
   const tg = info.telegram || "transportes_gibcn";
   const msg = encodeURIComponent("Hola, me gustaría solicitar un presupuesto de transporte.");
 

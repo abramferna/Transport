@@ -3,8 +3,8 @@ import { ListIcon, WhatsappLogoIcon, EnvelopeIcon } from "@phosphor-icons/react"
 import { useState } from "react";
 import { Logo } from "@/components/Logo";
 
-const WHATSAPP_URL = "https://wa.me/34600000000?text=Hola%2C%20soy%20transportista%20y%20me%20interesa%20unirme%20a%20la%20red%20ViaNord.";
-const EMAIL_URL = "mailto:hola@vianord.cat?subject=Quiero%20unirme%20a%20la%20red%20ViaNord";
+const WHATSAPP_URL = "https://wa.me/34673392259?text=Hola%2C%20soy%20transportista%20y%20me%20interesa%20unirme%20a%20la%20red%20ViaNord.";
+const EMAIL_URL = "mailto:ViaNord@gmail.com?subject=Quiero%20unirme%20a%20la%20red%20ViaNord";
 
 const items = [
   { id: "modelos", label: "Servicios" },
@@ -52,7 +52,7 @@ export const Navbar = () => {
           <Link to="/" className="flex items-center gap-2.5 group" data-testid="nav-logo">
             <Logo size={36} />
             <div className="leading-none">
-              <div className="font-display font-black tracking-tighter text-[#0F172A] text-lg">vianord</div>
+              <div className="font-display font-black tracking-tighter text-[#0F172A] text-lg">ViaNord</div>
               <div className="text-[10px] tracking-[0.2em] uppercase text-slate-500 font-bold">Girona · Barcelona · Jonquera</div>
             </div>
           </Link>
