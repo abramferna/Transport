@@ -1,17 +1,16 @@
 import { useEffect, useState } from "react";
-import { WhatsappLogoIcon, TelegramLogoIcon, XIcon, ChatCircleDotsIcon } from "@phosphor-icons/react";
+import { WhatsappLogoIcon, XIcon, ChatCircleDotsIcon } from "@phosphor-icons/react";
 import { api } from "@/lib/api";
 
 export const FloatingContact = () => {
   const [open, setOpen] = useState(false);
-  const [info, setInfo] = useState({ whatsapp: "", telegram: "" });
+  const [info, setInfo] = useState({ whatsapp: "" });
 
   useEffect(() => {
     api.get("/contact-info").then((r) => setInfo(r.data)).catch(() => {});
   }, []);
 
   const wa = info.whatsapp || "34673392259";
-  const tg = info.telegram || "transportes_gibcn";
   const msg = encodeURIComponent("Hola, me gustaría solicitar un presupuesto de transporte.");
 
   return (
@@ -26,15 +25,6 @@ export const FloatingContact = () => {
             className="flex items-center gap-2 bg-[#25D366] hover:bg-[#20BA5A] text-white font-bold pl-4 pr-5 h-12 transition-colors duration-150 shadow-lg"
           >
             <WhatsappLogoIcon size={22} weight="fill" /> WhatsApp
-          </a>
-          <a
-            href={`https://t.me/${tg}`}
-            target="_blank"
-            rel="noopener noreferrer"
-            data-testid="floating-telegram"
-            className="flex items-center gap-2 bg-[#26A5E4] hover:bg-[#1F8FCB] text-white font-bold pl-4 pr-5 h-12 transition-colors duration-150 shadow-lg"
-          >
-            <TelegramLogoIcon size={22} weight="fill" /> Telegram
           </a>
         </div>
       )}
