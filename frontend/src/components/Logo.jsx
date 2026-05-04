@@ -6,11 +6,11 @@ export const Logo = ({ size = 40, dark = true }) => (
     xmlns="http://www.w3.org/2000/svg"
     aria-label="Vianord"
   >
-    <rect width="40" height="40" fill={dark ? "#0F172A" : "#FFFFFF"} />
-    {/* Stylized V/N: two angled stripes evoking AP-7 north */}
-    <path d="M 8 30 L 16 10 L 20 18 L 28 10 L 32 30 L 26 30 L 24 22 L 20 28 L 16 22 L 14 30 Z" fill="#FBBF24" />
-    {/* North arrow tip */}
-    <circle cx="33" cy="8" r="2" fill="#FBBF24" />
+    <rect width="40" height="40" fill={dark ? "#0F172A" : "#1E3A8A"} />
+    {/* Bold V — two angled arms meeting at a sharp tip */}
+    <path d="M5,8 L14,8 L20,27 L26,8 L35,8 L20,34 Z" fill="#FBBF24" />
+    {/* North accent: thin bar at top */}
+    <rect x="5" y="4" width="30" height="1.8" fill="#FBBF24" opacity="0.4" />
   </svg>
 );
 
