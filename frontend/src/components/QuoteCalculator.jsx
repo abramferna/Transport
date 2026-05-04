@@ -12,6 +12,7 @@ const ADDONS_LIST = [
   { id: "descarga_small", label: "Descarga con plataforma 1–3 palets", desc: "+35€", icon: "package" },
   { id: "descarga_media", label: "Descarga con plataforma hasta 8 palets", desc: "+70€", icon: "package" },
   { id: "full_truck", label: "Descarga camión completo con plataforma", desc: "+110€", icon: "truck" },
+  { id: "descarga_extra", label: "Descarga extra misma población", desc: "+25€", icon: "package" },
   { id: "descarga_muelle", label: "Descarga muelle · conductor", desc: "+40€", icon: "package" },
   { id: "urgente", label: "Urgente · <24h", desc: "Sin previsión. ×1,20 sobre total", icon: "clock" },
 ];
@@ -268,6 +269,14 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
               {addons.length === 0 && (
                 <div className="mt-2 text-xs text-slate-500">Sin extras: servicio estándar muelle a muelle.</div>
               )}
+              <div className="mt-3 space-y-2">
+                <div className="bg-[#FFF9EC] border border-[#FBBF24]/40 px-3 py-2 text-xs text-[#78350F] leading-snug">
+                  <span className="font-bold">Descargas adicionales o situaciones especiales</span> — Contacta con nosotros antes de confirmar: <a href="https://wa.me/34600000000" target="_blank" rel="noopener noreferrer" className="font-bold underline hover:text-[#92400E]">WhatsApp</a> o <a href="mailto:hola@vianord.cat" className="font-bold underline hover:text-[#92400E]">Email</a>.
+                </div>
+                <div className="bg-slate-50 border border-slate-200 px-3 py-2 text-xs text-slate-600 leading-snug">
+                  <span className="font-bold">Mercancía paletizada o preparada.</span> Toda la carga debe llegar paletizada o correctamente preparada para la descarga en destino. En caso contrario, consulta previamente con nosotros.
+                </div>
+              </div>
             </div>
 
             <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-5">

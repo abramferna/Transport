@@ -94,6 +94,12 @@ ADDONS = {
         "route_pct": 0.0,
         "multiplier": 1.0,
     },
+    "descarga_extra": {
+        "label": "Descarga extra misma población",
+        "flat": 25.0,
+        "route_pct": 0.0,
+        "multiplier": 1.0,
+    },
     "descarga_muelle": {
         "label": "Descarga muelle · conductor",
         "flat": 40.0,
