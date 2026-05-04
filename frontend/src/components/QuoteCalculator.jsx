@@ -271,7 +271,7 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
             </div>
 
             <div className="mt-5 grid grid-cols-1 md:grid-cols-2 gap-5">
-              <Field label="Franja horaria de recogida">
+              <Field label="Franja horaria de recogida (en origen)">
                 <div className="grid grid-cols-2 gap-px bg-slate-200 border border-slate-200" data-testid="calc-time-slots">
                   {TIME_SLOTS.map((s) => {
                     const active = timeSlot === s.id;
@@ -434,12 +434,13 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
 
               {/* Paradas */}
               <div className="mt-5">
-                <div className="label-eyebrow mb-3 flex items-center gap-2">
+                <div className="label-eyebrow mb-1 flex items-center gap-2">
                   <FlagIcon size={14} weight="fill" className="text-[#1E3A8A]" />
                   {tipo === "b2c"
-                    ? "Dirección de entrega y franja horaria"
-                    : `Paradas del plan (${stops.length}) · dirección y franja horaria`}
+                    ? "Dirección de entrega · disponibilidad para descarga"
+                    : `Paradas del plan (${stops.length}) · dirección y disponibilidad para descarga`}
                 </div>
+                <p className="text-xs text-slate-500 mb-3">La franja de recogida en origen ya queda registrada arriba. Indícanos aquí cuándo puede recibir la mercancía el destinatario.</p>
                 <div className="space-y-3">
                   {stops.map((stop, i) => (
                     <div key={i} className="border border-slate-200 bg-[#F8FAFC] p-4">
@@ -457,7 +458,7 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
                             className="input-base"
                           />
                         </Field>
-                        <Field label="Franja horaria *">
+                        <Field label="Disponibilidad descarga *">
                           <select
                             value={stop.franja}
                             onChange={(e) => updateStop(i, "franja", e.target.value)}
