@@ -394,34 +394,100 @@ class StatusUpdate(BaseModel):
 
 
 # ----------------- Email helpers -----------------
-def _build_admin_html(q: dict) -> str:
-    rows = "".join(
-        f"<tr><td style='padding:6px 10px;border-bottom:1px solid #e2e8f0;color:#64748b;font-size:12px;text-transform:uppercase;letter-spacing:1px'>{k}</td><td style='padding:6px 10px;border-bottom:1px solid #e2e8f0;color:#0f172a;font-weight:600'>{v}</td></tr>"
-        for k, v in q.items() if v not in (None, "", [])
+def _row(label: str, value) -> str:
+    if value in (None, "", [], 0):
+        return ""
+    return (
+        f"<tr>"
+        f"<td style='padding:8px 12px;border-bottom:1px solid #E2E8F0;color:#64748B;font-size:12px;text-transform:uppercase;letter-spacing:1px;white-space:nowrap;width:38%'>{label}</td>"
+        f"<td style='padding:8px 12px;border-bottom:1px solid #E2E8F0;color:#0F172A;font-weight:600'>{value}</td>"
+        f"</tr>"
     )
+
+def _build_admin_html(q: dict) -> str:
+    addons_str = ", ".join(q.get("addons") or []) or "—"
+    precio = f"{q.get('estimated_price', 0):.2f} € (IVA incl.)" if q.get("estimated_price") else "—"
+    tipo_label = "Plan B2B semanal" if q.get("tipo") == "b2b" else "Servicio puntual B2C"
+    paradas = q.get("paradas") or []
+    paradas_html = ""
+    if paradas:
+        paradas_html = "<tr><td colspan='2' style='padding:8px 12px;border-bottom:1px solid #E2E8F0;color:#64748B;font-size:12px;text-transform:uppercase;letter-spacing:1px'>Paradas</td></tr>"
+        for p in paradas:
+            paradas_html += _row(f"Parada {p.get('numero','')}", f"{p.get('direccion','')} · {p.get('franja','')}")
+
     return f"""
-    <div style='font-family:Arial,sans-serif;max-width:640px;margin:0 auto;background:#fff'>
-      <div style='background:#0F172A;padding:24px'>
-        <div style='color:#FBBF24;font-size:11px;letter-spacing:3px;text-transform:uppercase'>Nueva solicitud</div>
-        <div style='color:#fff;font-size:22px;font-weight:800;margin-top:6px'>Presupuesto #{q.get('reference')}</div>
+    <div style='font-family:Arial,sans-serif;max-width:640px;margin:0 auto;background:#fff;border:1px solid #E2E8F0'>
+      <div style='background:#0F172A;padding:24px 28px'>
+        <div style='color:#FBBF24;font-size:10px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px'>Nueva solicitud de presupuesto</div>
+        <div style='color:#fff;font-size:22px;font-weight:800'>Ref. {q.get('reference')}</div>
+        <div style='color:#94A3B8;font-size:13px;margin-top:4px'>{tipo_label}</div>
       </div>
-      <table style='width:100%;border-collapse:collapse;background:#fff'>{rows}</table>
+
+      <div style='padding:20px 28px 0'>
+        <div style='font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#94A3B8;margin-bottom:8px'>Cliente</div>
+      </div>
+      <table style='width:100%;border-collapse:collapse'>
+        {_row("Nombre", q.get("nombre"))}
+        {_row("Empresa", q.get("empresa"))}
+        {_row("Email", q.get("email"))}
+        {_row("Teléfono", q.get("telefono"))}
+      </table>
+
+      <div style='padding:20px 28px 0'>
+        <div style='font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#94A3B8;margin-bottom:8px'>Envío</div>
+      </div>
+      <table style='width:100%;border-collapse:collapse'>
+        {_row("Origen", q.get("origen"))}
+        {_row("Destino", q.get("destino"))}
+        {_row("Peso", f"{q.get('peso_kg')} kg" if q.get('peso_kg') else None)}
+        {_row("Volumen", f"{q.get('volumen_m3')} m³" if q.get('volumen_m3') else None)}
+        {_row("Franja recogida", q.get("time_slot"))}
+        {_row("Fecha preferida", q.get("fecha_preferida"))}
+        {_row("Extras", addons_str)}
+        {paradas_html}
+        {_row("Descripción", q.get("descripcion"))}
+      </table>
+
+      <div style='padding:20px 28px 0'>
+        <div style='font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#94A3B8;margin-bottom:8px'>Precio estimado</div>
+      </div>
+      <table style='width:100%;border-collapse:collapse'>
+        {_row("Estimación", precio)}
+        {_row("Plan", q.get("plan_id"))}
+      </table>
+
+      <div style='padding:20px 28px 24px'>
+        <a href='mailto:{q.get("email")}' style='display:inline-block;background:#FBBF24;color:#0F172A;font-weight:700;padding:10px 20px;text-decoration:none;font-size:14px'>
+          Responder al cliente
+        </a>
+        <a href='https://wa.me/34{q.get("telefono","").replace(" ","").replace("+34","")}' style='display:inline-block;background:#25D366;color:#fff;font-weight:700;padding:10px 20px;text-decoration:none;font-size:14px;margin-left:8px'>
+          WhatsApp
+        </a>
+      </div>
+
+      <div style='background:#F8FAFC;padding:12px 28px;border-top:1px solid #E2E8F0'>
+        <span style='color:#94A3B8;font-size:11px'>ViaNord · Transporte Catalunya · abramferna@gmail.com</span>
+      </div>
     </div>
     """
 
 
 def _build_client_html(q: dict) -> str:
+    precio = f"{q.get('estimated_price', 0):.2f} € (IVA incl.)" if q.get("estimated_price") else "pendiente de confirmar"
     return f"""
-    <div style='font-family:Arial,sans-serif;max-width:640px;margin:0 auto;background:#fff'>
+    <div style='font-family:Arial,sans-serif;max-width:640px;margin:0 auto;background:#fff;border:1px solid #E2E8F0'>
       <div style='background:#1E3A8A;padding:28px'>
-        <div style='color:#FBBF24;font-size:11px;letter-spacing:3px;text-transform:uppercase'>Solicitud recibida</div>
-        <div style='color:#fff;font-size:24px;font-weight:800;margin-top:8px'>Hola {q.get('nombre')}, gracias.</div>
+        <div style='color:#FBBF24;font-size:10px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px'>Solicitud recibida</div>
+        <div style='color:#fff;font-size:22px;font-weight:800'>Hola {q.get('nombre')}, gracias.</div>
       </div>
-      <div style='padding:24px;color:#0f172a'>
-        <p>Hemos recibido tu solicitud de presupuesto. Te contactaremos en menos de 4 horas hábiles.</p>
-        <p><strong>Referencia:</strong> {q.get('reference')}</p>
-        <p><strong>Ruta:</strong> {q.get('origen')} → {q.get('destino')}</p>
-        <p style='margin-top:24px;padding:16px;background:#FBBF24;color:#0F172A;font-weight:700'>Vianord · Transportes Catalunya</p>
+      <div style='padding:28px;color:#0f172a'>
+        <p style='margin:0 0 16px;color:#475569'>Hemos recibido tu solicitud. Te contactaremos en menos de 4 horas hábiles para confirmar el presupuesto.</p>
+        <table style='width:100%;border-collapse:collapse;background:#F8FAFC;border:1px solid #E2E8F0'>
+          {_row("Referencia", q.get("reference"))}
+          {_row("Ruta", f"{q.get('origen')} → {q.get('destino')}")}
+          {_row("Estimación", precio)}
+        </table>
+        <p style='margin:24px 0 0;color:#94A3B8;font-size:12px'>ViaNord · Transporte de mercancías · Catalunya<br>Tel: +34 673 392 259 · ViaNord@gmail.com</p>
       </div>
     </div>
     """
