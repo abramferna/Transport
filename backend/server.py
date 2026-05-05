@@ -13,6 +13,7 @@ from typing import List, Optional, Literal
 import uuid
 from datetime import datetime, timezone
 from towns import TOWNS, get_town
+from supabase import create_client as _supabase_create_client
 
 
 ROOT_DIR = Path(__file__).parent
@@ -22,6 +23,46 @@ load_dotenv(ROOT_DIR / '.env')
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
+
+# Supabase
+_SUPABASE_URL = os.environ.get('SUPABASE_URL', '')
+_SUPABASE_KEY = os.environ.get('SUPABASE_KEY', '')
+_supabase = _supabase_create_client(_SUPABASE_URL, _SUPABASE_KEY) if _SUPABASE_URL and _SUPABASE_KEY else None
+
+async def _sync_to_supabase(doc: dict):
+    """Insert quote into Supabase quotes table (fire & forget, non-blocking)."""
+    if not _supabase:
+        return
+    try:
+        loop = asyncio.get_event_loop()
+        row = {
+            "id": doc.get("id"),
+            "reference": doc.get("reference"),
+            "tipo": doc.get("tipo"),
+            "plan_id": doc.get("plan_id"),
+            "nombre": doc.get("nombre"),
+            "empresa": doc.get("empresa"),
+            "email": doc.get("email"),
+            "telefono": doc.get("telefono"),
+            "origen": doc.get("origen"),
+            "destino": doc.get("destino"),
+            "peso_kg": doc.get("peso_kg"),
+            "volumen_m3": doc.get("volumen_m3"),
+            "addons": doc.get("addons") or [],
+            "time_slot": doc.get("time_slot"),
+            "fecha_preferida": doc.get("fecha_preferida"),
+            "descripcion": doc.get("descripcion"),
+            "estimated_price": doc.get("estimated_price"),
+            "status": doc.get("status", "pendiente"),
+            "created_at": doc.get("created_at"),
+        }
+        await loop.run_in_executor(
+            None,
+            lambda: _supabase.table("quotes").insert(row).execute()
+        )
+        logging.info(f"[Supabase] Quote {doc.get('reference')} sincronizada correctamente")
+    except Exception as e:
+        logging.warning(f"[Supabase] Error sincronizando quote: {e}")
 
 # Resend
 RESEND_API_KEY = os.environ.get('RESEND_API_KEY', '')
@@ -464,7 +505,8 @@ async def create_quote(payload: QuoteCreate):
     doc["updated_at"] = doc["updated_at"].isoformat()
     await db.quotes.insert_one(doc)
 
-    # Fire & forget emails
+    # Fire & forget: Supabase sync + emails
+    asyncio.create_task(_sync_to_supabase(doc))
     asyncio.create_task(send_email_safe(
         ADMIN_NOTIFY_EMAIL,
         f"[Nuevo presupuesto] {quote.reference} · {quote.origen}→{quote.destino}",
