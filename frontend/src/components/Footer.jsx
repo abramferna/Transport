@@ -10,11 +10,11 @@ export const Footer = () => (
           <div className="flex items-center gap-2.5 mb-5">
             <Logo size={36} />
             <div>
-              <div className="font-display font-black tracking-tighter text-white text-lg leading-none">ViaNord</div>
+              <div className="font-display font-black tracking-tighter text-white text-lg leading-none">ViaNordTrans</div>
               <div className="text-[10px] tracking-[0.2em] uppercase text-slate-500 font-bold mt-1">Girona · Barcelona · Jonquera</div>
             </div>
           </div>
-          <p className="text-sm text-slate-400 max-w-md">ViaNord. Transporte de mercancías especializado en el corredor norte de Catalunya: Girona, Barcelona y La Jonquera. Cargas semanales para profesionales y servicios puntuales paletizados con flota propia.</p>
+          <p className="text-sm text-slate-400 max-w-md">ViaNordTrans. Transporte de mercancías especializado en el corredor norte de Catalunya: Girona, Barcelona y La Jonquera. Cargas semanales para profesionales y servicios puntuales paletizados con flota propia.</p>
         </div>
 
         <div>

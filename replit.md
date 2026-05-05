@@ -1,6 +1,6 @@
-# Vianord - Transport de Mercancies Catalunya
+# ViaNordTrans - Transport de Mercancies Catalunya
 
-A transport/logistics quote management app for Vianord, a Girona-based freight transport company operating routes between Girona, Barcelona, and La Jonquera.
+A transport/logistics quote management app for ViaNordTrans, a Girona-based freight transport company operating routes between Girona, Barcelona, and La Jonquera.
 
 ## Architecture
 

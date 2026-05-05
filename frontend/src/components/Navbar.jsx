@@ -3,8 +3,8 @@ import { ListIcon, WhatsappLogoIcon, EnvelopeIcon } from "@phosphor-icons/react"
 import { useState } from "react";
 import { Logo } from "@/components/Logo";
 
-const WHATSAPP_URL = "https://wa.me/34673392259?text=Hola%2C%20soy%20transportista%20y%20me%20interesa%20unirme%20a%20la%20red%20ViaNord.";
-const EMAIL_URL = "mailto:ViaNord@gmail.com?subject=Quiero%20unirme%20a%20la%20red%20ViaNord";
+const WHATSAPP_URL = "https://wa.me/34673392259?text=Hola%2C%20soy%20transportista%20y%20me%20interesa%20unirme%20a%20la%20red%20ViaNordTrans.";
+const EMAIL_URL = "mailto:ViaNord@gmail.com?subject=Quiero%20unirme%20a%20la%20red%20ViaNordTrans";
 
 const items = [
   { id: "modelos", label: "Servicios" },
@@ -22,7 +22,7 @@ export const Navbar = () => {
       <div className="bg-[#0F172A] border-b border-white/10">
         <div className="max-w-7xl mx-auto px-5 lg:px-8 py-2 flex flex-wrap items-center justify-between gap-x-6 gap-y-1">
           <p className="text-[11px] text-slate-400 leading-snug hidden sm:block">
-            <span className="text-white font-medium">ViaNord</span> resuelve envíos urgentes y necesidades recurrentes de transporte para empresas, con eficiencia, rapidez y precios competitivos.
+            <span className="text-white font-medium">ViaNordTrans</span> resuelve envíos urgentes y necesidades recurrentes de transporte para empresas, con eficiencia, rapidez y precios competitivos.
           </p>
           <div className="flex items-center gap-3 ml-auto flex-shrink-0">
             <span className="text-[11px] text-slate-400 hidden sm:inline">¿Transportista? Únete a nuestra red →</span>
@@ -52,7 +52,7 @@ export const Navbar = () => {
           <Link to="/" className="flex items-center gap-2.5 group" data-testid="nav-logo">
             <Logo size={36} />
             <div className="leading-none">
-              <div className="font-display font-black tracking-tighter text-[#0F172A] text-lg">ViaNord</div>
+              <div className="font-display font-black tracking-tighter text-[#0F172A] text-lg">ViaNordTrans</div>
               <div className="text-[10px] tracking-[0.2em] uppercase text-slate-500 font-bold">Girona · Barcelona · Jonquera</div>
             </div>
           </Link>

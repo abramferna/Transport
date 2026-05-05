@@ -466,7 +466,7 @@ def _build_admin_html(q: dict) -> str:
       </div>
 
       <div style='background:#F8FAFC;padding:12px 28px;border-top:1px solid #E2E8F0'>
-        <span style='color:#94A3B8;font-size:11px'>ViaNord · Transporte Catalunya · abramferna@gmail.com</span>
+        <span style='color:#94A3B8;font-size:11px'>ViaNordTrans · Transporte Catalunya · abramferna@gmail.com</span>
       </div>
     </div>
     """
@@ -487,7 +487,7 @@ def _build_client_html(q: dict) -> str:
           {_row("Ruta", f"{q.get('origen')} → {q.get('destino')}")}
           {_row("Estimación", precio)}
         </table>
-        <p style='margin:24px 0 0;color:#94A3B8;font-size:12px'>ViaNord · Transporte de mercancías · Catalunya<br>Tel: +34 673 392 259 · ViaNord@gmail.com</p>
+        <p style='margin:24px 0 0;color:#94A3B8;font-size:12px'>ViaNordTrans · Transporte de mercancías · Catalunya<br>Tel: +34 673 392 259 · ViaNord@gmail.com</p>
       </div>
     </div>
     """
