@@ -25,7 +25,7 @@ export const Navbar = () => {
             <span className="text-white font-medium">ViaNordTrans</span> resuelve envíos urgentes y necesidades recurrentes de transporte para empresas, con eficiencia, rapidez y precios competitivos.
           </p>
           <div className="flex items-center gap-3 ml-auto flex-shrink-0">
-            <span className="text-[11px] text-slate-400 hidden sm:inline">¿Transportista? Únete a nuestra red →</span>
+            <span className="text-[11px] text-slate-400 hidden sm:inline">¿Quieres colaborar como conductor? ¡Contáctanos!</span>
             <a
               href={WHATSAPP_URL}
               target="_blank"
