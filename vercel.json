@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "cd frontend && yarn install && yarn build && rm -rf node_modules .cache",
+  "buildCommand": "cd frontend && rm -rf node_modules/.cache && yarn install && yarn build",
   "outputDirectory": "frontend/build",
   "functions": {
     "api/index.py": {
