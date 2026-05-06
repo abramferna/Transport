@@ -1,13 +1,11 @@
 {
   "version": 2,
-  "buildCommand": "cd frontend && yarn install && yarn build",
+  "buildCommand": "cd frontend && yarn install && yarn build && rm -rf node_modules .cache",
   "outputDirectory": "frontend/build",
   "functions": {
     "api/index.py": {
       "runtime": "@vercel/python@4.3.1",
-      "maxDuration": 30,
-      "includeFiles": "api/**",
-      "excludeFiles": "frontend/**|backend/**|node_modules/**"
+      "maxDuration": 30
     }
   },
   "routes": [
