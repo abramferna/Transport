@@ -4,3 +4,4 @@ backend
 start.sh
 *.log
 .git
+node_modules
