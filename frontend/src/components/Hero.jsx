@@ -18,20 +18,22 @@ export const Hero = () => {
           <div className="lg:col-span-8 fade-up">
             <div className="flex items-center gap-3 mb-6">
               <span className="inline-block w-10 h-[2px] bg-[#FBBF24]" />
-              <span className="label-eyebrow text-[#FBBF24]">Transporte de Mercancías · Catalunya</span>
+              <span className="label-eyebrow text-[#FBBF24]">Transporte profesional · Girona · Barcelona · Jonquera</span>
             </div>
-            <h1 className="font-display font-black tracking-tighter leading-[0.92] text-white text-5xl sm:text-6xl lg:text-7xl">
-              Camión listo<br />
-              cuando lo <span className="text-[#FBBF24]">necesitas</span>.
+            <h1 className="font-display font-black tracking-tighter leading-[0.92] text-white text-4xl sm:text-5xl lg:text-6xl">
+              Transporte para empresas<br />
+              en <span className="text-[#FBBF24]">Girona, Barcelona</span><br />
+              y La Jonquera.
             </h1>
-            <p className="mt-3 font-display font-bold text-xl sm:text-2xl text-slate-300 tracking-tight">
-              Urgente o recurrente. Dedicado a tu empresa.
+            <p className="mt-4 font-display font-bold text-lg sm:text-xl text-[#FBBF24] tracking-tight">
+              Entregas rápidas, precios cerrados y sin sorpresas.
             </p>
-          <p className="mt-7 text-lg text-slate-200 max-w-xl leading-relaxed">
-            Todo el Gironès · puntas a <strong className="text-white">Barcelona</strong> y <strong className="text-white">La Jonquera</strong>. Entrega en 24h o el mismo día. Fuera de zona, consulta disponibilidad y precio.
-          </p>
+            <p className="mt-3 text-base text-slate-300 max-w-xl leading-relaxed">
+              Rutas fijas o envíos puntuales. Camión propio, base Girona. Entrega en 24h o el mismo día.{" "}
+              <span className="text-white font-medium">Envíos fuera de ruta a consultar.</span>
+            </p>
 
-            <div className="mt-10 flex flex-wrap gap-3">
+            <div className="mt-8 flex flex-wrap gap-3">
               <a
                 href="#calculadora"
                 data-testid="hero-cta-calculator"
@@ -41,11 +43,11 @@ export const Hero = () => {
                 <ArrowRightIcon size={18} weight="bold" className="transition-transform duration-200 group-hover:translate-x-1" />
               </a>
               <a
-                href="#modelos"
+                href="#como-funciona"
                 data-testid="hero-cta-services"
                 className="inline-flex items-center gap-2 border border-white/30 hover:border-white text-white font-semibold px-6 h-12 transition-colors duration-150"
               >
-                Ver modelos de servicio
+                Cómo funciona
               </a>
             </div>
           </div>
