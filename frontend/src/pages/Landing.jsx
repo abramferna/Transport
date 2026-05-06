@@ -1,6 +1,7 @@
 import { useState } from "react";
 import Navbar from "@/components/Navbar";
 import Hero from "@/components/Hero";
+import HowItWorks from "@/components/HowItWorks";
 import ServiceModels from "@/components/ServiceModels";
 import QuoteCalculator from "@/components/QuoteCalculator";
 import Coverage from "@/components/Coverage";
@@ -25,6 +26,7 @@ export default function Landing() {
       <Navbar />
       <main>
         <Hero />
+        <HowItWorks />
         <ServiceModels onSelectPlan={handleSelectPlan} />
         <QuoteCalculator initialPlan={selectedPlan} />
         <Coverage />
