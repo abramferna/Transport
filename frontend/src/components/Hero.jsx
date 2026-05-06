@@ -13,7 +13,7 @@ export const Hero = () => {
       <div className="absolute inset-0 bg-gradient-to-r from-[#0F172A] via-[#0F172A]/85 to-[#0F172A]/30" aria-hidden />
       <div className="absolute inset-0 grid-bg opacity-20" aria-hidden />
 
-      <div className="relative max-w-7xl mx-auto px-5 lg:px-8 pt-20 pb-24 lg:pt-28 lg:pb-32">
+      <div className="relative max-w-7xl mx-auto px-5 lg:px-8 pt-10 pb-12 lg:pt-14 lg:pb-16">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 items-end">
           <div className="lg:col-span-8 fade-up">
             <div className="flex items-center gap-3 mb-6">
