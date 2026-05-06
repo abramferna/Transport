@@ -240,6 +240,27 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
               </Field>
             </div>
 
+            <div className="mt-3 grid grid-cols-3 divide-x divide-slate-200 border border-slate-200 bg-slate-50 text-center text-[11px]">
+              <div className="px-3 py-2">
+                <div className="font-black text-[#0F172A] text-sm">18</div>
+                <div className="text-slate-500 font-medium">palets europeos</div>
+                <div className="text-slate-400 mt-0.5">80×120 cm</div>
+              </div>
+              <div className="px-3 py-2">
+                <div className="font-black text-[#0F172A] text-sm">6.000 kg</div>
+                <div className="text-slate-500 font-medium">peso máx.</div>
+                <div className="text-slate-400 mt-0.5">≈ 333 kg/palet</div>
+              </div>
+              <div className="px-3 py-2">
+                <div className="font-black text-[#0F172A] text-sm">34 m³</div>
+                <div className="text-slate-500 font-medium">volumen máx.</div>
+                <div className="text-slate-400 mt-0.5">≈ 1,45 m³/palet</div>
+              </div>
+            </div>
+            <div className="mt-1 text-[11px] text-slate-500 px-0.5">
+              Carga máxima del vehículo. Si superas alguno de los límites, contacta para valorar un servicio a medida.
+            </div>
+
             {calc?.breakdown?.chargeable_kg > Number(weight) && (
               <div className="mt-3 text-xs text-[#1E3A8A] bg-[#1E3A8A]/5 border border-[#1E3A8A]/20 px-3 py-2">
                 El volumen manda: facturamos por <strong>{calc.breakdown.chargeable_kg} kg</strong> (peso volumétrico, 176 kg/m³ del 12T).
