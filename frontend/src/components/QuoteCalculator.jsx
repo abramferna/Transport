@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import {
@@ -101,30 +101,32 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
   const isWeekend = weekday >= 5;
 
   const fetchCalc = useMemo(
-    () => async (params) => {
+    () => async (params, { silent = false } = {}) => {
       setLoading(true);
-      let lastErr;
       for (let attempt = 0; attempt < 3; attempt++) {
         try {
           const r = await api.post("/calculate", params);
           setCalc(r.data);
           setLoading(false);
           return;
-        } catch (e) {
-          lastErr = e;
-          if (attempt < 2) await new Promise((res) => setTimeout(res, 1200));
+        } catch {
+          if (attempt < 2) await new Promise((res) => setTimeout(res, 1500));
         }
       }
-      toast.error("No se pudo calcular el precio");
+      if (!silent) toast.error("No se pudo calcular el precio");
       setLoading(false);
     }, []);
 
+  const isFirstLoad = useRef(true);
+
   useEffect(() => {
+    const silent = isFirstLoad.current;
+    isFirstLoad.current = false;
     fetchCalc({
       origin_town: origin, destination_town: destination,
       weight_kg: Number(weight) || 0, volume_m3: Number(volume) || 0,
       addons, time_slot: timeSlot, weekday: Number(weekday),
-    });
+    }, { silent });
   }, [origin, destination, weight, volume, addons, timeSlot, weekday, fetchCalc]);
 
   const originName = towns.find((t) => t.id === origin)?.name || "Girona";
