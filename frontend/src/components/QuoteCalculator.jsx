@@ -103,14 +103,20 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
   const fetchCalc = useMemo(
     () => async (params) => {
       setLoading(true);
-      try {
-        const r = await api.post("/calculate", params);
-        setCalc(r.data);
-      } catch {
-        toast.error("No se pudo calcular el precio");
-      } finally {
-        setLoading(false);
+      let lastErr;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          const r = await api.post("/calculate", params);
+          setCalc(r.data);
+          setLoading(false);
+          return;
+        } catch (e) {
+          lastErr = e;
+          if (attempt < 2) await new Promise((res) => setTimeout(res, 1200));
+        }
       }
+      toast.error("No se pudo calcular el precio");
+      setLoading(false);
     }, []);
 
   useEffect(() => {
