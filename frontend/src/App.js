@@ -1,5 +1,5 @@
 import "@/App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "sonner";
 import Landing from "@/pages/Landing";
 import Admin from "@/pages/Admin";
@@ -12,6 +12,7 @@ function App() {
         <Toaster position="top-right" richColors closeButton />
         <Routes>
           <Route path="/" element={<Landing />} />
+          <Route path="/calculadora" element={<Navigate to="/#calculadora" replace />} />
           <Route path="/admin" element={<Admin />} />
           <Route path="/seguimiento" element={<Tracking />} />
           <Route path="/seguimiento/:reference" element={<Tracking />} />
