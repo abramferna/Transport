@@ -3,7 +3,7 @@ import { ListIcon, WhatsappLogoIcon, EnvelopeIcon } from "@phosphor-icons/react"
 import { useState } from "react";
 import { Logo } from "@/components/Logo";
 
-const WHATSAPP_URL = "https://wa.me/34673392259?text=Hola%2C%20soy%20transportista%20y%20me%20interesa%20unirme%20a%20la%20red%20ViaNordTrans.";
+const WHATSAPP_URL = "https://wa.me/34673392259?text=Hola%2C%20me%20gustar%C3%ADa%20solicitar%20un%20presupuesto%20de%20transporte.";
 const EMAIL_URL = "mailto:ViaNord@gmail.com?subject=Quiero%20unirme%20a%20la%20red%20ViaNordTrans";
 
 const items = [
