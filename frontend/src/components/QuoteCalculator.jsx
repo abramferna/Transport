@@ -475,8 +475,8 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
                 )}
               </div>
 
-              {/* Paradas — solo para b2c o plan Básico */}
-              {(tipo === "b2c" || planId === "basico") && (
+              {/* Paradas — solo para b2c */}
+              {tipo === "b2c" && (
                 <div className="mt-5">
                   <div className="label-eyebrow mb-1 flex items-center gap-2">
                     <FlagIcon size={14} weight="fill" className="text-[#1E3A8A]" />
