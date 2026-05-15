@@ -32,8 +32,8 @@ export default function AvisoLegal() {
           <p>En cumplimiento del artículo 10 de la Ley 34/2002, de 11 de julio, de Servicios de la Sociedad de la Información y de Comercio Electrónico (LSSI-CE), se informa de los siguientes datos identificativos del titular del sitio web:</p>
           <ul className="mt-3 space-y-1">
             <li><strong>Nombre comercial:</strong> ViaNordTrans</li>
-            <li><strong>NIF/CIF:</strong> [NÚMERO NIF/CIF]</li>
-            <li><strong>Domicilio social:</strong> Girona, Catalunya, España</li>
+            <li><strong>NIF:</strong> 41644986J</li>
+            <li><strong>Domicilio social:</strong> C/ Gavarres 35, Castell d'Aro, Girona, Catalunya</li>
             <li><strong>Correo electrónico:</strong> ViaNord@gmail.com</li>
             <li><strong>Teléfono:</strong> +34 673 392 259</li>
           </ul>
