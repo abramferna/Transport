@@ -25,6 +25,7 @@ const TIME_SLOTS = [
 ];
 
 const WEEKDAYS = ["Lun", "Mar", "Mié", "Jue", "Vie", "Sáb", "Dom"];
+const PALLET_M3 = 34 / 18; // ≈ 1.89 m³ por europalet (80×120 cm)
 
 const TownSelect = ({ value, onChange, towns, label, testid }) => {
   const grouped = useMemo(() => {
@@ -52,6 +53,7 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
   const [destination, setDestination] = useState("barcelona");
   const [weight, setWeight] = useState(800);
   const [volume, setVolume] = useState(4);
+  const [pallets, setPallets] = useState(0);
   const [addons, setAddons] = useState([]);
   const [timeSlot, setTimeSlot] = useState("manana");
   const [weekday, setWeekday] = useState(2);
@@ -233,15 +235,57 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
               <Field label={`Volumen · ${volume.toFixed(1)} m³ ${calc?.breakdown?.volumetric_kg ? `(equiv. ${calc.breakdown.volumetric_kg} kg)` : ""}`}>
                 <input
                   type="range" min="0.5" max="34" step="0.5"
-                  value={volume} onChange={(e) => setVolume(Number(e.target.value))}
+                  value={volume}
+                  onChange={(e) => {
+                    const v = Number(e.target.value);
+                    setVolume(v);
+                    setPallets(Math.min(18, Math.round(v / PALLET_M3)));
+                  }}
                   className="w-full accent-[#FBBF24]"
                   data-testid="calc-volume"
                 />
                 <div className="flex justify-between text-[11px] font-mono text-slate-500 mt-1">
                   <span>0,5 m³</span><span>12</span><span>24</span><span>34 m³ · máx.</span>
                 </div>
-                <div className="mt-1 text-[11px] text-slate-500">Referencia: <span className="font-semibold text-slate-600">1 palet europeo (80×120 cm) ≈ 1,45 m³</span> · carga estándar 4 palets ≈ 5,8 m³</div>
               </Field>
+            </div>
+
+            {/* Palets slider */}
+            <div className="mt-4 border border-slate-200 bg-slate-50 p-4">
+              <div className="flex items-center justify-between mb-2">
+                <span className="label-eyebrow">Número de palets · <span className="text-[#0F172A] normal-case font-bold text-sm">{pallets === 0 ? "no especificado" : `${pallets} de 18`}</span></span>
+                {pallets > 0 && (
+                  <span className="text-[11px] text-slate-500 font-mono">{pallets} palet{pallets !== 1 ? "s" : ""} → ~{Math.min(34, Math.round(pallets * PALLET_M3 * 2) / 2).toFixed(1)} m³</span>
+                )}
+              </div>
+              <input
+                type="range" min="0" max="18" step="1"
+                value={pallets}
+                onChange={(e) => {
+                  const p = Number(e.target.value);
+                  setPallets(p);
+                  if (p > 0) setVolume(Math.min(34, Math.round(p * PALLET_M3 * 2) / 2));
+                }}
+                className="w-full accent-[#0F172A]"
+              />
+              <div className="flex gap-0.5 mt-2">
+                {Array.from({ length: 18 }, (_, i) => (
+                  <button
+                    type="button"
+                    key={i}
+                    title={`${i + 1} palet${i + 1 !== 1 ? "s" : ""}`}
+                    onClick={() => {
+                      const p = i + 1;
+                      setPallets(p);
+                      setVolume(Math.min(34, Math.round(p * PALLET_M3 * 2) / 2));
+                    }}
+                    className={`flex-1 h-5 border transition-colors duration-75 ${i < pallets ? "bg-[#0F172A] border-[#0F172A]" : "bg-white border-slate-300 hover:bg-slate-200"}`}
+                  />
+                ))}
+              </div>
+              <div className="flex justify-between text-[11px] font-mono text-slate-400 mt-1">
+                <span>0</span><span>6</span><span>12</span><span>18 máx.</span>
+              </div>
             </div>
 
             <div className="mt-3 grid grid-cols-3 divide-x divide-slate-200 border border-slate-200 bg-slate-50 text-center text-[11px]">
@@ -594,7 +638,7 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
                 <ConfirmRow label="Ruta" value={`${originName} → ${destName} (${calc?.breakdown?.km_recorridos_aprox ?? "—"} km)`} />
                 {tipo === "b2c" && (
                   <>
-                    <ConfirmRow label="Peso / Volumen" value={`${weight} kg · ${volume} m³`} />
+                    <ConfirmRow label="Peso / Volumen" value={`${weight} kg · ${volume} m³${pallets > 0 ? ` · ${pallets} palet${pallets !== 1 ? "s" : ""}` : ""}`} />
                     {addons.length > 0 && <ConfirmRow label="Extras" value={addons.map((a) => ADDONS_LIST.find((x) => x.id === a)?.label).join(", ")} />}
                     {calc && <ConfirmRow label="Estimación" value={`${calc.total_con_iva.toFixed(2)}€ IVA incl.`} highlight />}
                   </>
