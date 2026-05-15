@@ -374,7 +374,7 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
                 {calc?.breakdown?.premium_jonquera > 0 && <Row k="Premium frontera Jonquera" v={`${calc.breakdown.premium_jonquera.toFixed(2)}€`} />}
                 <Row k="Recargo peso/volumen" v={`${(calc?.breakdown?.weight_surcharge ?? 0).toFixed(2)}€`} />
                 {calc?.breakdown?.big_load_discount_pct > 0 && (
-                  <Row k={`Descuento gran carga (-${calc.breakdown.big_load_discount_pct}%)`} v={`-${calc.breakdown.big_load_discount_amount.toFixed(2)}€`} highlight />
+                  <Row k={`Descuento gran carga (-${calc.breakdown.big_load_discount_pct}%)`} v={`-${(calc.breakdown.big_load_discount_amount ?? 0).toFixed(2)}€`} highlight />
                 )}
                 {calc?.breakdown?.addons_flat > 0 && <Row k="Extras (fijo)" v={`${calc.breakdown.addons_flat.toFixed(2)}€`} />}
                 {calc?.breakdown?.addons_route_pct_charge > 0 && <Row k="Ida + vuelta (+50% ruta)" v={`${calc.breakdown.addons_route_pct_charge.toFixed(2)}€`} />}
