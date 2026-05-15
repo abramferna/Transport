@@ -1,7 +1,5 @@
 import { TruckIcon, ShieldCheckIcon, RoadHorizonIcon, ClockIcon } from "@phosphor-icons/react";
 
-const FLEET_IMG = "https://images.unsplash.com/photo-1761479556231-570639303a51?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA2MTJ8MHwxfHNlYXJjaHwyfHxmcmVpZ2h0JTIwdHJ1Y2slMjBoaWdod2F5fGVufDB8fHx8MTc3Nzc1NjEyM3ww&ixlib=rb-4.1.0&q=85";
-
 const VEHICLES = [
   { name: "Furgón cerrado", payload: "hasta 6.000 kg", volume: "34 m³", best: "Carga paletizada protegida" },
   { name: "Plataforma elevadora", payload: "hasta 6.000 kg", volume: "32 m³", best: "Puerta a puerta sin muelle" },
@@ -17,8 +15,7 @@ const FEATURES = [
 export const Fleet = () => (
   <section id="flota" className="py-20 lg:py-28 bg-[#F8FAFC]" data-testid="fleet-section">
     <div className="max-w-7xl mx-auto px-5 lg:px-8">
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-px bg-slate-200 border border-slate-200 mb-10">
-        <div className="lg:col-span-7 bg-white p-8 lg:p-10">
+      <div className="border border-slate-200 bg-white p-8 lg:p-10 mb-10">
           <div className="label-eyebrow mb-3">Flota & fiabilidad</div>
           <h2 className="font-display font-black tracking-tighter text-4xl sm:text-5xl text-[#0F172A] leading-[0.95]">
             Vehículos pensados<br />para tu carga.
@@ -35,8 +32,6 @@ export const Fleet = () => (
               </div>
             ))}
           </div>
-        </div>
-        <div className="lg:col-span-5 bg-cover bg-center min-h-[260px]" style={{ backgroundImage: `url(${FLEET_IMG})` }} aria-hidden />
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-slate-200 border border-slate-200">
