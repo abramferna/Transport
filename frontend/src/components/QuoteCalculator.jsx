@@ -83,6 +83,10 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
     if (initialPlan) {
       setTipo("b2b");
       setPlanId(initialPlan.id);
+      setForm((prev) => ({
+        ...prev,
+        descripcion: `Plan de interés: ${initialPlan.name} – ${initialPlan.price_week}€/semana · ${initialPlan.frequency} · hasta ${initialPlan.weight_limit_kg.toLocaleString("es-ES")} kg`,
+      }));
       setTimeout(() => onScrollToForm?.(), 50);
     }
   }, [initialPlan, onScrollToForm]);
@@ -534,6 +538,16 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
 
               <div className="mt-4">
                 <Field label="Descripción de la mercancía / observaciones">
+                  {tipo === "b2b" && planId && (
+                    <div className="mb-2 flex items-center gap-2 flex-wrap">
+                      <span className="inline-flex items-center gap-1.5 bg-[#FBBF24] text-[#0F172A] text-[11px] font-bold tracking-[0.15em] uppercase px-2.5 py-1">
+                        Plan seleccionado
+                      </span>
+                      <span className="text-sm font-semibold text-[#0F172A]">
+                        {plans.find((p) => p.id === planId)?.name} · {plans.find((p) => p.id === planId)?.price_week}€/sem
+                      </span>
+                    </div>
+                  )}
                   <textarea rows={3} value={form.descripcion} onChange={(e) => setForm({ ...form, descripcion: e.target.value })} className="input-base resize-none" data-testid="form-descripcion" />
                 </Field>
               </div>
