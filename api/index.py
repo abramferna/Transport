@@ -66,15 +66,38 @@ TIME_SLOTS = {
 }
 
 WEEKLY_PLANS = [
-    {"id": "basico",   "name": "Plan Basico",   "price_week": 199, "frequency": "1 dia / semana",    "weight_limit_kg": 2500, "volume_limit_m3": 8,  "stops": 2,
-     "highlights": ["1 dia semanal pactado", "Hasta 2 paradas radio ~10 km", "Todo el Girones + punta BCN o Jonquera", "Con o sin plataforma hasta 2.500 kg"],
-     "best_for": "Pymes y autonomos con necesidad semanal puntual"},
-    {"id": "estandar", "name": "Plan Estandar", "price_week": 449, "frequency": "2-3 dias / semana", "weight_limit_kg": 4000, "volume_limit_m3": 18, "stops": 4,
-     "highlights": ["2-3 dias pactados (ej. L-X-V)", "Hasta 4 paradas radio ~20 km", "Todo el Girones + puntas BCN y Jonquera", "Con o sin plataforma hasta 4.000 kg"],
-     "best_for": "Distribuidores y empresas con reparto regular", "popular": True},
-    {"id": "premium",  "name": "Plan Premium",  "price_week": 899, "frequency": "Diario L-V",        "weight_limit_kg": 6000, "volume_limit_m3": 34, "stops": 6,
-     "highlights": ["Servicio diario de lunes a viernes", "Hasta 6 paradas radio ~20 km", "Todo el Girones + BCN y Jonquera", "Con o sin plataforma hasta 6.000 kg"],
-     "best_for": "Operadores logisticos y cargas completas diarias"},
+    {"id": "basico", "name": "Plan Basico", "price_week": 199, "frequency": "1 dia / semana",
+     "weight_limit_kg": 2500, "volume_limit_m3": 8, "stops": 2,
+     "highlights": [
+         "1 dia semanal (aviso con 24h de antelacion)",
+         "Hasta 2.500 kg por servicio",
+         "Hasta 2 paradas por dia en ruta",
+         "Ventana flexible de recogida y entrega",
+         "Servicio puntual y flexible",
+     ],
+     "best_for": "Envios puntuales o necesidades ocasionales"},
+    {"id": "estandar", "name": "Plan Estandar", "price_week": 399, "frequency": "2 dias fijos / semana",
+     "weight_limit_kg": 4000, "volume_limit_m3": 18, "stops": 2,
+     "highlights": [
+         "2 dias fijos por semana (acordados)",
+         "Hasta 4.000 kg por servicio",
+         "Hasta 2 paradas por dia en ruta",
+         "Planificacion semanal fija",
+         "Aviso minimo 6h para ajustes puntuales",
+         "Ventana horaria de servicio (sin hora exacta)",
+     ],
+     "best_for": "Empresas con distribucion constante y planificada", "popular": True},
+    {"id": "premium", "name": "Plan Premium", "price_week": 749, "frequency": "4 dias / semana",
+     "weight_limit_kg": 6000, "volume_limit_m3": 34, "stops": 3,
+     "highlights": [
+         "4 dias por semana",
+         "Hasta 6.000 kg por servicio",
+         "Hasta 3 paradas por dia en ruta",
+         "Hora exacta de recogida y entrega acordada",
+         "Contacto directo operativo con conductor",
+         "Planificacion prioritaria y estabilidad total",
+     ],
+     "best_for": "Empresas que necesitan una logistica casi interna"},
 ]
 
 
