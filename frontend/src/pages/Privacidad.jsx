@@ -31,8 +31,8 @@ export default function Privacidad() {
         <Section title="1. Responsable del tratamiento">
           <ul className="space-y-1">
             <li><strong>Responsable:</strong> ViaNordTrans</li>
-            <li><strong>NIF/CIF:</strong> [NÚMERO NIF/CIF]</li>
-            <li><strong>Domicilio:</strong> Girona, Catalunya, España</li>
+            <li><strong>NIF:</strong> 41644986J</li>
+            <li><strong>Domicilio:</strong> C/ Gavarres 35, Castell d'Aro, Girona, Catalunya</li>
             <li><strong>Contacto:</strong> ViaNord@gmail.com · +34 673 392 259</li>
           </ul>
         </Section>
