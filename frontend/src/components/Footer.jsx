@@ -39,8 +39,12 @@ export const Footer = () => (
       </div>
 
       <div className="border-t border-white/10 mt-12 pt-6 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
-        <div>© {new Date().getFullYear()} Vianord. Todos los derechos reservados.</div>
-        <div className="font-mono">v1.0 · construido en Catalunya</div>
+        <div>© {new Date().getFullYear()} ViaNordTrans. Todos los derechos reservados.</div>
+        <div className="flex flex-wrap gap-4">
+          <Link to="/aviso-legal" className="hover:text-[#FBBF24] transition-colors">Aviso legal</Link>
+          <Link to="/privacidad" className="hover:text-[#FBBF24] transition-colors">Privacidad</Link>
+          <Link to="/cookies" className="hover:text-[#FBBF24] transition-colors">Cookies</Link>
+        </div>
       </div>
     </div>
   </footer>
