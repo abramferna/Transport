@@ -3,7 +3,7 @@ import { api } from "@/lib/api";
 import { toast } from "sonner";
 import {
   CalculatorIcon, MoonStarsIcon, SunIcon, TruckIcon, PackageIcon, ClockIcon, ArrowRightIcon, SpinnerIcon,
-  MapPinIcon, FlagIcon, PencilSimpleIcon, CheckCircleIcon,
+  MapPinIcon, FlagIcon, PencilSimpleIcon, CheckCircleIcon, WhatsappLogoIcon,
 } from "@phosphor-icons/react";
 
 const ADDONS_LIST = [
@@ -471,48 +471,66 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
                 )}
               </div>
 
-              {/* Paradas */}
-              <div className="mt-5">
-                <div className="label-eyebrow mb-1 flex items-center gap-2">
-                  <FlagIcon size={14} weight="fill" className="text-[#1E3A8A]" />
-                  {tipo === "b2c"
-                    ? "Dirección de entrega · disponibilidad para descarga"
-                    : `Paradas del plan (${stops.length}) · dirección y disponibilidad para descarga`}
-                </div>
-                <p className="text-xs text-slate-500 mb-3">La franja de recogida en origen ya queda registrada arriba. Indícanos aquí cuándo puede recibir la mercancía el destinatario.</p>
-                <div className="space-y-3">
-                  {stops.map((stop, i) => (
-                    <div key={i} className="border border-slate-200 bg-[#F8FAFC] p-4">
-                      <div className="text-xs font-bold text-slate-500 mb-3 flex items-center gap-2">
-                        <span className="bg-[#0F172A] text-white w-5 h-5 grid place-items-center text-[10px] font-bold">{i + 1}</span>
-                        {tipo === "b2c" ? "Entrega" : `Parada ${i + 1}`}
+              {/* Paradas — solo para b2c o plan Básico */}
+              {(tipo === "b2c" || planId === "basico") && (
+                <div className="mt-5">
+                  <div className="label-eyebrow mb-1 flex items-center gap-2">
+                    <FlagIcon size={14} weight="fill" className="text-[#1E3A8A]" />
+                    {tipo === "b2c"
+                      ? "Dirección de entrega · disponibilidad para descarga"
+                      : `Paradas del plan (${stops.length}) · dirección y disponibilidad para descarga`}
+                  </div>
+                  <p className="text-xs text-slate-500 mb-3">La franja de recogida en origen ya queda registrada arriba. Indícanos aquí cuándo puede recibir la mercancía el destinatario.</p>
+                  <div className="space-y-3">
+                    {stops.map((stop, i) => (
+                      <div key={i} className="border border-slate-200 bg-[#F8FAFC] p-4">
+                        <div className="text-xs font-bold text-slate-500 mb-3 flex items-center gap-2">
+                          <span className="bg-[#0F172A] text-white w-5 h-5 grid place-items-center text-[10px] font-bold">{i + 1}</span>
+                          {tipo === "b2c" ? "Entrega" : `Parada ${i + 1}`}
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                          <Field label="Dirección *">
+                            <input
+                              required
+                              placeholder="Calle, número, población"
+                              value={stop.direccion}
+                              onChange={(e) => updateStop(i, "direccion", e.target.value)}
+                              className="input-base"
+                            />
+                          </Field>
+                          <Field label="Disponibilidad descarga *">
+                            <select
+                              value={stop.franja}
+                              onChange={(e) => updateStop(i, "franja", e.target.value)}
+                              className="select-base"
+                            >
+                              {TIME_SLOTS.map((s) => (
+                                <option key={s.id} value={s.id}>{s.label} · {s.range}{s.penalty ? " (+25%)" : ""}</option>
+                              ))}
+                            </select>
+                          </Field>
+                        </div>
                       </div>
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <Field label="Dirección *">
-                          <input
-                            required
-                            placeholder="Calle, número, población"
-                            value={stop.direccion}
-                            onChange={(e) => updateStop(i, "direccion", e.target.value)}
-                            className="input-base"
-                          />
-                        </Field>
-                        <Field label="Disponibilidad descarga *">
-                          <select
-                            value={stop.franja}
-                            onChange={(e) => updateStop(i, "franja", e.target.value)}
-                            className="select-base"
-                          >
-                            {TIME_SLOTS.map((s) => (
-                              <option key={s.id} value={s.id}>{s.label} · {s.range}{s.penalty ? " (+25%)" : ""}</option>
-                            ))}
-                          </select>
-                        </Field>
-                      </div>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
                 </div>
-              </div>
+              )}
+
+              {/* Contacto directo — Estándar y Premium */}
+              {tipo === "b2b" && (planId === "estandar" || planId === "premium") && (
+                <div className="mt-5 bg-[#F0FDF4] border border-[#16A34A]/40 p-5">
+                  <div className="text-sm font-bold text-[#15803D] mb-2">Gestión personalizada de rutas</div>
+                  <p className="text-sm text-slate-600 mb-4">Para los planes Estándar y Premium acordamos contigo las rutas, paradas y horarios. Envíanos tu solicitud y te contactamos en menos de 4h.</p>
+                  <a
+                    href={`https://wa.me/34673392259?text=${encodeURIComponent("Hola, me gustaría solicitar un presupuesto de transporte.")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-2 bg-[#25D366] hover:bg-[#20BA5A] text-white font-bold px-5 h-11 transition-colors duration-150 text-sm"
+                  >
+                    <WhatsappLogoIcon size={18} weight="fill" /> Contactar por WhatsApp
+                  </a>
+                </div>
+              )}
 
               <div className="mt-4">
                 <Field label="Descripción de la mercancía / observaciones">
