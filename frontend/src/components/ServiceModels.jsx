@@ -16,9 +16,9 @@ import {
 const B2B_IMG = "https://images.pexels.com/photos/34968619/pexels-photo-34968619.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940";
 
 const PLAN_IDEAL = {
-  basico: "Empresas con envíos puntuales o volumen bajo. Ideal para autónomos y pymes que necesitan regularidad sin un gran compromiso.",
-  estandar: "Empresas con distribución regular en la zona. Perfecto para distribuidores, tiendas y operadores del Gironès con 2-3 rutas semanales.",
-  premium: "Operadores logísticos y grandes empresas que necesitan servicio diario, cobertura amplia y atención exclusiva.",
+  basico: "Envíos puntuales o necesidades ocasionales. Ideal para autónomos y pymes que necesitan regularidad sin un gran compromiso semanal.",
+  estandar: "Empresas con distribución constante y planificada. Perfecto para distribuidores y operadores del Gironès con 2 rutas semanales fijas.",
+  premium: "Empresas que necesitan una logística casi interna: hora exacta, contacto directo con el conductor y máxima estabilidad del servicio.",
 };
 
 const CONDITIONS = [
