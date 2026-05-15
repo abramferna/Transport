@@ -150,10 +150,11 @@ def calculate_price(origin_id, dest_id, weight_kg, addons, hour, weekday, volume
             "chargeable_kg":         round(chargeable_kg, 1),
             "volumetric_kg":         round(vol_kg, 1),
             "weight_surcharge":      round(w_charge, 2),
-            "big_load_discount_pct": round(big_disc * 100),
-            "addons":                [{"id": a, "label": ADDONS[a]["label"]} for a in addons_clean],
-            "addons_flat":           round(addon_flat, 2),
-            "addons_multiplier":     addon_mult,
+            "big_load_discount_pct":    round(big_disc * 100),
+            "big_load_discount_amount": round(w_full * big_disc, 2),
+            "addons":                   [{"id": a, "label": ADDONS[a]["label"]} for a in addons_clean],
+            "addons_flat":              round(addon_flat, 2),
+            "addons_multiplier":        addon_mult,
         },
     }
 
