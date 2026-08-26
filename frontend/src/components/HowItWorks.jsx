@@ -5,7 +5,7 @@ const steps = [
     n: "01",
     icon: <PackageIcon size={28} weight="duotone" />,
     title: "Contratas el plan o servicio",
-    desc: "Elige el plan B2B que mejor encaja o solicita un servicio puntual. Te enviamos confirmación y presupuesto en menos de 4h.",
+    desc: "Elige el plan B2B que mejor encaja o solicita un servicio puntual. Te enviamos confirmación y presupuesto en menos de 1h.",
   },
   {
     n: "02",
@@ -29,7 +29,7 @@ const steps = [
 
 export const HowItWorks = () => {
   return (
-    <section id="como-funciona" className="py-16 lg:py-20 bg-[#0F172A]">
+    <section id="como-funciona" className="py-16 lg:py-20 bg-[#012030]">
       <div className="max-w-7xl mx-auto px-5 lg:px-8">
         <div className="text-center mb-12">
           <div className="label-eyebrow text-[#FBBF24] mb-3">Proceso</div>
@@ -43,7 +43,7 @@ export const HowItWorks = () => {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-white/10">
           {steps.map((s, i) => (
-            <div key={s.n} className="bg-[#0F172A] p-7 relative group hover:bg-white/5 transition-colors duration-200">
+            <div key={s.n} className="bg-[#012030] p-7 relative group hover:bg-white/5 transition-colors duration-200">
               <div className="text-[#FBBF24]/20 font-display font-black text-7xl leading-none absolute top-4 right-5 select-none">
                 {s.n}
               </div>
@@ -62,7 +62,7 @@ export const HowItWorks = () => {
         <div className="mt-8 text-center">
           <a
             href="#calculadora"
-            className="inline-flex items-center gap-2 bg-[#FBBF24] hover:bg-[#F59E0B] text-[#0F172A] font-bold px-8 h-12 transition-colors duration-150"
+            className="inline-flex items-center gap-2 bg-[#FBBF24] hover:bg-[#F59E0B] text-[#012030] font-bold px-8 h-12 transition-colors duration-150"
           >
             Solicitar presupuesto ahora
           </a>

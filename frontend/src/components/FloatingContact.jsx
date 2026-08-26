@@ -1,7 +1,7 @@
 import { WhatsappLogoIcon } from "@phosphor-icons/react";
 
 export const FloatingContact = () => {
-  const wa = "34673392259";
+  const wa = "34609928719";
   const msg = encodeURIComponent("Hola, me gustaría solicitar un presupuesto de transporte.");
 
   return (

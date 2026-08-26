@@ -1,9 +1,10 @@
 """
 ViaNordTrans API — Vercel Serverless Function
-WSGI app (no external frameworks — only httpx + stdlib)
+WSGI app (no external frameworks — only requests + stdlib)
 Vercel Python runtime detects the top-level `app` callable.
 """
 import json
+import math
 import os
 import secrets
 import sys
@@ -11,7 +12,7 @@ import uuid
 from datetime import datetime, timezone
 from urllib.parse import urlparse, parse_qs
 
-import httpx
+import requests
 
 # Ensure the api/ directory is in sys.path so `towns` can be imported
 _here = os.path.dirname(os.path.abspath(__file__))
@@ -34,12 +35,17 @@ SB_HEADERS = {
     "Prefer": "return=representation",
 }
 
+# Use the `requests` library (not httpx) for outbound HTTP calls: httpx's
+# httpcore/anyio transport raises "[Errno 16] Device or resource busy" on the
+# Vercel Python serverless runtime's sandboxed filesystem/socket layer.
+_http_session = requests.Session()
+
 # ═══════════════════════════════════════════════════════════════════════════════
 #  PRICING ENGINE
 # ═══════════════════════════════════════════════════════════════════════════════
 
-BASE_MINIMUM = 85.0
-COST_PER_KM = 0.60
+BASE_MINIMUM = 60.0
+COST_PER_KM = 0.70
 VOLUMETRIC_FACTOR = 176
 
 WEIGHT_TIERS = [
@@ -48,14 +54,11 @@ WEIGHT_TIERS = [
 ]
 
 ADDONS = {
-    "plataforma":      {"label": "Plataforma elevadora",                   "flat": 35.0,  "route_pct": 0.0, "multiplier": 1.0},
-    "tauliner":        {"label": "Tauliner",                               "flat": 35.0,  "route_pct": 0.0, "multiplier": 1.0},
-    "descarga_small":  {"label": "Descarga con plataforma 1-3 palets",     "flat": 35.0,  "route_pct": 0.0, "multiplier": 1.0},
-    "descarga_media":  {"label": "Descarga con plataforma hasta 8 palets", "flat": 70.0,  "route_pct": 0.0, "multiplier": 1.0},
-    "full_truck":      {"label": "Descarga camion completo con plataforma", "flat": 110.0, "route_pct": 0.0, "multiplier": 1.0},
+    "plataforma":      {"label": "Plataforma elevadora",                   "flat": 25.0,  "route_pct": 0.0, "multiplier": 1.0},
+    "tauliner":        {"label": "Tauliner",                               "flat": 25.0,  "route_pct": 0.0, "multiplier": 1.0},
     "descarga_extra":  {"label": "Descarga extra misma poblacion",          "flat": 25.0,  "route_pct": 0.0, "multiplier": 1.0},
-    "descarga_muelle": {"label": "Descarga muelle conductor",               "flat": 40.0,  "route_pct": 0.0, "multiplier": 1.0},
-    "urgente":         {"label": "Urgente sin planificar (<24h)",           "flat": 0.0,   "route_pct": 0.0, "multiplier": 1.20},
+    "descarga_muelle": {"label": "Descarga muelle conductor",               "flat": 20.0,  "route_pct": 0.0, "multiplier": 1.0},
+    "urgente":         {"label": "Urgente sin planificar (<24h)",           "flat": 0.0,   "route_pct": 0.0, "multiplier": 1.15},
 }
 
 TIME_SLOTS = {
@@ -115,12 +118,32 @@ def _big_load_discount(kg):
     return 0.30
 
 
+ROAD_FACTOR = 1.20  # relacion tipica distancia por carretera / distancia en linea recta
+
+
+def _haversine_km(a, b):
+    lat1, lon1 = a["lat"], a["lon"]
+    lat2, lon2 = b["lat"], b["lon"]
+    R = 6371.0
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    dp = math.radians(lat2 - lat1)
+    dl = math.radians(lon2 - lon1)
+    x = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
+    return 2 * R * math.asin(math.sqrt(x))
+
+
+def _route_km(origin, dest):
+    """Distancia real pueblo a pueblo usando coordenadas (lat/lon) y un factor de
+    carretera, en vez de solo la distancia de cada uno a la base de Girona."""
+    return round(_haversine_km(origin, dest) * ROAD_FACTOR)
+
+
 def calculate_price(origin_id, dest_id, weight_kg, addons, hour, weekday, volume_m3=0):
     origin = get_town(origin_id) or get_town("girona")
     dest   = get_town(dest_id)   or get_town("barcelona")
 
-    far_km_gi   = max(origin["km_gi"], dest["km_gi"])
-    dist_charge = far_km_gi * COST_PER_KM
+    route_km    = _route_km(origin, dest)
+    dist_charge = route_km * COST_PER_KM
     route_base  = BASE_MINIMUM + dist_charge
 
     vol_kg        = (volume_m3 or 0) * VOLUMETRIC_FACTOR
@@ -166,7 +189,7 @@ def calculate_price(origin_id, dest_id, weight_kg, addons, hour, weekday, volume
         "breakdown": {
             "origen":                origin["name"],
             "destino":               dest["name"],
-            "km_recorridos_aprox":   far_km_gi,
+            "km_recorridos_aprox":   route_km,
             "minimo_salida_base":    BASE_MINIMUM,
             "coste_km":              round(dist_charge, 2),
             "ruta_base":             round(route_base, 2),
@@ -194,19 +217,19 @@ def sb_get(table, filters=None, order=None, limit=500):
         params["order"] = order
     if limit:
         params["limit"] = str(limit)
-    r = httpx.get(f"{SUPABASE_URL}/rest/v1/{table}", headers=SB_HEADERS, params=params, timeout=10)
+    r = _http_session.get(f"{SUPABASE_URL}/rest/v1/{table}", headers=SB_HEADERS, params=params, timeout=10)
     r.raise_for_status()
     return r.json()
 
 
 def sb_insert(table, row):
-    r = httpx.post(f"{SUPABASE_URL}/rest/v1/{table}", headers=SB_HEADERS, json=row, timeout=10)
+    r = _http_session.post(f"{SUPABASE_URL}/rest/v1/{table}", headers=SB_HEADERS, json=row, timeout=10)
     r.raise_for_status()
     return r.json()
 
 
 def sb_update(table, filters, data):
-    r = httpx.patch(
+    r = _http_session.patch(
         f"{SUPABASE_URL}/rest/v1/{table}",
         headers=SB_HEADERS,
         params=filters,
@@ -278,11 +301,11 @@ def _client_html(q):
         <div style='color:#fff;font-size:22px;font-weight:800'>Hola {q.get('nombre')}, gracias.</div>
       </div>
       <div style='padding:28px;color:#0f172a'>
-        <p style='margin:0 0 16px;color:#475569'>Hemos recibido tu solicitud. Te contactaremos en menos de 4 horas habiles para confirmar el presupuesto.</p>
+        <p style='margin:0 0 16px;color:#475569'>Hemos recibido tu solicitud. Te contactaremos en menos de 1 hora habil para confirmar el presupuesto.</p>
         <table style='width:100%;border-collapse:collapse;background:#F8FAFC;border:1px solid #E2E8F0'>
           {_td("Referencia",q.get("reference"))}{_td("Ruta",f"{q.get('origen')} a {q.get('destino')}")}{_td("Estimacion",precio)}
         </table>
-        <p style='margin:24px 0 0;color:#94A3B8;font-size:12px'>ViaNordTrans - Transporte de mercancias - Catalunya<br>Tel: +34 673 392 259 - ViaNord@gmail.com</p>
+        <p style='margin:24px 0 0;color:#94A3B8;font-size:12px'>ViaNordTrans - Transporte de mercancias - Catalunya<br>Tel: +34 609 928 719 - info@vianordtrans.es</p>
       </div>
     </div>"""
 
@@ -291,12 +314,14 @@ def send_email(to, subject, html):
     if not RESEND_API_KEY or not to:
         return
     try:
-        httpx.post(
+        r = _http_session.post(
             "https://api.resend.com/emails",
             headers={"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"},
             json={"from": SENDER_EMAIL, "to": [to], "subject": subject, "html": html},
             timeout=10,
         )
+        if r.status_code >= 400:
+            print(f"[Email error] {r.status_code} {r.text}")
     except Exception as e:
         print(f"[Email error] {e}")
 

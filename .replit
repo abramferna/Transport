@@ -16,7 +16,8 @@ PORT = "5000"
 HOST = "0.0.0.0"
 SUPABASE_URL = "https://bwdcsmcetvohatcczptg.supabase.co"
 SUPABASE_KEY = "sb_publishable_Qy6WeoJ6lrME0KeVEcqCRQ_4Bu_KXQh"
-ADMIN_NOTIFY_EMAIL = "abramferna@gmail.com"
+ADMIN_NOTIFY_EMAIL = "info@vianordtrans.es"
+SENDER_EMAIL = "ViaNordTrans <info@vianordtrans.es>"
 
 [workflows]
 runButton = "Project"
@@ -50,7 +51,11 @@ externalPort = 80
 localPort = 5001
 externalPort = 3001
 
+[[ports]]
+localPort = 23636
+externalPort = 3000
+
 [deployment]
-deploymentTarget = "autoscale"
-run = ["bash", "-c", "mkdir -p /tmp/mongodb/data && /nix/store/3z9iq2gr9ddb0ncmxjlv81ngn6b4nm70-mongodb-6.0.5/bin/mongod --dbpath /tmp/mongodb/data --fork --logpath /tmp/mongodb/mongod.log --bind_ip 127.0.0.1 --port 27017 && cd /home/runner/workspace/backend && uvicorn server:app --host 0.0.0.0 --port 8001 &amp; cd /home/runner/workspace/frontend &amp;&amp; npx serve -s build -l 5000"]
-build = ["bash", "-c", "cd /home/runner/workspace/frontend && yarn build"]
+deploymentTarget = "vm"
+run = ["bash", "/home/runner/workspace/backend/start_prod.sh"]
+build = ["bash", "-c", "cd /home/runner/workspace/frontend && yarn build && chmod +x /home/runner/workspace/backend/start_prod.sh"]

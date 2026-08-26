@@ -1,8 +1,11 @@
 from fastapi import FastAPI, APIRouter, HTTPException
+from fastapi.staticfiles import StaticFiles
+from fastapi.responses import FileResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
+import math
 import logging
 import asyncio
 import secrets
@@ -80,9 +83,9 @@ logger = logging.getLogger(__name__)
 
 # ----------------- Pricing engine -----------------
 # Mínimo por salir de la base (Girona). Irrenunciable.
-BASE_MINIMUM = 85.0
+BASE_MINIMUM = 60.0
 # Coste por km recorrido desde la base (Girona)
-COST_PER_KM = 0.60
+COST_PER_KM = 0.70
 # Premium de zona desactivado: todo se cobra por distancia.
 BCN_PREMIUM_MAX = 0.0
 BCN_PREMIUM_FADE_KM = 30
@@ -107,31 +110,13 @@ VOLUMETRIC_FACTOR = 176
 ADDONS = {
     "plataforma": {
         "label": "Plataforma elevadora",
-        "flat": 35.0,
+        "flat": 25.0,
         "route_pct": 0.0,
         "multiplier": 1.0,
     },
     "tauliner": {
         "label": "Tauliner",
-        "flat": 35.0,
-        "route_pct": 0.0,
-        "multiplier": 1.0,
-    },
-    "descarga_small": {
-        "label": "Descarga con plataforma 1–3 palets",
-        "flat": 35.0,
-        "route_pct": 0.0,
-        "multiplier": 1.0,
-    },
-    "descarga_media": {
-        "label": "Descarga con plataforma hasta 8 palets",
-        "flat": 70.0,
-        "route_pct": 0.0,
-        "multiplier": 1.0,
-    },
-    "full_truck": {
-        "label": "Descarga camión completo con plataforma",
-        "flat": 110.0,
+        "flat": 25.0,
         "route_pct": 0.0,
         "multiplier": 1.0,
     },
@@ -143,7 +128,7 @@ ADDONS = {
     },
     "descarga_muelle": {
         "label": "Descarga muelle · conductor",
-        "flat": 40.0,
+        "flat": 20.0,
         "route_pct": 0.0,
         "multiplier": 1.0,
     },
@@ -151,7 +136,7 @@ ADDONS = {
         "label": "Urgente · sin planificar (<24h)",
         "flat": 0.0,
         "route_pct": 0.0,
-        "multiplier": 1.20,  # +20% por solicitud con menos de 24h de antelación
+        "multiplier": 1.15,  # +15% por solicitud con menos de 24h de antelación
     },
 }
 
@@ -222,6 +207,26 @@ def weight_surcharge(weight_kg: float) -> float:
     return WEIGHT_TIERS[-1][1] + 60.0
 
 
+ROAD_FACTOR = 1.20  # relacion tipica distancia por carretera / distancia en linea recta
+
+
+def _haversine_km(a: dict, b: dict) -> float:
+    lat1, lon1 = a["lat"], a["lon"]
+    lat2, lon2 = b["lat"], b["lon"]
+    R = 6371.0
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    dp = math.radians(lat2 - lat1)
+    dl = math.radians(lon2 - lon1)
+    x = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
+    return 2 * R * math.asin(math.sqrt(x))
+
+
+def route_km_between(origin: dict, dest: dict) -> float:
+    """Distancia real pueblo a pueblo usando coordenadas (lat/lon) y un factor de
+    carretera, en vez de solo la distancia de cada uno a la base de Girona."""
+    return round(_haversine_km(origin, dest) * ROAD_FACTOR)
+
+
 def calculate_price(
     origin_town: str,
     destination_town: str,
@@ -234,7 +239,7 @@ def calculate_price(
     origin = get_town(origin_town) or get_town("girona")
     dest = get_town(destination_town) or get_town("barcelona")
 
-    far_km_gi = max(origin["km_gi"], dest["km_gi"])
+    far_km_gi = route_km_between(origin, dest)
     near_km_bcn = min(origin["km_bcn"], dest["km_bcn"])
     near_km_jq = min(origin["km_jq"], dest["km_jq"])
 
@@ -481,13 +486,13 @@ def _build_client_html(q: dict) -> str:
         <div style='color:#fff;font-size:22px;font-weight:800'>Hola {q.get('nombre')}, gracias.</div>
       </div>
       <div style='padding:28px;color:#0f172a'>
-        <p style='margin:0 0 16px;color:#475569'>Hemos recibido tu solicitud. Te contactaremos en menos de 4 horas hábiles para confirmar el presupuesto.</p>
+        <p style='margin:0 0 16px;color:#475569'>Hemos recibido tu solicitud. Te contactaremos en menos de 1 hora hábil para confirmar el presupuesto.</p>
         <table style='width:100%;border-collapse:collapse;background:#F8FAFC;border:1px solid #E2E8F0'>
           {_row("Referencia", q.get("reference"))}
           {_row("Ruta", f"{q.get('origen')} → {q.get('destino')}")}
           {_row("Estimación", precio)}
         </table>
-        <p style='margin:24px 0 0;color:#94A3B8;font-size:12px'>ViaNordTrans · Transporte de mercancías · Catalunya<br>Tel: +34 673 392 259 · ViaNord@gmail.com</p>
+        <p style='margin:24px 0 0;color:#94A3B8;font-size:12px'>ViaNordTrans · Transporte de mercancías · Catalunya<br>Tel: +34 609 928 719 · info@vianordtrans.es</p>
       </div>
     </div>
     """
@@ -653,6 +658,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Serve React build in production
+_FRONTEND_BUILD = Path(__file__).parent.parent / "frontend" / "build"
+if _FRONTEND_BUILD.exists():
+    app.mount("/static", StaticFiles(directory=str(_FRONTEND_BUILD / "static")), name="static")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def serve_react(full_path: str):
+        candidate = _FRONTEND_BUILD / full_path
+        if candidate.exists() and candidate.is_file():
+            return FileResponse(str(candidate))
+        return FileResponse(str(_FRONTEND_BUILD / "index.html"))
 
 
 @app.on_event("shutdown")

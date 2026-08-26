@@ -3,8 +3,8 @@ import { MapPinIcon, RoadHorizonIcon, ClockClockwiseIcon } from "@phosphor-icons
 const ZONES = [
   { name: "La Jonquera (frontera)", time: "55 min · norte", color: "#FBBF24" },
   { name: "Figueres / Vilafant", time: "35 min", color: "#FBBF24" },
-  { name: "Girona (polígonos)", time: "0 km · base", color: "#1E3A8A" },
-  { name: "Salt / Sarrià", time: "5 min", color: "#1E3A8A" },
+  { name: "Girona (polígonos)", time: "0 km · base", color: "#013044" },
+  { name: "Salt / Sarrià", time: "5 min", color: "#013044" },
   { name: "La Bisbal / Begur", time: "30-40 min · costa", color: "#1E40AF" },
   { name: "Granollers / Mataró", time: "55-70 min", color: "#2563EB" },
   { name: "Barcelona (polígonos)", time: "1h 15min", color: "#FBBF24" },
@@ -17,13 +17,13 @@ export const Coverage = () => (
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 mb-12">
         <div className="lg:col-span-6">
           <div className="label-eyebrow mb-3">Cobertura</div>
-          <h2 className="font-display font-black tracking-tighter text-4xl sm:text-5xl text-[#0F172A] leading-[0.95]">
+          <h2 className="font-display font-black tracking-tighter text-4xl sm:text-5xl text-[#012030] leading-[0.95]">
             Express:<br />La Jonquera ⇄ Barcelona.
           </h2>
         </div>
         <div className="lg:col-span-6">
           <p className="text-slate-600 leading-relaxed">
-            Nuestra ruta diaria pasa por <strong className="text-[#0F172A]">La Jonquera, Girona y Barcelona</strong>, conectando frontera y área metropolitana. Servicios regulares en todo el corredor norte de Catalunya. <strong className="text-[#0F172A]">Otros destinos en España bajo consulta</strong> con antelación. No realizamos reparto urbano.
+            Nuestra ruta diaria pasa por <strong className="text-[#012030]">La Jonquera, Girona y Barcelona</strong>, conectando frontera y área metropolitana. Servicios regulares en todo el corredor norte de Catalunya. <strong className="text-[#012030]">Otros destinos en España bajo consulta</strong> con antelación. No realizamos reparto urbano.
           </p>
         </div>
       </div>
@@ -35,17 +35,17 @@ export const Coverage = () => (
           <div className="absolute inset-0">
             <svg viewBox="0 0 600 380" className="w-full h-full">
               {/* AP-7 norte (Girona → La Jonquera) */}
-              <line x1="300" y1="200" x2="160" y2="50" stroke="#0F172A" strokeWidth="3" strokeDasharray="6 4" />
+              <line x1="300" y1="200" x2="160" y2="50" stroke="#012030" strokeWidth="3" strokeDasharray="6 4" />
               <line x1="300" y1="200" x2="160" y2="50" stroke="#FBBF24" strokeWidth="6" strokeOpacity="0.25" />
               {/* AP-7 sur (Girona → Barcelona) */}
-              <line x1="300" y1="200" x2="540" y2="340" stroke="#0F172A" strokeWidth="3" strokeDasharray="6 4" />
+              <line x1="300" y1="200" x2="540" y2="340" stroke="#012030" strokeWidth="3" strokeDasharray="6 4" />
               <line x1="300" y1="200" x2="540" y2="340" stroke="#FBBF24" strokeWidth="6" strokeOpacity="0.25" />
 
               {/* La Jonquera */}
               <g transform="translate(160,50)">
                 <circle r="9" fill="#FBBF24" />
                 <circle r="22" fill="#FBBF24" fillOpacity="0.25" />
-                <text x="-118" y="6" fontFamily="Cabinet Grotesk" fontSize="18" fontWeight="900" fill="#0F172A">LA JONQUERA</text>
+                <text x="-118" y="6" fontFamily="Cabinet Grotesk" fontSize="18" fontWeight="900" fill="#012030">LA JONQUERA</text>
                 <text x="-32" y="22" fontFamily="IBM Plex Sans" fontSize="10" fill="#64748B">frontera</text>
               </g>
               <circle cx="220" cy="120" r="5" fill="#1E40AF" />
@@ -53,9 +53,9 @@ export const Coverage = () => (
 
               {/* Girona base */}
               <g transform="translate(300,200)">
-                <circle r="11" fill="#1E3A8A" />
-                <circle r="26" fill="#1E3A8A" fillOpacity="0.18" />
-                <text x="16" y="6" fontFamily="Cabinet Grotesk" fontSize="22" fontWeight="900" fill="#0F172A">GIRONA</text>
+                <circle r="11" fill="#013044" />
+                <circle r="26" fill="#013044" fillOpacity="0.18" />
+                <text x="16" y="6" fontFamily="Cabinet Grotesk" fontSize="22" fontWeight="900" fill="#012030">GIRONA</text>
                 <text x="16" y="22" fontFamily="IBM Plex Sans" fontSize="10" fill="#64748B" letterSpacing="2">BASE</text>
               </g>
 
@@ -71,11 +71,11 @@ export const Coverage = () => (
               <g transform="translate(540,340)">
                 <circle r="9" fill="#FBBF24" />
                 <circle r="22" fill="#FBBF24" fillOpacity="0.25" />
-                <text x="-128" y="6" fontFamily="Cabinet Grotesk" fontSize="20" fontWeight="900" fill="#0F172A">BARCELONA</text>
+                <text x="-128" y="6" fontFamily="Cabinet Grotesk" fontSize="20" fontWeight="900" fill="#012030">BARCELONA</text>
               </g>
             </svg>
           </div>
-          <div className="absolute bottom-6 left-6 bg-[#0F172A] text-white px-4 py-3 flex items-center gap-3">
+          <div className="absolute bottom-6 left-6 bg-[#012030] text-white px-4 py-3 flex items-center gap-3">
             <RoadHorizonIcon size={20} className="text-[#FBBF24]" weight="duotone" />
             <div>
               <div className="font-display font-black tracking-tight text-lg leading-none">Express AP-7</div>
@@ -91,7 +91,7 @@ export const Coverage = () => (
               <div key={z.name} className="px-6 py-4 flex items-center justify-between hover:bg-slate-50 transition-colors duration-150">
                 <div className="flex items-center gap-3">
                   <span className="w-2 h-2" style={{ background: z.color }} />
-                  <span className="font-semibold text-[#0F172A] text-sm">{z.name}</span>
+                  <span className="font-semibold text-[#012030] text-sm">{z.name}</span>
                 </div>
                 <span className="font-mono text-xs text-slate-500 flex items-center gap-1.5">
                   <ClockClockwiseIcon size={13} /> {z.time}
@@ -103,8 +103,8 @@ export const Coverage = () => (
       </div>
 
       {/* Resto de España bajo consulta */}
-      <div className="mt-4 bg-[#0F172A] text-white p-6 lg:p-8 flex items-center gap-5 flex-wrap">
-        <div className="bg-[#FBBF24] text-[#0F172A] w-12 h-12 grid place-items-center flex-shrink-0">
+      <div className="mt-4 bg-[#012030] text-white p-6 lg:p-8 flex items-center gap-5 flex-wrap">
+        <div className="bg-[#FBBF24] text-[#012030] w-12 h-12 grid place-items-center flex-shrink-0">
           <RoadHorizonIcon size={22} weight="fill" />
         </div>
         <div className="flex-1 min-w-[220px]">
@@ -112,7 +112,7 @@ export const Coverage = () => (
           <div className="font-display font-bold text-lg leading-snug">¿Necesitas mover algo fuera del corredor?</div>
           <p className="text-sm text-slate-300 mt-1">Operamos rutas puntuales al resto de España bajo consulta, con antelación suficiente para planificar. Cuéntanos origen, destino y fecha y te confirmamos disponibilidad y precio cerrado.</p>
         </div>
-        <a href="#solicitud" className="bg-[#FBBF24] hover:bg-[#F59E0B] text-[#0F172A] font-bold px-5 h-11 inline-flex items-center transition-colors duration-150">
+        <a href="#solicitud" className="bg-[#FBBF24] hover:bg-[#F59E0B] text-[#012030] font-bold px-5 h-11 inline-flex items-center transition-colors duration-150">
           Consultar ruta
         </a>
       </div>

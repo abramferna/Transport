@@ -3,7 +3,7 @@ import { Logo } from "@/components/Logo";
 
 const Section = ({ title, children }) => (
   <div className="mb-8">
-    <h2 className="text-lg font-bold text-[#0F172A] mb-3 pb-2 border-b border-slate-200">{title}</h2>
+    <h2 className="text-lg font-bold text-[#012030] mb-3 pb-2 border-b border-slate-200">{title}</h2>
     <div className="text-sm text-slate-600 leading-relaxed space-y-2">{children}</div>
   </div>
 );
@@ -15,16 +15,16 @@ export default function AvisoLegal() {
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5">
             <Logo size={32} />
-            <span className="font-display font-black tracking-tighter text-[#0F172A] text-base leading-none">ViaNordTrans</span>
+            <span className="font-display font-black tracking-tighter text-[#012030] text-base leading-none">ViaNordTrans</span>
           </Link>
-          <Link to="/" className="text-sm text-slate-500 hover:text-[#0F172A] transition-colors">← Volver</Link>
+          <Link to="/" className="text-sm text-slate-500 hover:text-[#012030] transition-colors">← Volver</Link>
         </div>
       </header>
 
       <main className="max-w-3xl mx-auto px-5 py-12">
         <div className="mb-10">
           <div className="label-eyebrow mb-2">Información legal</div>
-          <h1 className="font-display font-black text-4xl tracking-tighter text-[#0F172A] mb-2">Aviso Legal</h1>
+          <h1 className="font-display font-black text-4xl tracking-tighter text-[#012030] mb-2">Aviso Legal</h1>
           <p className="text-sm text-slate-400">Última actualización: mayo de 2025</p>
         </div>
 
@@ -34,8 +34,8 @@ export default function AvisoLegal() {
             <li><strong>Nombre comercial:</strong> ViaNordTrans</li>
             <li><strong>NIF:</strong> 41644986J</li>
             <li><strong>Domicilio social:</strong> C/ Gavarres 35, Castell d'Aro, Girona, Catalunya</li>
-            <li><strong>Correo electrónico:</strong> ViaNord@gmail.com</li>
-            <li><strong>Teléfono:</strong> +34 673 392 259</li>
+            <li><strong>Correo electrónico:</strong> info@vianordtrans.es</li>
+            <li><strong>Teléfono:</strong> +34 609 928 719</li>
           </ul>
         </Section>
 
@@ -59,7 +59,7 @@ export default function AvisoLegal() {
         </Section>
 
         <Section title="6. Política de privacidad y cookies">
-          <p>El tratamiento de los datos personales recabados a través del Sitio Web se rige por la <Link to="/privacidad" className="text-[#1E3A8A] underline underline-offset-2 hover:text-[#0F172A]">Política de Privacidad</Link> y la <Link to="/cookies" className="text-[#1E3A8A] underline underline-offset-2 hover:text-[#0F172A]">Política de Cookies</Link>.</p>
+          <p>El tratamiento de los datos personales recabados a través del Sitio Web se rige por la <Link to="/privacidad" className="text-[#013044] underline underline-offset-2 hover:text-[#012030]">Política de Privacidad</Link> y la <Link to="/cookies" className="text-[#013044] underline underline-offset-2 hover:text-[#012030]">Política de Cookies</Link>.</p>
         </Section>
 
         <Section title="7. Legislación y jurisdicción aplicable">
@@ -69,9 +69,9 @@ export default function AvisoLegal() {
 
       <footer className="border-t border-slate-200 px-5 py-6 mt-4">
         <div className="max-w-3xl mx-auto flex flex-wrap gap-4 text-xs text-slate-400">
-          <Link to="/aviso-legal" className="hover:text-[#0F172A]">Aviso legal</Link>
-          <Link to="/privacidad" className="hover:text-[#0F172A]">Política de privacidad</Link>
-          <Link to="/cookies" className="hover:text-[#0F172A]">Política de cookies</Link>
+          <Link to="/aviso-legal" className="hover:text-[#012030]">Aviso legal</Link>
+          <Link to="/privacidad" className="hover:text-[#012030]">Política de privacidad</Link>
+          <Link to="/cookies" className="hover:text-[#012030]">Política de cookies</Link>
           <span className="ml-auto">© {new Date().getFullYear()} ViaNordTrans</span>
         </div>
       </footer>

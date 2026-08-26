@@ -5,3 +5,9 @@ start.sh
 *.log
 .git
 node_modules
+artifacts
+.cache
+.local
+.agents
+.pythonlibs
+.upm

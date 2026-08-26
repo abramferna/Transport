@@ -8,13 +8,13 @@
 html, body {
     margin: 0;
     background: #FFFFFF;
-    color: #0F172A;
+    color: #012030;
     font-family: 'IBM Plex Sans', system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
-::selection { background: #FBBF24; color: #0F172A; }
+::selection { background: #FBBF24; color: #012030; }
 
 .font-display { font-family: 'Cabinet Grotesk', 'IBM Plex Sans', sans-serif; }
 .font-mono { font-family: 'IBM Plex Mono', monospace; }
@@ -29,8 +29,8 @@ html, body {
 
 .grid-bg {
     background-image:
-        linear-gradient(to right, rgba(15,23,42,0.06) 1px, transparent 1px),
-        linear-gradient(to bottom, rgba(15,23,42,0.06) 1px, transparent 1px);
+        linear-gradient(to right, rgba(1,32,48,0.06) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(1,32,48,0.06) 1px, transparent 1px);
     background-size: 48px 48px;
 }
 
@@ -61,7 +61,7 @@ html, body {
         --card-foreground: 222 47% 11%;
         --popover: 0 0% 100%;
         --popover-foreground: 222 47% 11%;
-        --primary: 224 71% 33%;
+        --primary: 198 97% 14%;
         --primary-foreground: 0 0% 100%;
         --secondary: 210 40% 96%;
         --secondary-foreground: 222 47% 11%;

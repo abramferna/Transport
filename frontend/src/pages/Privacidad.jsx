@@ -3,7 +3,7 @@ import { Logo } from "@/components/Logo";
 
 const Section = ({ title, children }) => (
   <div className="mb-8">
-    <h2 className="text-lg font-bold text-[#0F172A] mb-3 pb-2 border-b border-slate-200">{title}</h2>
+    <h2 className="text-lg font-bold text-[#012030] mb-3 pb-2 border-b border-slate-200">{title}</h2>
     <div className="text-sm text-slate-600 leading-relaxed space-y-2">{children}</div>
   </div>
 );
@@ -15,16 +15,16 @@ export default function Privacidad() {
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2.5">
             <Logo size={32} />
-            <span className="font-display font-black tracking-tighter text-[#0F172A] text-base leading-none">ViaNordTrans</span>
+            <span className="font-display font-black tracking-tighter text-[#012030] text-base leading-none">ViaNordTrans</span>
           </Link>
-          <Link to="/" className="text-sm text-slate-500 hover:text-[#0F172A] transition-colors">← Volver</Link>
+          <Link to="/" className="text-sm text-slate-500 hover:text-[#012030] transition-colors">← Volver</Link>
         </div>
       </header>
 
       <main className="max-w-3xl mx-auto px-5 py-12">
         <div className="mb-10">
           <div className="label-eyebrow mb-2">Protección de datos</div>
-          <h1 className="font-display font-black text-4xl tracking-tighter text-[#0F172A] mb-2">Política de Privacidad</h1>
+          <h1 className="font-display font-black text-4xl tracking-tighter text-[#012030] mb-2">Política de Privacidad</h1>
           <p className="text-sm text-slate-400">Última actualización: mayo de 2025</p>
         </div>
 
@@ -33,7 +33,7 @@ export default function Privacidad() {
             <li><strong>Responsable:</strong> ViaNordTrans</li>
             <li><strong>NIF:</strong> 41644986J</li>
             <li><strong>Domicilio:</strong> C/ Gavarres 35, Castell d'Aro, Girona, Catalunya</li>
-            <li><strong>Contacto:</strong> ViaNord@gmail.com · +34 673 392 259</li>
+            <li><strong>Contacto:</strong> info@vianordtrans.es · +34 609 928 719</li>
           </ul>
         </Section>
 
@@ -54,8 +54,8 @@ export default function Privacidad() {
             <table className="w-full text-xs border border-slate-200">
               <thead>
                 <tr className="bg-slate-50">
-                  <th className="text-left px-3 py-2 font-semibold text-[#0F172A] border-b border-slate-200">Finalidad</th>
-                  <th className="text-left px-3 py-2 font-semibold text-[#0F172A] border-b border-slate-200">Base jurídica</th>
+                  <th className="text-left px-3 py-2 font-semibold text-[#012030] border-b border-slate-200">Finalidad</th>
+                  <th className="text-left px-3 py-2 font-semibold text-[#012030] border-b border-slate-200">Base jurídica</th>
                 </tr>
               </thead>
               <tbody>
@@ -82,14 +82,14 @@ export default function Privacidad() {
         <Section title="5. Destinatarios y transferencias internacionales">
           <p>Sus datos no se cederán a terceros salvo obligación legal. Utilizamos los siguientes proveedores de servicio que actúan como encargados del tratamiento:</p>
           <ul className="list-disc pl-5 mt-2 space-y-1">
-            <li><strong>Resend Inc.</strong> (resend.com) — envío transaccional de correos electrónicos. Servidores en la UE disponibles. Puede consultar su política en <a href="https://resend.com/privacy" target="_blank" rel="noopener noreferrer" className="text-[#1E3A8A] underline underline-offset-2">resend.com/privacy</a>.</li>
-            <li><strong>Supabase Inc.</strong> — base de datos de presupuestos. Datos almacenados en la UE (West EU). Puede consultar su política en <a href="https://supabase.com/privacy" target="_blank" rel="noopener noreferrer" className="text-[#1E3A8A] underline underline-offset-2">supabase.com/privacy</a>.</li>
+            <li><strong>Resend Inc.</strong> (resend.com) — envío transaccional de correos electrónicos. Servidores en la UE disponibles. Puede consultar su política en <a href="https://resend.com/privacy" target="_blank" rel="noopener noreferrer" className="text-[#013044] underline underline-offset-2">resend.com/privacy</a>.</li>
+            <li><strong>Supabase Inc.</strong> — base de datos de presupuestos. Datos almacenados en la UE (West EU). Puede consultar su política en <a href="https://supabase.com/privacy" target="_blank" rel="noopener noreferrer" className="text-[#013044] underline underline-offset-2">supabase.com/privacy</a>.</li>
           </ul>
           <p className="mt-2">No realizamos transferencias internacionales fuera del Espacio Económico Europeo sin las garantías adecuadas.</p>
         </Section>
 
         <Section title="6. Derechos del interesado">
-          <p>Puede ejercer en cualquier momento los siguientes derechos dirigiéndose a <strong>ViaNord@gmail.com</strong> con copia de su DNI/NIE:</p>
+          <p>Puede ejercer en cualquier momento los siguientes derechos dirigiéndose a <strong>info@vianordtrans.es</strong> con copia de su DNI/NIE:</p>
           <ul className="list-disc pl-5 mt-2 space-y-1">
             <li><strong>Acceso</strong> a sus datos personales.</li>
             <li><strong>Rectificación</strong> de datos inexactos o incompletos.</li>
@@ -107,15 +107,15 @@ export default function Privacidad() {
         </Section>
 
         <Section title="8. Cookies">
-          <p>Para información sobre el uso de cookies, consulte nuestra <Link to="/cookies" className="text-[#1E3A8A] underline underline-offset-2 hover:text-[#0F172A]">Política de Cookies</Link>.</p>
+          <p>Para información sobre el uso de cookies, consulte nuestra <Link to="/cookies" className="text-[#013044] underline underline-offset-2 hover:text-[#012030]">Política de Cookies</Link>.</p>
         </Section>
       </main>
 
       <footer className="border-t border-slate-200 px-5 py-6 mt-4">
         <div className="max-w-3xl mx-auto flex flex-wrap gap-4 text-xs text-slate-400">
-          <Link to="/aviso-legal" className="hover:text-[#0F172A]">Aviso legal</Link>
-          <Link to="/privacidad" className="hover:text-[#0F172A]">Política de privacidad</Link>
-          <Link to="/cookies" className="hover:text-[#0F172A]">Política de cookies</Link>
+          <Link to="/aviso-legal" className="hover:text-[#012030]">Aviso legal</Link>
+          <Link to="/privacidad" className="hover:text-[#012030]">Política de privacidad</Link>
+          <Link to="/cookies" className="hover:text-[#012030]">Política de cookies</Link>
           <span className="ml-auto">© {new Date().getFullYear()} ViaNordTrans</span>
         </div>
       </footer>

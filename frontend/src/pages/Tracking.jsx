@@ -53,7 +53,7 @@ export default function Tracking() {
       <Navbar />
       <main className="max-w-3xl mx-auto px-5 lg:px-8 py-16">
         <div className="label-eyebrow mb-2">Seguimiento de envío</div>
-        <h1 className="font-display font-black tracking-tighter text-4xl sm:text-5xl text-[#0F172A] leading-[0.95]">
+        <h1 className="font-display font-black tracking-tighter text-4xl sm:text-5xl text-[#012030] leading-[0.95]">
           Consulta tu envío.
         </h1>
         <p className="mt-4 text-slate-600">Introduce tu referencia (formato TR240312AB12) para ver el estado actualizado.</p>
@@ -63,13 +63,13 @@ export default function Tracking() {
             value={ref}
             onChange={(e) => setRef(e.target.value)}
             placeholder="TR________"
-            className="flex-1 px-4 h-12 outline-none font-mono uppercase tracking-wider text-[#0F172A] bg-white"
+            className="flex-1 px-4 h-12 outline-none font-mono uppercase tracking-wider text-[#012030] bg-white"
             data-testid="tracking-input"
           />
           <button
             type="submit"
             data-testid="tracking-submit"
-            className="bg-[#0F172A] hover:bg-[#1E3A8A] text-white font-bold px-6 h-12 inline-flex items-center gap-2 transition-colors duration-150"
+            className="bg-[#012030] hover:bg-[#013044] text-white font-bold px-6 h-12 inline-flex items-center gap-2 transition-colors duration-150"
           >
             <MagnifyingGlassIcon size={18} weight="bold" /> Buscar
           </button>
@@ -79,7 +79,7 @@ export default function Tracking() {
 
         {data && (
           <div className="mt-10 border border-slate-200" data-testid="tracking-result">
-            <div className="bg-[#0F172A] text-white p-6 flex items-center justify-between flex-wrap gap-3">
+            <div className="bg-[#012030] text-white p-6 flex items-center justify-between flex-wrap gap-3">
               <div>
                 <div className="label-eyebrow text-[#FBBF24]">Referencia</div>
                 <div className="font-mono font-bold text-2xl mt-1">{data.reference}</div>
@@ -113,12 +113,12 @@ export default function Tracking() {
                     return (
                       <li key={s.id} className="relative pl-12">
                         {i < STEPS.length - 1 && (
-                          <span className={`absolute left-[14px] top-9 bottom-[-24px] w-0.5 ${reached && i < stepIndex ? "bg-[#1E3A8A]" : "bg-slate-200"}`} />
+                          <span className={`absolute left-[14px] top-9 bottom-[-24px] w-0.5 ${reached && i < stepIndex ? "bg-[#013044]" : "bg-slate-200"}`} />
                         )}
-                        <span className={`absolute left-0 top-0 w-8 h-8 grid place-items-center ${reached ? "bg-[#1E3A8A] text-white" : "bg-slate-100 text-slate-400 border border-slate-200"}`}>
+                        <span className={`absolute left-0 top-0 w-8 h-8 grid place-items-center ${reached ? "bg-[#013044] text-white" : "bg-slate-100 text-slate-400 border border-slate-200"}`}>
                           <Icon size={16} weight={reached ? "fill" : "regular"} />
                         </span>
-                        <div className={`font-display font-bold ${reached ? "text-[#0F172A]" : "text-slate-400"}`}>{s.label}</div>
+                        <div className={`font-display font-bold ${reached ? "text-[#012030]" : "text-slate-400"}`}>{s.label}</div>
                         {i === stepIndex && (
                           <div className="text-xs text-slate-500 mt-1 inline-flex items-center gap-1">
                             <ClockIcon size={12} /> Actualizado {new Date(data.updated_at).toLocaleString("es-ES")}
@@ -141,6 +141,6 @@ export default function Tracking() {
 const Info = ({ k, v }) => (
   <div className="bg-white p-5">
     <div className="label-eyebrow">{k}</div>
-    <div className="font-semibold text-[#0F172A] mt-1">{v || "—"}</div>
+    <div className="font-semibold text-[#012030] mt-1">{v || "—"}</div>
   </div>
 );

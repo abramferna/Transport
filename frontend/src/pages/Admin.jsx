@@ -16,9 +16,9 @@ const STATUS_OPTIONS = [
 ];
 
 const STATUS_COLORS = {
-  pendiente: "bg-[#FBBF24] text-[#0F172A]",
+  pendiente: "bg-[#FBBF24] text-[#012030]",
   confirmado: "bg-[#2563EB] text-white",
-  en_ruta: "bg-[#1E3A8A] text-white",
+  en_ruta: "bg-[#013044] text-white",
   entregado: "bg-[#16A34A] text-white",
   cancelado: "bg-slate-400 text-white",
 };
@@ -64,12 +64,12 @@ export default function Admin() {
         <div className="flex items-center justify-between flex-wrap gap-4 mb-8">
           <div>
             <div className="label-eyebrow mb-1">Panel administrativo</div>
-            <h1 className="font-display font-black tracking-tighter text-3xl sm:text-4xl text-[#0F172A]">Solicitudes recibidas</h1>
+            <h1 className="font-display font-black tracking-tighter text-3xl sm:text-4xl text-[#012030]">Solicitudes recibidas</h1>
           </div>
           <button
             onClick={load}
             data-testid="admin-refresh"
-            className="inline-flex items-center gap-2 bg-[#0F172A] hover:bg-[#1E3A8A] text-white font-bold px-4 h-10 transition-colors duration-150"
+            className="inline-flex items-center gap-2 bg-[#012030] hover:bg-[#013044] text-white font-bold px-4 h-10 transition-colors duration-150"
           >
             <ArrowClockwiseIcon size={16} weight="bold" /> Actualizar
           </button>
@@ -78,7 +78,7 @@ export default function Admin() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-px bg-slate-200 border border-slate-200 mb-8" data-testid="admin-stats">
           <Stat icon={<GaugeIcon size={22} weight="duotone" />} label="Total" value={stats?.total ?? "—"} />
           <Stat icon={<BuildingOfficeIcon size={22} weight="duotone" />} label="B2B" value={stats?.b2b ?? "—"} accent="#FBBF24" />
-          <Stat icon={<HouseIcon size={22} weight="duotone" />} label="B2C" value={stats?.b2c ?? "—"} accent="#1E3A8A" />
+          <Stat icon={<HouseIcon size={22} weight="duotone" />} label="B2C" value={stats?.b2c ?? "—"} accent="#013044" />
           <Stat icon={<ClockCountdownIcon size={22} weight="duotone" />} label="Pendientes" value={stats?.pendientes ?? "—"} accent="#DC2626" />
         </div>
 
@@ -94,7 +94,7 @@ export default function Admin() {
                 onClick={() => setFilter(f.id)}
                 data-testid={`admin-filter-${f.id}`}
                 className={`text-xs font-bold px-3 h-8 transition-colors duration-150 ${
-                  filter === f.id ? "bg-[#0F172A] text-white" : "bg-white border border-slate-300 hover:bg-slate-50"
+                  filter === f.id ? "bg-[#012030] text-white" : "bg-white border border-slate-300 hover:bg-slate-50"
                 }`}
               >{f.label}</button>
             ))}
@@ -115,7 +115,7 @@ export default function Admin() {
                 {filtered.map((q) => (
                   <tr key={q.id} className="border-b border-slate-200 hover:bg-slate-50 cursor-pointer" onClick={() => setSelected(q)} data-testid={`admin-row-${q.reference}`}>
                     <td className="px-4 py-3 font-mono text-xs font-bold">{q.reference}</td>
-                    <td className="px-4 py-3"><span className={`px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${q.tipo === "b2b" ? "bg-[#FBBF24] text-[#0F172A]" : "bg-[#1E3A8A] text-white"}`}>{q.tipo}</span></td>
+                    <td className="px-4 py-3"><span className={`px-2 py-0.5 text-[10px] font-bold tracking-wider uppercase ${q.tipo === "b2b" ? "bg-[#FBBF24] text-[#012030]" : "bg-[#013044] text-white"}`}>{q.tipo}</span></td>
                     <td className="px-4 py-3"><div className="font-semibold">{q.nombre}</div><div className="text-xs text-slate-500">{q.empresa || q.email}</div></td>
                     <td className="px-4 py-3 text-slate-700">{q.origen} → {q.destino}</td>
                     <td className="px-4 py-3 font-mono">{q.estimated_price ? `${q.estimated_price.toFixed(2)}€` : (q.plan_id ? q.plan_id : "—")}</td>
@@ -130,9 +130,9 @@ export default function Admin() {
         </div>
 
         {selected && (
-          <div className="fixed inset-0 z-50 bg-[#0F172A]/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-6" onClick={() => setSelected(null)} data-testid="admin-detail-modal">
+          <div className="fixed inset-0 z-50 bg-[#012030]/60 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-6" onClick={() => setSelected(null)} data-testid="admin-detail-modal">
             <div className="bg-white w-full max-w-2xl border border-slate-200 max-h-[90vh] overflow-auto" onClick={(e) => e.stopPropagation()}>
-              <div className="bg-[#0F172A] text-white p-6 flex items-start justify-between gap-4">
+              <div className="bg-[#012030] text-white p-6 flex items-start justify-between gap-4">
                 <div>
                   <div className="label-eyebrow text-[#FBBF24]">Solicitud · {selected.tipo.toUpperCase()}</div>
                   <div className="font-display font-black text-3xl mt-2">{selected.reference}</div>
@@ -142,8 +142,8 @@ export default function Admin() {
               <div className="p-6 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                 <Detail k="Nombre" v={selected.nombre} />
                 <Detail k="Empresa" v={selected.empresa} />
-                <Detail k="Email" v={<a href={`mailto:${selected.email}`} className="inline-flex items-center gap-1 text-[#1E3A8A] hover:underline"><EnvelopeSimpleIcon size={13} /> {selected.email}</a>} />
-                <Detail k="Teléfono" v={<a href={`tel:${selected.telefono}`} className="inline-flex items-center gap-1 text-[#1E3A8A] hover:underline"><PhoneIcon size={13} /> {selected.telefono}</a>} />
+                <Detail k="Email" v={<a href={`mailto:${selected.email}`} className="inline-flex items-center gap-1 text-[#013044] hover:underline"><EnvelopeSimpleIcon size={13} /> {selected.email}</a>} />
+                <Detail k="Teléfono" v={<a href={`tel:${selected.telefono}`} className="inline-flex items-center gap-1 text-[#013044] hover:underline"><PhoneIcon size={13} /> {selected.telefono}</a>} />
                 <Detail k="Origen" v={selected.origen} />
                 <Detail k="Destino" v={selected.destino} />
                 <Detail k="Ruta" v={selected.route} />
@@ -162,7 +162,7 @@ export default function Admin() {
                       key={s.id}
                       onClick={() => updateStatus(selected.reference, s.id)}
                       data-testid={`admin-status-${s.id}`}
-                      className={`p-3 text-xs font-bold transition-colors duration-150 ${selected.status === s.id ? "bg-[#0F172A] text-white" : "bg-white hover:bg-slate-50"}`}
+                      className={`p-3 text-xs font-bold transition-colors duration-150 ${selected.status === s.id ? "bg-[#012030] text-white" : "bg-white hover:bg-slate-50"}`}
                     >{s.label}</button>
                   ))}
                 </div>
@@ -176,16 +176,16 @@ export default function Admin() {
   );
 }
 
-const Stat = ({ icon, label, value, accent = "#0F172A" }) => (
+const Stat = ({ icon, label, value, accent = "#012030" }) => (
   <div className="bg-white p-5">
     <div className="flex items-center gap-2"><span style={{ color: accent }}>{icon}</span><span className="label-eyebrow">{label}</span></div>
-    <div className="font-display font-black text-4xl mt-2 text-[#0F172A]">{value}</div>
+    <div className="font-display font-black text-4xl mt-2 text-[#012030]">{value}</div>
   </div>
 );
 
 const Detail = ({ k, v }) => (
   <div className="border-b border-slate-200 pb-2">
     <div className="label-eyebrow mb-1">{k}</div>
-    <div className="font-medium text-[#0F172A]">{v || <span className="text-slate-400">—</span>}</div>
+    <div className="font-medium text-[#012030]">{v || <span className="text-slate-400">—</span>}</div>
   </div>
 );

@@ -28,7 +28,7 @@ export const CookieBanner = () => {
     <div
       role="dialog"
       aria-label="Aviso de cookies"
-      className="fixed bottom-0 left-0 right-0 z-50 bg-[#0F172A] text-white border-t-2 border-[#FBBF24] shadow-2xl"
+      className="fixed bottom-0 left-0 right-0 z-50 bg-[#012030] text-white border-t-2 border-[#FBBF24] shadow-2xl"
     >
       <div className="max-w-7xl mx-auto px-5 py-4 flex flex-col sm:flex-row items-start sm:items-center gap-4">
         <CookieIcon size={22} weight="fill" className="text-[#FBBF24] flex-shrink-0 mt-0.5 sm:mt-0" />
@@ -47,7 +47,7 @@ export const CookieBanner = () => {
           </button>
           <button
             onClick={accept}
-            className="h-9 px-5 text-xs font-bold bg-[#FBBF24] hover:bg-[#F59E0B] text-[#0F172A] transition-colors"
+            className="h-9 px-5 text-xs font-bold bg-[#FBBF24] hover:bg-[#F59E0B] text-[#012030] transition-colors"
           >
             Aceptar
           </button>

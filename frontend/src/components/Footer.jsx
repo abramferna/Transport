@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Logo } from "@/components/Logo";
 
 export const Footer = () => (
-  <footer className="bg-[#0F172A] text-slate-300" data-testid="main-footer">
+  <footer className="bg-[#012030] text-slate-300" data-testid="main-footer">
     <div className="max-w-7xl mx-auto px-5 lg:px-8 py-16">
       <div className="grid grid-cols-2 md:grid-cols-4 gap-10">
         <div className="col-span-2">
@@ -31,8 +31,8 @@ export const Footer = () => (
         <div>
           <div className="label-eyebrow text-slate-500 mb-4">Contacto</div>
           <ul className="space-y-2.5 text-sm">
-            <li className="flex items-center gap-2"><PhoneIcon size={14} /> +34 673 392 259</li>
-            <li className="flex items-center gap-2"><EnvelopeIcon size={14} /> ViaNord@gmail.com</li>
+            <li className="flex items-center gap-2"><PhoneIcon size={14} /> +34 609 928 719</li>
+            <li className="flex items-center gap-2"><EnvelopeIcon size={14} /> info@vianordtrans.es</li>
             <li className="flex items-center gap-2"><MapPinIcon size={14} /> Girona · Barcelona</li>
           </ul>
         </div>

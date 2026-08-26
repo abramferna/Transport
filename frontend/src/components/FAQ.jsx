@@ -60,13 +60,13 @@ export const FAQ = () => (
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
         <div className="lg:col-span-4">
           <div className="label-eyebrow mb-3">Preguntas frecuentes</div>
-          <h2 className="font-display font-black tracking-tighter text-4xl sm:text-5xl text-[#0F172A] leading-[0.95]">
+          <h2 className="font-display font-black tracking-tighter text-4xl sm:text-5xl text-[#012030] leading-[0.95]">
             Todo claro,<br />sin letra pequeña.
           </h2>
           <p className="mt-5 text-slate-600">¿No encuentras tu duda? Escríbenos por WhatsApp, respondemos en minutos.</p>
 
           {/* 12T notice */}
-          <div className="mt-8 bg-[#0F172A] text-white p-5">
+          <div className="mt-8 bg-[#012030] text-white p-5">
             <div className="flex items-start gap-3">
               <WarningCircleIcon size={20} className="text-[#FBBF24] flex-shrink-0 mt-0.5" weight="fill" />
               <div>
@@ -82,7 +82,7 @@ export const FAQ = () => (
             {FAQS.map((f, i) => (
               <AccordionItem key={i} value={`item-${i}`} className="border-b border-slate-200 last:border-b-0">
                 <AccordionTrigger
-                  className="px-5 py-5 hover:bg-slate-50 hover:no-underline text-left font-display font-bold text-[#0F172A] text-base"
+                  className="px-5 py-5 hover:bg-slate-50 hover:no-underline text-left font-display font-bold text-[#012030] text-base"
                   data-testid={`faq-q-${i}`}
                 >
                   {f.q}

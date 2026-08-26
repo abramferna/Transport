@@ -6,7 +6,7 @@ fuser -k 5000/tcp 2>/dev/null || true
 fuser -k 8001/tcp 2>/dev/null || true
 
 # Start MongoDB if not already running
-MONGO_BIN="/nix/store/3z9iq2gr9ddb0ncmxjlv81ngn6b4nm70-mongodb-6.0.5/bin/mongod"
+MONGO_BIN=$(which mongod 2>/dev/null || find /nix/store -name mongod -path "*/mongodb*/bin/mongod" -type f 2>/dev/null | head -1)
 MONGO_DATA="/tmp/mongodb/data"
 MONGO_LOG="/tmp/mongodb/mongod.log"
 

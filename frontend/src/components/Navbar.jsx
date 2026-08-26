@@ -3,8 +3,8 @@ import { ListIcon, WhatsappLogoIcon, EnvelopeIcon } from "@phosphor-icons/react"
 import { useState } from "react";
 import { Logo } from "@/components/Logo";
 
-const WHATSAPP_URL = "https://wa.me/34673392259?text=Hola%2C%20me%20gustar%C3%ADa%20solicitar%20un%20presupuesto%20de%20transporte.";
-const EMAIL_URL = "mailto:ViaNord@gmail.com?subject=Quiero%20unirme%20a%20la%20red%20ViaNordTrans";
+const WHATSAPP_URL = "https://wa.me/34609928719?text=Hola%2C%20me%20gustar%C3%ADa%20solicitar%20un%20presupuesto%20de%20transporte.";
+const EMAIL_URL = "mailto:info@vianordtrans.es?subject=Solicitud%20de%20informaci%C3%B3n";
 
 const items = [
   { id: "modelos", label: "Servicios" },
@@ -19,7 +19,7 @@ export const Navbar = () => {
   return (
     <header className="sticky top-0 z-40" data-testid="main-navbar">
       {/* Announcement bar */}
-      <div className="bg-[#0F172A] border-b border-white/10">
+      <div className="bg-[#012030] border-b border-white/10">
         <div className="max-w-7xl mx-auto px-5 lg:px-8 py-2 flex flex-wrap items-center justify-between gap-x-6 gap-y-1">
           <p className="text-[11px] text-slate-400 leading-snug hidden sm:block">
             <span className="text-white font-medium">ViaNordTrans</span> resuelve envíos urgentes y necesidades recurrentes de transporte para empresas, con eficiencia, rapidez y precios competitivos.
@@ -52,7 +52,7 @@ export const Navbar = () => {
           <Link to="/" className="flex items-center gap-2.5 group" data-testid="nav-logo">
             <Logo size={36} />
             <div className="leading-none">
-              <div className="font-display font-black tracking-tighter text-[#0F172A] text-lg">ViaNordTrans</div>
+              <div className="font-display font-black tracking-tighter text-[#012030] text-lg">ViaNordTrans</div>
               <div className="text-[10px] tracking-[0.2em] uppercase text-slate-500 font-bold">Girona · Barcelona · Jonquera</div>
             </div>
           </Link>
@@ -63,7 +63,7 @@ export const Navbar = () => {
                 key={it.id}
                 href={`#${it.id}`}
                 data-testid={`nav-link-${it.id}`}
-                className="text-sm font-medium text-slate-700 hover:text-[#1E3A8A] transition-colors duration-150"
+                className="text-sm font-medium text-slate-700 hover:text-[#013044] transition-colors duration-150"
               >
                 {it.label}
               </a>
@@ -71,7 +71,7 @@ export const Navbar = () => {
             <Link
               to="/seguimiento"
               data-testid="nav-link-tracking"
-              className="text-sm font-medium text-slate-700 hover:text-[#1E3A8A] transition-colors duration-150"
+              className="text-sm font-medium text-slate-700 hover:text-[#013044] transition-colors duration-150"
             >
               Seguimiento
             </Link>
@@ -81,7 +81,7 @@ export const Navbar = () => {
             <a
               href="#calculadora"
               data-testid="nav-cta-quote"
-              className="hidden sm:inline-flex bg-[#FBBF24] hover:bg-[#F59E0B] text-[#0F172A] font-bold text-sm px-4 h-10 items-center transition-colors duration-150"
+              className="hidden sm:inline-flex bg-[#FBBF24] hover:bg-[#F59E0B] text-[#012030] font-bold text-sm px-4 h-10 items-center transition-colors duration-150"
             >
               Pedir presupuesto
             </a>
