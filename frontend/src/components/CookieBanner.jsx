@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
-import { CookieIcon, XIcon } from "@phosphor-icons/react";
+import { CookieIcon, X as XIcon } from "@phosphor-icons/react";
 
 const CONSENT_KEY = "vnt_cookie_consent";
 
