@@ -1,0 +1,561 @@
+"""
+ViaNordTrans API — Vercel Serverless Function
+WSGI app (no external frameworks — only requests + stdlib)
+Vercel Python runtime detects the top-level `app` callable.
+"""
+import json
+import math
+import os
+import secrets
+import sys
+import uuid
+from datetime import datetime, timezone
+from urllib.parse import urlparse, parse_qs
+
+import requests
+
+# Ensure the api/ directory is in sys.path so `towns` can be imported
+_here = os.path.dirname(os.path.abspath(__file__))
+if _here not in sys.path:
+    sys.path.insert(0, _here)
+
+from towns import TOWNS, get_town
+
+# ── Config ────────────────────────────────────────────────────────────────────
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
+SUPABASE_KEY = os.environ.get("SUPABASE_SERVICE_KEY") or os.environ.get("SUPABASE_KEY", "")
+RESEND_API_KEY = os.environ.get("RESEND_API_KEY", "")
+SENDER_EMAIL = os.environ.get("SENDER_EMAIL", "onboarding@resend.dev")
+ADMIN_EMAIL = os.environ.get("ADMIN_NOTIFY_EMAIL", "")
+
+SB_HEADERS = {
+    "apikey": SUPABASE_KEY,
+    "Authorization": f"Bearer {SUPABASE_KEY}",
+    "Content-Type": "application/json",
+    "Prefer": "return=representation",
+}
+
+# Use the `requests` library (not httpx) for outbound HTTP calls: httpx's
+# httpcore/anyio transport raises "[Errno 16] Device or resource busy" on the
+# Vercel Python serverless runtime's sandboxed filesystem/socket layer.
+_http_session = requests.Session()
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  PRICING ENGINE
+# ═══════════════════════════════════════════════════════════════════════════════
+
+BASE_MINIMUM = 60.0
+COST_PER_KM = 0.70
+VOLUMETRIC_FACTOR = 176
+
+WEIGHT_TIERS = [
+    (200, 0.0), (500, 15.0), (1000, 36.0),
+    (2000, 72.0), (3500, 120.0), (5000, 168.0), (6000, 216.0),
+]
+
+ADDONS = {
+    "plataforma":      {"label": "Plataforma elevadora",                   "flat": 25.0,  "route_pct": 0.0, "multiplier": 1.0},
+    "tauliner":        {"label": "Tauliner",                               "flat": 25.0,  "route_pct": 0.0, "multiplier": 1.0},
+    "descarga_extra":  {"label": "Descarga extra misma poblacion",          "flat": 25.0,  "route_pct": 0.0, "multiplier": 1.0},
+    "descarga_muelle": {"label": "Descarga muelle conductor",               "flat": 20.0,  "route_pct": 0.0, "multiplier": 1.0},
+    "urgente":         {"label": "Urgente sin planificar (<24h)",           "flat": 0.0,   "route_pct": 0.0, "multiplier": 1.15},
+}
+
+TIME_SLOTS = {
+    "manana":   {"label": "Manana 8-11h",        "hour": 9},
+    "mediodia": {"label": "Mediodia 12-15h",      "hour": 13},
+    "tarde":    {"label": "Tarde 15-17h",          "hour": 16},
+    "nocturno": {"label": "Nocturno 18h+ (+25%)", "hour": 19},
+}
+
+WEEKLY_PLANS = [
+    {"id": "basico", "name": "Plan Basico", "price_week": 199, "frequency": "1 dia / semana",
+     "weight_limit_kg": 2500, "volume_limit_m3": 8, "stops": 2,
+     "highlights": [
+         "1 dia semanal (aviso con 24h de antelacion)",
+         "Hasta 2.500 kg por servicio",
+         "Hasta 2 paradas por dia en ruta",
+         "Ventana flexible de recogida y entrega",
+         "Servicio puntual y flexible",
+     ],
+     "best_for": "Envios puntuales o necesidades ocasionales"},
+    {"id": "estandar", "name": "Plan Estandar", "price_week": 399, "frequency": "2 dias fijos / semana",
+     "weight_limit_kg": 4000, "volume_limit_m3": 18, "stops": 2,
+     "highlights": [
+         "2 dias fijos por semana (acordados)",
+         "Hasta 4.000 kg por servicio",
+         "Hasta 2 paradas por dia en ruta",
+         "Planificacion semanal fija",
+         "Aviso minimo 6h para ajustes puntuales",
+         "Ventana horaria de servicio (sin hora exacta)",
+     ],
+     "best_for": "Empresas con distribucion constante y planificada", "popular": True},
+    {"id": "premium", "name": "Plan Premium", "price_week": 749, "frequency": "4 dias / semana",
+     "weight_limit_kg": 6000, "volume_limit_m3": 34, "stops": 3,
+     "highlights": [
+         "4 dias por semana",
+         "Hasta 6.000 kg por servicio",
+         "Hasta 3 paradas por dia en ruta",
+         "Hora exacta de recogida y entrega acordada",
+         "Contacto directo operativo con conductor",
+         "Planificacion prioritaria y estabilidad total",
+     ],
+     "best_for": "Empresas que necesitan una logistica casi interna"},
+]
+
+
+def _weight_surcharge(kg):
+    points = [(0.0, 0.0), *[(float(limit), charge) for limit, charge in WEIGHT_TIERS]]
+    return _interpolate(points, kg)
+
+
+def _big_load_discount(kg):
+    points = [
+        (0.0, 0.0),
+        (1000.0, 0.0),
+        (2500.0, 0.10),
+        (5000.0, 0.20),
+        (6000.0, 0.30),
+    ]
+    return _interpolate(points, kg)
+
+
+def _interpolate(points, value):
+    if value <= points[0][0]:
+        return points[0][1]
+
+    for (start_x, start_y), (end_x, end_y) in zip(points, points[1:]):
+        if value <= end_x:
+            ratio = (value - start_x) / (end_x - start_x)
+            return start_y + (end_y - start_y) * ratio
+
+    start_x, start_y = points[-2]
+    end_x, end_y = points[-1]
+    slope = (end_y - start_y) / (end_x - start_x)
+    return end_y + (value - end_x) * slope
+
+
+ROAD_FACTOR = 1.20  # relacion tipica distancia por carretera / distancia en linea recta
+
+
+def _haversine_km(a, b):
+    lat1, lon1 = a["lat"], a["lon"]
+    lat2, lon2 = b["lat"], b["lon"]
+    R = 6371.0
+    p1, p2 = math.radians(lat1), math.radians(lat2)
+    dp = math.radians(lat2 - lat1)
+    dl = math.radians(lon2 - lon1)
+    x = math.sin(dp / 2) ** 2 + math.cos(p1) * math.cos(p2) * math.sin(dl / 2) ** 2
+    return 2 * R * math.asin(math.sqrt(x))
+
+
+def _route_km(origin, dest):
+    """Distancia real pueblo a pueblo usando coordenadas (lat/lon) y un factor de
+    carretera, en vez de solo la distancia de cada uno a la base de Girona."""
+    return round(_haversine_km(origin, dest) * ROAD_FACTOR)
+
+
+def calculate_price(origin_id, dest_id, weight_kg, addons, hour, weekday, volume_m3=0):
+    origin = get_town(origin_id) or get_town("girona")
+    dest   = get_town(dest_id)   or get_town("barcelona")
+
+    route_km    = _route_km(origin, dest)
+    dist_charge = route_km * COST_PER_KM
+    route_base  = BASE_MINIMUM + dist_charge
+
+    vol_kg        = (volume_m3 or 0) * VOLUMETRIC_FACTOR
+    chargeable_kg = max(weight_kg, vol_kg)
+    w_full        = _weight_surcharge(chargeable_kg)
+    big_disc      = _big_load_discount(chargeable_kg)
+    w_charge      = w_full * (1 - big_disc)
+
+    addons_clean    = [a for a in (addons or []) if a in ADDONS]
+    addon_flat      = sum(ADDONS[a]["flat"]      for a in addons_clean)
+    addon_route_pct = sum(ADDONS[a]["route_pct"] for a in addons_clean)
+    addon_mult      = 1.0
+    for a in addons_clean:
+        addon_mult *= ADDONS[a]["multiplier"]
+
+    route_pct_charge = route_base * addon_route_pct
+    is_weekend       = weekday in (5, 6)
+
+    if is_weekend:
+        route_base = route_base * 2.0
+
+    extras = w_charge + addon_flat + route_pct_charge
+    if is_weekend:
+        extras = extras * 1.15
+
+    subtotal       = route_base + extras
+    nocturno_extra = subtotal * 0.25 if (hour >= 18 or hour < 7) else 0.0
+    total          = (subtotal + nocturno_extra) * addon_mult
+    iva            = total * 0.21
+
+    service_label = (
+        " + ".join(ADDONS[a]["label"] for a in addons_clean)
+        if addons_clean else "Estandar (muelle)"
+    )
+    return {
+        "currency":      "EUR",
+        "subtotal":      round(subtotal, 2),
+        "total_sin_iva": round(total, 2),
+        "iva_21":        round(iva, 2),
+        "total_con_iva": round(total + iva, 2),
+        "service_label": service_label,
+        "is_weekend":    is_weekend,
+        "breakdown": {
+            "origen":                origin["name"],
+            "destino":               dest["name"],
+            "km_recorridos_aprox":   route_km,
+            "minimo_salida_base":    BASE_MINIMUM,
+            "coste_km":              round(dist_charge, 2),
+            "ruta_base":             round(route_base, 2),
+            "chargeable_kg":         round(chargeable_kg, 1),
+            "volumetric_kg":         round(vol_kg, 1),
+            "weight_surcharge":      round(w_charge, 2),
+            "big_load_discount_pct":    round(big_disc * 100),
+            "big_load_discount_amount": round(w_full * big_disc, 2),
+            "addons":                   [{"id": a, "label": ADDONS[a]["label"]} for a in addons_clean],
+            "addons_flat":              round(addon_flat, 2),
+            "addons_multiplier":        addon_mult,
+        },
+    }
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  SUPABASE HELPERS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def sb_get(table, filters=None, order=None, limit=500):
+    params = {}
+    if filters:
+        params.update(filters)
+    if order:
+        params["order"] = order
+    if limit:
+        params["limit"] = str(limit)
+    r = _http_session.get(f"{SUPABASE_URL}/rest/v1/{table}", headers=SB_HEADERS, params=params, timeout=10)
+    r.raise_for_status()
+    return r.json()
+
+
+def sb_insert(table, row):
+    r = _http_session.post(f"{SUPABASE_URL}/rest/v1/{table}", headers=SB_HEADERS, json=row, timeout=10)
+    r.raise_for_status()
+    return r.json()
+
+
+def sb_update(table, filters, data):
+    r = _http_session.patch(
+        f"{SUPABASE_URL}/rest/v1/{table}",
+        headers=SB_HEADERS,
+        params=filters,
+        json=data,
+        timeout=10,
+    )
+    r.raise_for_status()
+    return r.json()
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  EMAIL HELPERS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def _td(label, value):
+    if value in (None, "", [], 0):
+        return ""
+    return (
+        f"<tr>"
+        f"<td style='padding:8px 12px;border-bottom:1px solid #E2E8F0;color:#64748B;font-size:12px;"
+        f"text-transform:uppercase;letter-spacing:1px;white-space:nowrap;width:38%'>{label}</td>"
+        f"<td style='padding:8px 12px;border-bottom:1px solid #E2E8F0;color:#0F172A;font-weight:600'>{value}</td>"
+        f"</tr>"
+    )
+
+
+def _admin_html(q):
+    addons_str = ", ".join(q.get("addons") or []) or "-"
+    precio     = f"{q.get('estimated_price', 0):.2f} EUR (IVA incl.)" if q.get("estimated_price") else "-"
+    tipo_label = "Plan B2B semanal" if q.get("tipo") == "b2b" else "Servicio puntual B2C"
+    tel        = (q.get("telefono") or "").replace(" ", "").replace("+34", "")
+    return f"""<div style='font-family:Arial,sans-serif;max-width:640px;margin:0 auto;background:#fff;border:1px solid #E2E8F0'>
+      <div style='background:#0F172A;padding:24px 28px'>
+        <div style='color:#FBBF24;font-size:10px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px'>Nueva solicitud de presupuesto</div>
+        <div style='color:#fff;font-size:22px;font-weight:800'>Ref. {q.get('reference')}</div>
+        <div style='color:#94A3B8;font-size:13px;margin-top:4px'>{tipo_label}</div>
+      </div>
+      <div style='padding:20px 28px 0'><div style='font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#94A3B8;margin-bottom:8px'>Cliente</div></div>
+      <table style='width:100%;border-collapse:collapse'>
+        {_td("Nombre",q.get("nombre"))}{_td("Empresa",q.get("empresa"))}{_td("Email",q.get("email"))}{_td("Telefono",q.get("telefono"))}
+      </table>
+      <div style='padding:20px 28px 0'><div style='font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#94A3B8;margin-bottom:8px'>Envio</div></div>
+      <table style='width:100%;border-collapse:collapse'>
+        {_td("Origen",q.get("origen"))}{_td("Destino",q.get("destino"))}
+        {_td("Peso",f"{q.get('peso_kg')} kg" if q.get('peso_kg') else None)}
+        {_td("Volumen",f"{q.get('volumen_m3')} m3" if q.get('volumen_m3') else None)}
+        {_td("Franja recogida",q.get("time_slot"))}{_td("Fecha preferida",q.get("fecha_preferida"))}
+        {_td("Extras",addons_str)}{_td("Descripcion",q.get("descripcion"))}
+      </table>
+      <div style='padding:20px 28px 0'><div style='font-size:11px;letter-spacing:2px;text-transform:uppercase;color:#94A3B8;margin-bottom:8px'>Precio estimado</div></div>
+      <table style='width:100%;border-collapse:collapse'>
+        {_td("Estimacion",precio)}{_td("Plan",q.get("plan_id"))}
+      </table>
+      <div style='padding:20px 28px 24px'>
+        <a href='mailto:{q.get("email")}' style='display:inline-block;background:#FBBF24;color:#0F172A;font-weight:700;padding:10px 20px;text-decoration:none;font-size:14px'>Responder al cliente</a>
+        <a href='https://wa.me/34{tel}' style='display:inline-block;background:#25D366;color:#fff;font-weight:700;padding:10px 20px;text-decoration:none;font-size:14px;margin-left:8px'>WhatsApp</a>
+      </div>
+      <div style='background:#F8FAFC;padding:12px 28px;border-top:1px solid #E2E8F0'>
+        <span style='color:#94A3B8;font-size:11px'>ViaNordTrans - Transporte Catalunya - abramferna@gmail.com</span>
+      </div>
+    </div>"""
+
+
+def _client_html(q):
+    precio = f"{q.get('estimated_price', 0):.2f} EUR (IVA incl.)" if q.get("estimated_price") else "pendiente de confirmar"
+    return f"""<div style='font-family:Arial,sans-serif;max-width:640px;margin:0 auto;background:#fff;border:1px solid #E2E8F0'>
+      <div style='background:#1E3A8A;padding:28px'>
+        <div style='color:#FBBF24;font-size:10px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px'>Solicitud recibida</div>
+        <div style='color:#fff;font-size:22px;font-weight:800'>Hola {q.get('nombre')}, gracias.</div>
+      </div>
+      <div style='padding:28px;color:#0f172a'>
+        <p style='margin:0 0 16px;color:#475569'>Hemos recibido tu solicitud. Te contactaremos en menos de 1 hora habil para confirmar el presupuesto.</p>
+        <table style='width:100%;border-collapse:collapse;background:#F8FAFC;border:1px solid #E2E8F0'>
+          {_td("Referencia",q.get("reference"))}{_td("Ruta",f"{q.get('origen')} a {q.get('destino')}")}{_td("Estimacion",precio)}
+        </table>
+        <p style='margin:24px 0 0;color:#94A3B8;font-size:12px'>ViaNordTrans - Transporte de mercancias - Catalunya<br>Tel: +34 609 928 719 - info@vianordtrans.es</p>
+      </div>
+    </div>"""
+
+
+def send_email(to, subject, html):
+    if not RESEND_API_KEY or not to:
+        return
+    try:
+        r = _http_session.post(
+            "https://api.resend.com/emails",
+            headers={"Authorization": f"Bearer {RESEND_API_KEY}", "Content-Type": "application/json"},
+            json={"from": SENDER_EMAIL, "to": [to], "subject": subject, "html": html},
+            timeout=10,
+        )
+        if r.status_code >= 400:
+            print(f"[Email error] {r.status_code} {r.text}")
+    except Exception as e:
+        print(f"[Email error] {e}")
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  REQUEST/RESPONSE HELPERS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def _gen_reference():
+    return "TR" + datetime.now(timezone.utc).strftime("%y%m%d") + secrets.token_hex(2).upper()
+
+
+def _json_response(data, status=200):
+    body = json.dumps(data, default=str).encode("utf-8")
+    return status, [
+        ("Content-Type", "application/json"),
+        ("Access-Control-Allow-Origin", "*"),
+        ("Access-Control-Allow-Methods", "GET,POST,PATCH,OPTIONS"),
+        ("Access-Control-Allow-Headers", "Content-Type,Authorization"),
+        ("Content-Length", str(len(body))),
+    ], body
+
+
+def _err(msg, status=400):
+    return _json_response({"error": msg}, status)
+
+
+def _read_body(environ):
+    try:
+        length = int(environ.get("CONTENT_LENGTH") or 0)
+        if length > 0:
+            return json.loads(environ["wsgi.input"].read(length))
+    except Exception:
+        pass
+    return {}
+
+
+def _route(environ):
+    path = environ.get("PATH_INFO", "/")
+    # Strip /api prefix
+    if path.startswith("/api"):
+        path = path[4:]
+    path = path.rstrip("/") or "/"
+    qs = parse_qs(environ.get("QUERY_STRING", ""))
+    return path, qs
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  ROUTE HANDLERS
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def handle_get(path, qs, environ):
+    if path in ("/", "", "/health"):
+        return _json_response({"status": "ok", "service": "ViaNordTrans API"})
+
+    if path == "/plans":
+        return _json_response({"plans": WEEKLY_PLANS})
+
+    if path in ("/addons", "/routes"):
+        return _json_response({"addons": [{"id": k, **v} for k, v in ADDONS.items()]})
+
+    if path == "/time-slots":
+        return _json_response({"slots": [{"id": k, **v} for k, v in TIME_SLOTS.items()]})
+
+    if path == "/towns":
+        comarcas = {}
+        for t in TOWNS:
+            comarcas.setdefault(t["comarca"], []).append(t)
+        grouped = [{"comarca": c, "towns": v} for c, v in comarcas.items()]
+        return _json_response({"towns": TOWNS, "grouped": grouped})
+
+    if path == "/contact-info":
+        return _json_response({
+            "whatsapp": os.environ.get("WHATSAPP_NUMBER", ""),
+            "telegram": os.environ.get("TELEGRAM_USERNAME", ""),
+        })
+
+    if path == "/quotes":
+        if not SUPABASE_URL:
+            return _err("DB not configured", 503)
+        try:
+            rows = sb_get("quotes", order="created_at.desc", limit=500)
+            return _json_response(rows)
+        except Exception as e:
+            return _err(str(e), 500)
+
+    if path == "/stats":
+        if not SUPABASE_URL:
+            return _err("DB not configured", 503)
+        try:
+            rows = sb_get("quotes", limit=2000)
+            total      = len(rows)
+            b2b        = sum(1 for r in rows if r.get("tipo") == "b2b")
+            b2c        = sum(1 for r in rows if r.get("tipo") == "b2c")
+            pendientes = sum(1 for r in rows if r.get("status") == "pendiente")
+            return _json_response({"total": total, "b2b": b2b, "b2c": b2c, "pendientes": pendientes})
+        except Exception as e:
+            return _err(str(e), 500)
+
+    if path.startswith("/quotes/") and path.count("/") == 2:
+        reference = path.split("/")[2].upper()
+        if not SUPABASE_URL:
+            return _err("DB not configured", 503)
+        try:
+            rows = sb_get("quotes", filters={"reference": f"eq.{reference}"}, limit=1)
+            if not rows:
+                return _err("No encontrado", 404)
+            return _json_response(rows[0])
+        except Exception as e:
+            return _err(str(e), 500)
+
+    return _err("Not found", 404)
+
+
+def handle_post(path, body):
+    if path == "/calculate":
+        try:
+            ts   = body.get("time_slot")
+            hour = TIME_SLOTS[ts]["hour"] if ts in TIME_SLOTS else int(body.get("hour", 10))
+            result = calculate_price(
+                body.get("origin_town", "girona"),
+                body.get("destination_town", "barcelona"),
+                float(body.get("weight_kg", 0)),
+                body.get("addons", []),
+                hour,
+                int(body.get("weekday", 2)),
+                float(body.get("volume_m3", 0)),
+            )
+            return _json_response(result)
+        except Exception as e:
+            return _err(str(e))
+
+    if path == "/quotes":
+        if not SUPABASE_URL:
+            return _err("DB not configured", 503)
+        try:
+            now = datetime.now(timezone.utc).isoformat()
+            row = {
+                "id":              str(uuid.uuid4()),
+                "reference":       _gen_reference(),
+                "tipo":            body.get("tipo", "b2c"),
+                "plan_id":         body.get("plan_id"),
+                "nombre":          body.get("nombre", ""),
+                "empresa":         body.get("empresa"),
+                "email":           body.get("email", ""),
+                "telefono":        body.get("telefono", ""),
+                "origen":          body.get("origen", ""),
+                "destino":         body.get("destino", ""),
+                "peso_kg":         body.get("peso_kg"),
+                "volumen_m3":      body.get("volumen_m3"),
+                "addons":          body.get("addons") or [],
+                "time_slot":       body.get("time_slot"),
+                "fecha_preferida": body.get("fecha_preferida"),
+                "descripcion":     body.get("descripcion"),
+                "estimated_price": body.get("estimated_price"),
+                "status":          "pendiente",
+                "created_at":      now,
+            }
+            saved  = sb_insert("quotes", row)
+            result = saved[0] if isinstance(saved, list) and saved else row
+            send_email(ADMIN_EMAIL,
+                f"[Nuevo presupuesto] {row['reference']} - {row['origen']} a {row['destino']}",
+                _admin_html(row))
+            send_email(row["email"],
+                f"Hemos recibido tu solicitud - Ref. {row['reference']}",
+                _client_html(row))
+            return _json_response(result, 201)
+        except Exception as e:
+            return _err(str(e), 500)
+
+    return _err("Not found", 404)
+
+
+def handle_patch(path, body):
+    if path.startswith("/quotes/") and path.endswith("/status"):
+        parts     = path.split("/")
+        reference = parts[2].upper() if len(parts) > 2 else ""
+        if not SUPABASE_URL:
+            return _err("DB not configured", 503)
+        try:
+            now    = datetime.now(timezone.utc).isoformat()
+            status = body.get("status", "pendiente")
+            rows   = sb_update(
+                "quotes",
+                {"reference": f"eq.{reference}"},
+                {"status": status, "updated_at": now},
+            )
+            if not rows:
+                return _err("No encontrado", 404)
+            return _json_response(rows[0] if isinstance(rows, list) else rows)
+        except Exception as e:
+            return _err(str(e), 500)
+
+    return _err("Not found", 404)
+
+
+# ═══════════════════════════════════════════════════════════════════════════════
+#  WSGI APP  — Vercel detects this top-level `app` callable
+# ═══════════════════════════════════════════════════════════════════════════════
+
+def app(environ, start_response):
+    method = environ.get("REQUEST_METHOD", "GET").upper()
+    path, qs = _route(environ)
+
+    if method == "OPTIONS":
+        status, headers, body = _json_response({})
+    elif method == "GET":
+        status, headers, body = handle_get(path, qs, environ)
+    elif method == "POST":
+        body_data = _read_body(environ)
+        status, headers, body = handle_post(path, body_data)
+    elif method == "PATCH":
+        body_data = _read_body(environ)
+        status, headers, body = handle_patch(path, body_data)
+    else:
+        status, headers, body = _err("Method not allowed", 405)
+
+    status_str = f"{status} {'OK' if status == 200 else ('Created' if status == 201 else 'Error')}"
+    start_response(status_str, headers)
+    return [body]
