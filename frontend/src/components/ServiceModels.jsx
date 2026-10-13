@@ -45,7 +45,7 @@ export const ServiceModels = ({ onSelectPlan }) => {
 
           <div className="mb-8 bg-[#012030] text-white px-5 py-3 flex items-center gap-3 flex-wrap">
             <span className="bg-[#FBBF24] text-[#012030] text-[10px] font-bold tracking-[0.2em] uppercase px-2 py-1">Promo</span>
-            <span className="text-sm">Reserva <strong className="text-[#FBBF24]">4 semanas seguidas</strong> y obtén un <strong className="text-[#FBBF24]">−10%</strong> en cualquier plan. Pregunta por la promo al solicitar tu presupuesto.</span>
+            <span className="text-sm">Reserva <strong>4 semanas seguidas</strong> y obtén un <strong>−10%</strong> en cualquier plan. Pregunta por la promo al solicitar tu presupuesto.</span>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-slate-200 border border-slate-200">
@@ -95,7 +95,7 @@ export const ServiceModels = ({ onSelectPlan }) => {
                   {/* Condición mínimo */}
                   <div className="mt-5 pt-4 border-t border-slate-100 text-xs text-slate-400 flex items-center gap-1.5">
                     <WarningIcon size={13} weight="fill" className="text-amber-400 flex-shrink-0" />
-                    Contratación mínima: <strong className="text-slate-500">2 semanas</strong>
+                    Contratación mínima: <strong>2 semanas</strong>
                   </div>
 
                   <button

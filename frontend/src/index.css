@@ -1,6 +1,3 @@
-@import url('https://api.fontshare.com/v2/css?f[]=cabinet-grotesk@500,700,800,900&display=swap');
-@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -9,15 +6,45 @@ html, body {
     margin: 0;
     background: #FFFFFF;
     color: #012030;
-    font-family: 'IBM Plex Sans', system-ui, sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 15px;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
 }
 
 ::selection { background: #FBBF24; color: #012030; }
 
-.font-display { font-family: 'Cabinet Grotesk', 'IBM Plex Sans', sans-serif; }
-.font-mono { font-family: 'IBM Plex Mono', monospace; }
+.font-display { font-family: Arial, Helvetica, sans-serif; }
+.font-mono { font-family: "Courier New", monospace; }
+
+.intro-video-card {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    overflow: hidden;
+    background: #012030;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.intro-video-media {
+    position: absolute;
+    inset: 0;
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}
+
+.intro-video-accent {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 4px;
+    background: #FBBF24;
+    pointer-events: none;
+}
 
 .label-eyebrow {
     font-size: 11px;

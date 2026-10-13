@@ -232,7 +232,7 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
             </h2>
           </div>
           <div className="lg:col-span-5">
-            <p className="text-slate-600">Selecciona origen y destino, peso y volumen. Añade plataforma si no tienes muelle. Mínimo 60€. <strong className="text-[#012030]">Fuera del Gironès o destinos especiales</strong>: precio a consultar.</p>
+            <p className="text-slate-600">Selecciona origen y destino, peso y volumen. Añade plataforma si no tienes muelle. Mínimo 60€. <strong>Fuera del Gironès o destinos especiales</strong>: precio a consultar.</p>
           </div>
         </div>
 
@@ -289,7 +289,7 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
             {/* Palets slider */}
             <div className="mt-4 border border-slate-200 bg-slate-50 p-4">
               <div className="flex items-center justify-between mb-2">
-                <span className="label-eyebrow">Número de palets · <span className="text-[#012030] normal-case font-bold text-sm">{pallets === 0 ? "no especificado" : `${pallets} de 18`}</span></span>
+                <span className="label-eyebrow">Número de palets · <span className="normal-case font-bold text-sm">{pallets === 0 ? "no especificado" : `${pallets} de 18`}</span></span>
                 {pallets > 0 && (
                   <span className="text-[11px] text-slate-500 font-mono">{pallets} palet{pallets !== 1 ? "s" : ""} → ~{Math.min(34, Math.round(pallets * PALLET_M3 * 2) / 2).toFixed(1)} m³</span>
                 )}
@@ -635,7 +635,7 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
               {tipo === "b2c" && calc && (
                 <div className="mt-4 bg-[#F8FAFC] border border-slate-200 p-4 text-sm flex flex-wrap items-center justify-between gap-2">
                   <span className="text-slate-600">Estimación actual:</span>
-                  <span className="font-display font-black text-xl text-[#012030]">{calc.total_con_iva.toFixed(2)}€ <span className="text-xs text-slate-500 font-sans font-normal">IVA incl.</span></span>
+                  <span className="font-display font-black text-xl text-[#012030]">{calc.total_con_iva.toFixed(2)}€ <span className="text-xs font-sans font-normal">IVA incl.</span></span>
                 </div>
               )}
 

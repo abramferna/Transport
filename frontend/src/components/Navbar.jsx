@@ -22,7 +22,7 @@ export const Navbar = () => {
       <div className="bg-[#012030] border-b border-white/10">
         <div className="max-w-7xl mx-auto px-5 lg:px-8 py-2 flex flex-wrap items-center justify-between gap-x-6 gap-y-1">
           <p className="text-[11px] text-slate-400 leading-snug hidden sm:block">
-            <span className="text-white font-medium">ViaNordTrans</span> resuelve envíos urgentes y necesidades recurrentes de transporte para empresas, con eficiencia, rapidez y precios competitivos.
+            <span className="font-medium">ViaNordTrans</span> resuelve envíos urgentes y necesidades recurrentes de transporte para empresas, con eficiencia, rapidez y precios competitivos.
           </p>
           <div className="flex items-center gap-3 ml-auto flex-shrink-0">
             <span className="text-[11px] text-slate-400 hidden sm:inline">¿Quieres colaborar como conductor? ¡Contáctanos!</span>

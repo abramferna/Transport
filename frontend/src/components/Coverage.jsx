@@ -23,7 +23,7 @@ export const Coverage = () => (
         </div>
         <div className="lg:col-span-6">
           <p className="text-slate-600 leading-relaxed">
-            Nuestra ruta diaria pasa por <strong className="text-[#012030]">La Jonquera, Girona y Barcelona</strong>, conectando frontera y área metropolitana. Servicios regulares en todo el corredor norte de Catalunya. <strong className="text-[#012030]">Otros destinos en España bajo consulta</strong> con antelación. No realizamos reparto urbano.
+            Nuestra ruta diaria pasa por <strong>La Jonquera, Girona y Barcelona</strong>, conectando frontera y área metropolitana. Servicios regulares en todo el corredor norte de Catalunya. <strong>Otros destinos en España bajo consulta</strong> con antelación. No realizamos reparto urbano.
           </p>
         </div>
       </div>
@@ -45,33 +45,33 @@ export const Coverage = () => (
               <g transform="translate(160,50)">
                 <circle r="9" fill="#FBBF24" />
                 <circle r="22" fill="#FBBF24" fillOpacity="0.25" />
-                <text x="-118" y="6" fontFamily="Cabinet Grotesk" fontSize="18" fontWeight="900" fill="#012030">LA JONQUERA</text>
-                <text x="-32" y="22" fontFamily="IBM Plex Sans" fontSize="10" fill="#64748B">frontera</text>
+                <text x="-118" y="6" fontFamily="Arial, Helvetica, sans-serif" fontSize="18" fontWeight="700" fill="#012030">LA JONQUERA</text>
+                <text x="-32" y="22" fontFamily="Arial, Helvetica, sans-serif" fontSize="10" fill="#64748B">frontera</text>
               </g>
               <circle cx="220" cy="120" r="5" fill="#1E40AF" />
-              <text x="160" y="138" fontFamily="IBM Plex Sans" fontSize="11" fill="#334155">Figueres</text>
+              <text x="160" y="138" fontFamily="Arial, Helvetica, sans-serif" fontSize="11" fill="#334155">Figueres</text>
 
               {/* Girona base */}
               <g transform="translate(300,200)">
                 <circle r="11" fill="#013044" />
                 <circle r="26" fill="#013044" fillOpacity="0.18" />
-                <text x="16" y="6" fontFamily="Cabinet Grotesk" fontSize="22" fontWeight="900" fill="#012030">GIRONA</text>
-                <text x="16" y="22" fontFamily="IBM Plex Sans" fontSize="10" fill="#64748B" letterSpacing="2">BASE</text>
+                <text x="16" y="6" fontFamily="Arial, Helvetica, sans-serif" fontSize="22" fontWeight="700" fill="#012030">GIRONA</text>
+                <text x="16" y="22" fontFamily="Arial, Helvetica, sans-serif" fontSize="10" fill="#64748B" letterSpacing="2">BASE</text>
               </g>
 
               {/* Costa (lateral) */}
               <circle cx="380" cy="220" r="4" fill="#1E40AF" />
-              <text x="388" y="224" fontFamily="IBM Plex Sans" fontSize="10" fill="#334155">Begur / Pals</text>
+              <text x="388" y="224" fontFamily="Arial, Helvetica, sans-serif" fontSize="10" fill="#334155">Begur / Pals</text>
 
               {/* Granollers / Mataró */}
               <circle cx="430" cy="280" r="5" fill="#1E40AF" />
-              <text x="440" y="285" fontFamily="IBM Plex Sans" fontSize="11" fill="#334155">Granollers</text>
+              <text x="440" y="285" fontFamily="Arial, Helvetica, sans-serif" fontSize="11" fill="#334155">Granollers</text>
 
               {/* Barcelona */}
               <g transform="translate(540,340)">
                 <circle r="9" fill="#FBBF24" />
                 <circle r="22" fill="#FBBF24" fillOpacity="0.25" />
-                <text x="-128" y="6" fontFamily="Cabinet Grotesk" fontSize="20" fontWeight="900" fill="#012030">BARCELONA</text>
+                <text x="-128" y="6" fontFamily="Arial, Helvetica, sans-serif" fontSize="20" fontWeight="700" fill="#012030">BARCELONA</text>
               </g>
             </svg>
           </div>

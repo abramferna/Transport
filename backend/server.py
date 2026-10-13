@@ -149,14 +149,34 @@ TIME_SLOTS = {
 }
 
 # Descuento progresivo por gran carga: cuanto más kg, menor el coste relativo del peso.
+# Los puntos de descuento se interpolan para evitar saltos de precio al cambiar
+# de tramo. El precio total sigue creciendo siempre con el peso.
+BIG_LOAD_DISCOUNT_POINTS = [
+    (0.0, 0.0),
+    (1000.0, 0.0),
+    (2500.0, 0.10),
+    (5000.0, 0.20),
+    (6000.0, 0.30),
+]
+
+
+def _interpolate(points: list[tuple[float, float]], value: float) -> float:
+    if value <= points[0][0]:
+        return points[0][1]
+
+    for (start_x, start_y), (end_x, end_y) in zip(points, points[1:]):
+        if value <= end_x:
+            ratio = (value - start_x) / (end_x - start_x)
+            return start_y + (end_y - start_y) * ratio
+
+    start_x, start_y = points[-2]
+    end_x, end_y = points[-1]
+    slope = (end_y - start_y) / (end_x - start_x)
+    return end_y + (value - end_x) * slope
+
+
 def big_load_discount(chargeable_kg: float) -> float:
-    if chargeable_kg < 1000:
-        return 0.0
-    if chargeable_kg < 2500:
-        return 0.10
-    if chargeable_kg < 5000:
-        return 0.20
-    return 0.30
+    return _interpolate(BIG_LOAD_DISCOUNT_POINTS, chargeable_kg)
 
 # Recargo fin de semana: base ×2 + extras ×1.15
 WEEKEND_BASE_MULTIPLIER = 2.0
@@ -201,10 +221,8 @@ WEEKLY_PLANS = [
 
 
 def weight_surcharge(weight_kg: float) -> float:
-    for limit, charge in WEIGHT_TIERS:
-        if weight_kg <= limit:
-            return charge
-    return WEIGHT_TIERS[-1][1] + 60.0
+    points = [(0.0, 0.0), *[(float(limit), charge) for limit, charge in WEIGHT_TIERS]]
+    return _interpolate(points, weight_kg)
 
 
 ROAD_FACTOR = 1.20  # relacion tipica distancia por carretera / distancia en linea recta

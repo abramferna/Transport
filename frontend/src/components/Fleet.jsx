@@ -15,13 +15,36 @@ const FEATURES = [
 export const Fleet = () => (
   <section id="flota" className="py-20 lg:py-28 bg-[#F8FAFC]" data-testid="fleet-section">
     <div className="max-w-7xl mx-auto px-5 lg:px-8">
-      <div className="border border-slate-200 bg-white p-8 lg:p-10 mb-10">
+      <div className="relative isolate overflow-hidden border border-slate-200 bg-white p-6 sm:p-8 lg:p-10 mb-10">
+        <div className="pointer-events-none absolute inset-y-0 right-0 w-full overflow-hidden md:w-[70%]" aria-hidden="true">
+          <img
+            src="/vnt-truck-loading.webp"
+            alt=""
+            className="absolute inset-y-0 left-0 h-full w-[72%] scale-105 object-cover object-center opacity-30 blur-[3px]"
+            width="2400"
+            height="3600"
+            loading="lazy"
+            decoding="async"
+          />
+          <img
+            src="/vnt-truck-side.webp"
+            alt=""
+            className="absolute inset-y-0 right-0 h-full w-[72%] scale-105 object-cover object-center opacity-25 blur-[3px]"
+            width="2400"
+            height="3600"
+            loading="lazy"
+            decoding="async"
+          />
+          <div className="absolute inset-0 bg-white/35" />
+          <div className="absolute inset-0 bg-gradient-to-r from-white via-white/80 to-white/25" />
+        </div>
+        <div className="relative z-10 md:max-w-[76%]">
           <div className="label-eyebrow mb-3">Flota & fiabilidad</div>
           <h2 className="font-display font-black tracking-tighter text-4xl sm:text-5xl text-[#012030] leading-[0.95]">
             Vehículos pensados<br />para tu carga.
           </h2>
           <p className="mt-5 text-slate-600 max-w-xl">
-            Trabajamos con <strong className="text-[#012030]">flota propia 12T</strong> y carga útil máxima de <strong className="text-[#012030]">6.000 kg / 34 m³</strong>. Recogida y entrega en el día o al día siguiente, planificadas con antelación. Cubrimos los dos corredores desde Girona: sur a Barcelona y norte a La Jonquera. Conductores con CAP en vigor y mercancía asegurada en cada servicio.
+            Trabajamos con <strong>flota propia 12T</strong> y carga útil máxima de <strong>6.000 kg / 34 m³</strong>. Recogida y entrega en el día o al día siguiente, planificadas con antelación. Cubrimos los dos corredores desde Girona: sur a Barcelona y norte a La Jonquera. Conductores con CAP en vigor y mercancía asegurada en cada servicio.
           </p>
           <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4">
             {FEATURES.map((f) => (
@@ -32,6 +55,7 @@ export const Fleet = () => (
               </div>
             ))}
           </div>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-slate-200 border border-slate-200">

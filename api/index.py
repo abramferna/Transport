@@ -105,17 +105,34 @@ WEEKLY_PLANS = [
 
 
 def _weight_surcharge(kg):
-    for limit, charge in WEIGHT_TIERS:
-        if kg <= limit:
-            return charge
-    return WEIGHT_TIERS[-1][1] + 60.0
+    points = [(0.0, 0.0), *[(float(limit), charge) for limit, charge in WEIGHT_TIERS]]
+    return _interpolate(points, kg)
 
 
 def _big_load_discount(kg):
-    if kg < 1000: return 0.0
-    if kg < 2500: return 0.10
-    if kg < 5000: return 0.20
-    return 0.30
+    points = [
+        (0.0, 0.0),
+        (1000.0, 0.0),
+        (2500.0, 0.10),
+        (5000.0, 0.20),
+        (6000.0, 0.30),
+    ]
+    return _interpolate(points, kg)
+
+
+def _interpolate(points, value):
+    if value <= points[0][0]:
+        return points[0][1]
+
+    for (start_x, start_y), (end_x, end_y) in zip(points, points[1:]):
+        if value <= end_x:
+            ratio = (value - start_x) / (end_x - start_x)
+            return start_y + (end_y - start_y) * ratio
+
+    start_x, start_y = points[-2]
+    end_x, end_y = points[-1]
+    slope = (end_y - start_y) / (end_x - start_x)
+    return end_y + (value - end_x) * slope
 
 
 ROAD_FACTOR = 1.20  # relacion tipica distancia por carretera / distancia en linea recta

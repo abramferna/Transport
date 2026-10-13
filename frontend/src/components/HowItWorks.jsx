@@ -29,16 +29,29 @@ const steps = [
 
 export const HowItWorks = () => {
   return (
-    <section id="como-funciona" className="py-16 lg:py-20 bg-[#012030]">
+    <section id="como-funciona" className="relative isolate overflow-hidden py-16 lg:py-20 bg-[#012030]">
       <div className="max-w-7xl mx-auto px-5 lg:px-8">
-        <div className="text-center mb-12">
-          <div className="label-eyebrow text-[#FBBF24] mb-3">Proceso</div>
-          <h2 className="font-display font-black tracking-tighter text-4xl sm:text-5xl text-white leading-[0.95]">
-            Cómo funciona
-          </h2>
-          <p className="mt-3 text-slate-400 max-w-lg mx-auto">
-            Sin complicaciones. En cuatro pasos tienes el servicio en marcha.
-          </p>
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-8 lg:gap-12 items-center mb-12">
+          <div className="md:col-span-7">
+            <div className="label-eyebrow text-[#FBBF24] mb-3">Proceso</div>
+            <h2 className="font-display font-black tracking-tighter text-4xl sm:text-5xl text-white leading-[0.95]">
+              Cómo funciona
+            </h2>
+            <p className="mt-3 text-slate-400 max-w-lg">
+              Sin complicaciones. En cuatro pasos tienes el servicio en marcha.
+            </p>
+          </div>
+          <figure className="relative md:col-span-5 mx-auto w-full max-w-[460px] aspect-[4/5] overflow-hidden border border-white/20 bg-[#001A28]">
+            <img
+              src="/vnt-delivery-handoff.webp"
+              alt="Los responsables de ViaNordTrans se entregan una carpeta junto a uno de sus camiones"
+              className="h-full w-full object-cover object-[center_45%] brightness-110"
+              width="2400"
+              height="3600"
+              loading="lazy"
+              decoding="async"
+            />
+          </figure>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-white/10">
