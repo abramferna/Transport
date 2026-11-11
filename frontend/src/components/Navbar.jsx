@@ -7,8 +7,8 @@ const WHATSAPP_URL = "https://wa.me/34609928719?text=Hola%2C%20me%20gustar%C3%AD
 const EMAIL_URL = "mailto:info@vianordtrans.es?subject=Solicitud%20de%20informaci%C3%B3n";
 
 const items = [
+  { id: "calculadora", label: "Preparar envío" },
   { id: "modelos", label: "Servicios" },
-  { id: "calculadora", label: "Calculadora" },
   { id: "cobertura", label: "Cobertura" },
   { id: "flota", label: "Flota" },
   { id: "faq", label: "FAQ" },

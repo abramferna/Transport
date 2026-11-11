@@ -222,17 +222,16 @@ export const QuoteCalculator = ({ initialPlan, onScrollToForm }) => {
   const slotLabel = (id) => TIME_SLOTS.find((s) => s.id === id)?.label + " · " + TIME_SLOTS.find((s) => s.id === id)?.range;
 
   return (
-    <section id="calculadora" className="py-20 lg:py-28 bg-[#F1F5F9] border-y border-slate-200" data-testid="calculator-section">
+    <section id="calculadora" className="pt-6 pb-12 lg:pt-8 lg:pb-16 bg-[#F1F5F9] border-y border-slate-200 scroll-mt-32" data-testid="calculator-section">
       <div className="max-w-7xl mx-auto px-5 lg:px-8">
-        <div className="mb-10 grid grid-cols-1 lg:grid-cols-12 gap-6 items-end">
+        <div className="mb-5 grid grid-cols-1 lg:grid-cols-12 gap-3 items-end">
           <div className="lg:col-span-7">
-            <div className="label-eyebrow mb-3">Calculadora instantánea</div>
-            <h2 className="font-display font-black tracking-tighter text-4xl sm:text-5xl text-[#012030] leading-[0.95]">
-              Tu precio,<br />en 4 segundos.
-            </h2>
+            <h1 className="font-display font-black tracking-tight text-3xl sm:text-4xl text-[#012030] leading-tight">
+              Prepara tu envío
+            </h1>
           </div>
           <div className="lg:col-span-5">
-            <p className="text-slate-600">Selecciona origen y destino, peso y volumen. Añade plataforma si no tienes muelle. Mínimo 60€. <strong>Fuera del Gironès o destinos especiales</strong>: precio a consultar.</p>
+            <p className="text-sm text-slate-600">Indica origen, destino y carga para calcular tu presupuesto. Fuera de ruta: precio a consultar.</p>
           </div>
         </div>
 

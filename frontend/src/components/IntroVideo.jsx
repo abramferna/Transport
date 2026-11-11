@@ -20,7 +20,7 @@ export default function IntroVideo() {
         muted
         playsInline
         controls
-        preload="auto"
+        preload="metadata"
         aria-label="Vídeo de presentación de ViaNordTrans"
         data-testid="intro-video-player"
       >
