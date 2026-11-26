@@ -8,8 +8,7 @@ const EMAIL_URL = "mailto:info@vianordtrans.es?subject=Solicitud%20de%20informac
 
 const items = [
   { id: "calculadora", label: "Preparar envío" },
-  { id: "modelos", label: "Servicios" },
-  { id: "cobertura", label: "Cobertura" },
+  { id: "zonas", label: "Zonas y tarifas" },
   { id: "flota", label: "Flota" },
   { id: "faq", label: "FAQ" },
 ];

@@ -6,9 +6,11 @@ Vercel Python runtime detects the top-level `app` callable.
 import json
 import math
 import os
+import re
 import secrets
 import sys
 import uuid
+from html import escape
 from datetime import datetime, timezone
 from urllib.parse import urlparse, parse_qs
 
@@ -20,6 +22,12 @@ if _here not in sys.path:
     sys.path.insert(0, _here)
 
 from towns import TOWNS, get_town
+from pallet_pricing import (
+    calculate_pallet_quote,
+    describe_pallet_quote,
+    public_towns,
+    public_zones,
+)
 
 # ── Config ────────────────────────────────────────────────────────────────────
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "").rstrip("/")
@@ -264,19 +272,28 @@ def sb_update(table, filters, data):
 def _td(label, value):
     if value in (None, "", [], 0):
         return ""
+    safe_value = escape(str(value))
     return (
         f"<tr>"
         f"<td style='padding:8px 12px;border-bottom:1px solid #E2E8F0;color:#64748B;font-size:12px;"
-        f"text-transform:uppercase;letter-spacing:1px;white-space:nowrap;width:38%'>{label}</td>"
-        f"<td style='padding:8px 12px;border-bottom:1px solid #E2E8F0;color:#0F172A;font-weight:600'>{value}</td>"
+        f"text-transform:uppercase;letter-spacing:1px;white-space:nowrap;width:38%'>{escape(str(label))}</td>"
+        f"<td style='padding:8px 12px;border-bottom:1px solid #E2E8F0;color:#0F172A;font-weight:600'>{safe_value}</td>"
         f"</tr>"
     )
 
 
 def _admin_html(q):
     addons_str = ", ".join(q.get("addons") or []) or "-"
-    precio     = f"{q.get('estimated_price', 0):.2f} EUR (IVA incl.)" if q.get("estimated_price") else "-"
-    tipo_label = "Plan B2B semanal" if q.get("tipo") == "b2b" else "Servicio puntual B2C"
+    precio     = (
+        f"{q.get('estimated_price', 0):.2f} EUR (tarifa por palé)"
+        if q.get("tipo") == "palets" and q.get("estimated_price") is not None
+        else f"{q.get('estimated_price', 0):.2f} EUR (IVA incl.)"
+        if q.get("estimated_price") else "-"
+    )
+    tipo_label = {
+        "b2b": "Plan B2B semanal",
+        "palets": "Presupuesto por palé y zonas",
+    }.get(q.get("tipo"), "Servicio puntual B2C")
     tel        = (q.get("telefono") or "").replace(" ", "").replace("+34", "")
     return f"""<div style='font-family:Arial,sans-serif;max-width:640px;margin:0 auto;background:#fff;border:1px solid #E2E8F0'>
       <div style='background:#0F172A;padding:24px 28px'>
@@ -311,11 +328,16 @@ def _admin_html(q):
 
 
 def _client_html(q):
-    precio = f"{q.get('estimated_price', 0):.2f} EUR (IVA incl.)" if q.get("estimated_price") else "pendiente de confirmar"
+    precio = (
+        f"{q.get('estimated_price', 0):.2f} EUR según tarifa por palé"
+        if q.get("tipo") == "palets" and q.get("estimated_price") is not None
+        else f"{q.get('estimated_price', 0):.2f} EUR (IVA incl.)"
+        if q.get("estimated_price") else "pendiente de confirmar"
+    )
     return f"""<div style='font-family:Arial,sans-serif;max-width:640px;margin:0 auto;background:#fff;border:1px solid #E2E8F0'>
       <div style='background:#1E3A8A;padding:28px'>
         <div style='color:#FBBF24;font-size:10px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px'>Solicitud recibida</div>
-        <div style='color:#fff;font-size:22px;font-weight:800'>Hola {q.get('nombre')}, gracias.</div>
+        <div style='color:#fff;font-size:22px;font-weight:800'>Hola {escape(str(q.get('nombre', '')))}, gracias.</div>
       </div>
       <div style='padding:28px;color:#0f172a'>
         <p style='margin:0 0 16px;color:#475569'>Hemos recibido tu solicitud. Te contactaremos en menos de 1 hora habil para confirmar el presupuesto.</p>
@@ -410,6 +432,9 @@ def handle_get(path, qs, environ):
         grouped = [{"comarca": c, "towns": v} for c, v in comarcas.items()]
         return _json_response({"towns": TOWNS, "grouped": grouped})
 
+    if path == "/pallet-rates":
+        return _json_response({"zones": public_zones(), "towns": public_towns()})
+
     if path == "/contact-info":
         return _json_response({
             "whatsapp": os.environ.get("WHATSAPP_NUMBER", ""),
@@ -454,6 +479,14 @@ def handle_get(path, qs, environ):
 
 
 def handle_post(path, body):
+    if path == "/pallet-calculate":
+        try:
+            return _json_response(calculate_pallet_quote(body.get("lines")))
+        except ValueError as e:
+            return _err(str(e), 400)
+        except Exception as e:
+            return _err(f"No se pudo calcular el presupuesto: {e}", 500)
+
     if path == "/calculate":
         try:
             ts   = body.get("time_slot")
@@ -506,6 +539,84 @@ def handle_post(path, body):
                 f"Hemos recibido tu solicitud - Ref. {row['reference']}",
                 _client_html(row))
             return _json_response(result, 201)
+        except Exception as e:
+            return _err(str(e), 500)
+
+    if path == "/pallet-quotes":
+        if not SUPABASE_URL:
+            return _err("DB not configured", 503)
+        try:
+            quote = calculate_pallet_quote(body.get("lines"))
+            name = str(body.get("nombre", "")).strip()
+            company = str(body.get("empresa", "")).strip() or None
+            email = str(body.get("email", "")).strip()
+            phone = str(body.get("telefono", "")).strip()
+            comments = str(body.get("comentarios", "")).strip()
+            if not name or len(name) > 160:
+                return _err("Indica tu nombre y apellidos.", 400)
+            if len(company or "") > 160 or len(comments) > 2000:
+                return _err("Revisa los datos de empresa o comentarios.", 400)
+            if not re.fullmatch(r"[^@\s]+@[^@\s]+\.[^@\s]+", email) or len(email) > 254:
+                return _err("Indica un email válido.", 400)
+            if (
+                len(re.sub(r"\D", "", phone)) < 8
+                or not re.fullmatch(r"[0-9+(). -]{8,40}", phone)
+            ):
+                return _err("Indica un teléfono válido.", 400)
+            if body.get("consent") is not True:
+                return _err("Debes aceptar la confirmación para enviar la solicitud.", 400)
+            if body.get("quote_accepted") is True and quote["consultation_required"]:
+                return _err("Las líneas de más de 1.300 kg por palé requieren valoración.", 400)
+
+            description = describe_pallet_quote(quote, comments)
+
+            origins = list(dict.fromkeys(line["origin"] for line in quote["lines"]))
+            destinations = list(dict.fromkeys(line["destination"] for line in quote["lines"]))
+            total_weight = sum(
+                line["pallets"] * line["weight_kg_per_pallet"]
+                for line in quote["lines"]
+            )
+            now = datetime.now(timezone.utc).isoformat()
+            row = {
+                "id": str(uuid.uuid4()),
+                "reference": _gen_reference(),
+                "tipo": "palets",
+                "plan_id": None,
+                "nombre": name,
+                "empresa": company,
+                "email": email,
+                "telefono": phone,
+                "origen": " | ".join(origins),
+                "destino": " | ".join(destinations),
+                "peso_kg": round(total_weight, 2),
+                "volumen_m3": None,
+                "addons": [],
+                "time_slot": None,
+                "fecha_preferida": None,
+                "descripcion": description,
+                "estimated_price": None if quote["consultation_required"] else quote["total"],
+                "status": "pendiente",
+                "created_at": now,
+            }
+            saved = sb_insert("quotes", row)
+            result = saved[0] if isinstance(saved, list) and saved else row
+            send_email(
+                ADMIN_EMAIL,
+                f"[Presupuesto por palé] {row['reference']} · {row['origen']} → {row['destino']}",
+                _admin_html(row),
+            )
+            send_email(
+                email,
+                f"Hemos recibido tu solicitud · Ref. {row['reference']}",
+                _client_html(row),
+            )
+            return _json_response({
+                "reference": result.get("reference", row["reference"]),
+                "status": "pendiente",
+                "consultation_required": quote["consultation_required"],
+            }, 201)
+        except ValueError as e:
+            return _err(str(e), 400)
         except Exception as e:
             return _err(str(e), 500)
 

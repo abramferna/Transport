@@ -8,8 +8,11 @@ import os
 import math
 import logging
 import asyncio
+import html
+import re
 import secrets
 import resend
+import sys
 from pathlib import Path
 from pydantic import BaseModel, Field, EmailStr
 from typing import List, Optional, Literal
@@ -20,6 +23,16 @@ from supabase import create_client as _supabase_create_client
 
 
 ROOT_DIR = Path(__file__).parent
+API_MODULE_DIR = ROOT_DIR.parent / "api"
+if str(API_MODULE_DIR) not in sys.path:
+    sys.path.insert(0, str(API_MODULE_DIR))
+from pallet_pricing import (
+    calculate_pallet_quote,
+    describe_pallet_quote,
+    public_towns,
+    public_zones,
+)
+
 load_dotenv(ROOT_DIR / '.env')
 
 # MongoDB connection
@@ -384,6 +397,21 @@ class QuoteCreate(BaseModel):
     estimated_price: Optional[float] = None
 
 
+class PalletQuoteCreate(BaseModel):
+    lines: List[dict] = Field(min_length=1, max_length=20)
+    nombre: str = Field(min_length=1, max_length=160)
+    telefono: str = Field(min_length=8, max_length=40)
+    email: EmailStr
+    empresa: Optional[str] = Field(default=None, max_length=160)
+    comentarios: Optional[str] = Field(default=None, max_length=2000)
+    consent: bool
+    quote_accepted: bool = False
+
+
+class PalletCalculationRequest(BaseModel):
+    lines: List[dict] = Field(min_length=1, max_length=20)
+
+
 class Quote(BaseModel):
     id: str
     reference: str
@@ -420,17 +448,27 @@ class StatusUpdate(BaseModel):
 def _row(label: str, value) -> str:
     if value in (None, "", [], 0):
         return ""
+    safe_label = html.escape(str(label))
+    safe_value = html.escape(str(value))
     return (
         f"<tr>"
-        f"<td style='padding:8px 12px;border-bottom:1px solid #E2E8F0;color:#64748B;font-size:12px;text-transform:uppercase;letter-spacing:1px;white-space:nowrap;width:38%'>{label}</td>"
-        f"<td style='padding:8px 12px;border-bottom:1px solid #E2E8F0;color:#0F172A;font-weight:600'>{value}</td>"
+        f"<td style='padding:8px 12px;border-bottom:1px solid #E2E8F0;color:#64748B;font-size:12px;text-transform:uppercase;letter-spacing:1px;white-space:nowrap;width:38%'>{safe_label}</td>"
+        f"<td style='padding:8px 12px;border-bottom:1px solid #E2E8F0;color:#0F172A;font-weight:600'>{safe_value}</td>"
         f"</tr>"
     )
 
 def _build_admin_html(q: dict) -> str:
     addons_str = ", ".join(q.get("addons") or []) or "—"
-    precio = f"{q.get('estimated_price', 0):.2f} € (IVA incl.)" if q.get("estimated_price") else "—"
-    tipo_label = "Plan B2B semanal" if q.get("tipo") == "b2b" else "Servicio puntual B2C"
+    precio = (
+        f"{q.get('estimated_price', 0):.2f} € (tarifa por palé)"
+        if q.get("tipo") == "palets" and q.get("estimated_price") is not None
+        else f"{q.get('estimated_price', 0):.2f} € (IVA incl.)"
+        if q.get("estimated_price") else "—"
+    )
+    tipo_label = {
+        "b2b": "Plan B2B semanal",
+        "palets": "Presupuesto por palé y zonas",
+    }.get(q.get("tipo"), "Servicio puntual B2C")
     paradas = q.get("paradas") or []
     paradas_html = ""
     if paradas:
@@ -496,12 +534,17 @@ def _build_admin_html(q: dict) -> str:
 
 
 def _build_client_html(q: dict) -> str:
-    precio = f"{q.get('estimated_price', 0):.2f} € (IVA incl.)" if q.get("estimated_price") else "pendiente de confirmar"
+    precio = (
+        f"{q.get('estimated_price', 0):.2f} € según tarifa por palé"
+        if q.get("tipo") == "palets" and q.get("estimated_price") is not None
+        else f"{q.get('estimated_price', 0):.2f} € (IVA incl.)"
+        if q.get("estimated_price") else "pendiente de confirmar"
+    )
     return f"""
     <div style='font-family:Arial,sans-serif;max-width:640px;margin:0 auto;background:#fff;border:1px solid #E2E8F0'>
       <div style='background:#1E3A8A;padding:28px'>
         <div style='color:#FBBF24;font-size:10px;letter-spacing:3px;text-transform:uppercase;margin-bottom:6px'>Solicitud recibida</div>
-        <div style='color:#fff;font-size:22px;font-weight:800'>Hola {q.get('nombre')}, gracias.</div>
+        <div style='color:#fff;font-size:22px;font-weight:800'>Hola {html.escape(str(q.get('nombre', '')))}, gracias.</div>
       </div>
       <div style='padding:28px;color:#0f172a'>
         <p style='margin:0 0 16px;color:#475569'>Hemos recibido tu solicitud. Te contactaremos en menos de 1 hora hábil para confirmar el presupuesto.</p>
@@ -536,6 +579,19 @@ async def root():
 @api_router.get("/plans")
 async def get_plans():
     return {"plans": WEEKLY_PLANS}
+
+
+@api_router.get("/pallet-rates")
+async def get_pallet_rates():
+    return {"zones": public_zones(), "towns": public_towns()}
+
+
+@api_router.post("/pallet-calculate")
+async def calculate_pallets(req: PalletCalculationRequest):
+    try:
+        return calculate_pallet_quote(req.lines)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
 
 
 @api_router.get("/routes")
@@ -603,6 +659,82 @@ async def create_quote(payload: QuoteCreate):
     ))
     asyncio.create_task(send_email_safe(
         quote.email,
+        f"Hemos recibido tu solicitud · Ref. {quote.reference}",
+        _build_client_html(doc),
+    ))
+    return quote
+
+
+@api_router.post("/pallet-quotes", response_model=Quote)
+async def create_pallet_quote(payload: PalletQuoteCreate):
+    name = payload.nombre.strip()
+    phone = payload.telefono.strip()
+    email = str(payload.email).strip()
+    if not name:
+        raise HTTPException(status_code=400, detail="Indica tu nombre y apellidos.")
+    if (
+        len(re.sub(r"\D", "", phone)) < 8
+        or not re.fullmatch(r"[0-9+(). -]{8,40}", phone)
+    ):
+        raise HTTPException(status_code=400, detail="Indica un teléfono válido.")
+    if not payload.consent:
+        raise HTTPException(status_code=400, detail="Debes aceptar la confirmación para enviar la solicitud.")
+
+    try:
+        calculated = calculate_pallet_quote(payload.lines)
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc))
+    if payload.quote_accepted and calculated["consultation_required"]:
+        raise HTTPException(
+            status_code=400,
+            detail="Las líneas de más de 1.300 kg por palé requieren valoración.",
+        )
+
+    origins = list(dict.fromkeys(line["origin"] for line in calculated["lines"]))
+    destinations = list(dict.fromkeys(line["destination"] for line in calculated["lines"]))
+    total_weight = sum(
+        line["pallets"] * line["weight_kg_per_pallet"]
+        for line in calculated["lines"]
+    )
+    description = describe_pallet_quote(calculated, (payload.comentarios or "").strip())
+    if payload.quote_accepted:
+        description += "\nEl cliente indica que acepta el presupuesto calculado."
+    else:
+        description += "\nEl cliente solicita confirmar la valoración."
+
+    now = datetime.now(timezone.utc)
+    quote = Quote(
+        id=str(uuid.uuid4()),
+        reference=_gen_reference(),
+        tipo="palets",
+        nombre=name,
+        empresa=(payload.empresa or "").strip() or None,
+        email=email,
+        telefono=phone,
+        origen=" | ".join(origins),
+        destino=" | ".join(destinations),
+        peso_kg=round(total_weight, 2),
+        volumen_m3=None,
+        addons=[],
+        descripcion=description,
+        estimated_price=None if calculated["consultation_required"] else calculated["total"],
+        status="pendiente",
+        created_at=now,
+        updated_at=now,
+    )
+    doc = quote.model_dump()
+    doc["created_at"] = now.isoformat()
+    doc["updated_at"] = now.isoformat()
+    await db.quotes.insert_one(doc)
+
+    asyncio.create_task(_sync_to_supabase(doc))
+    asyncio.create_task(send_email_safe(
+        ADMIN_NOTIFY_EMAIL,
+        f"[Presupuesto por palé] {quote.reference} · {quote.origen} → {quote.destino}",
+        _build_admin_html(doc),
+    ))
+    asyncio.create_task(send_email_safe(
+        email,
         f"Hemos recibido tu solicitud · Ref. {quote.reference}",
         _build_client_html(doc),
     ))
