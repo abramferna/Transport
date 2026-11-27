@@ -20,9 +20,9 @@ export const Footer = () => (
         <div>
           <div className="label-eyebrow text-slate-500 mb-4">Plataforma</div>
           <ul className="space-y-2.5 text-sm">
-            <li><a href="/#modelos" className="hover:text-[#FBBF24] transition-colors">Servicios</a></li>
-            <li><a href="/#calculadora" className="hover:text-[#FBBF24] transition-colors">Calculadora</a></li>
-            <li><a href="/#cobertura" className="hover:text-[#FBBF24] transition-colors">Cobertura</a></li>
+            <li><a href="/#calculadora" className="hover:text-[#FBBF24] transition-colors">Preparar envío</a></li>
+            <li><a href="/#zonas" className="hover:text-[#FBBF24] transition-colors">Zonas y tarifas</a></li>
+            <li><a href="/#flota" className="hover:text-[#FBBF24] transition-colors">Flota</a></li>
             <li><Link to="/seguimiento" className="hover:text-[#FBBF24] transition-colors">Seguimiento</Link></li>
             <li><Link to="/admin" className="hover:text-[#FBBF24] transition-colors">Panel admin</Link></li>
           </ul>
