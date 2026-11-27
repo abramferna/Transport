@@ -49,6 +49,7 @@ WEIGHT_FACTORS = (
     (Decimal("1300"), Decimal("1.8")),
 )
 MAX_LINES = 20
+MAX_AUTOMATIC_ORIGIN_ZONE = 3
 
 
 def normalize_town(value):
@@ -125,6 +126,30 @@ def calculate_pallet_quote(lines):
         origin = str(line.get("origin", "")).strip()
         if len(origin) > 160:
             raise ValueError(f"El origen de la línea {index} es demasiado largo.")
+        if not origin:
+            raise ValueError(f"Selecciona el origen de la línea {index}.")
+        origin_manual = line.get("origin_manual") is True
+        origin_zone_id = None
+        origin_requires_consultation = origin_manual
+        consultation_reasons = []
+        if origin_manual:
+            consultation_reasons.append("Origen fuera del corredor: presupuesto aparte")
+        else:
+            origin_zone_id = TOWN_TO_ZONE.get(normalize_town(origin))
+            if origin_zone_id is None:
+                raise ValueError(
+                    f"El origen de la línea {index} debe elegirse de la lista o solicitarse como presupuesto aparte."
+                )
+            origin = next(
+                town for zone in ZONES
+                for town in zone["towns"].split("|")
+                if normalize_town(town) == normalize_town(origin)
+            )
+            if origin_zone_id > MAX_AUTOMATIC_ORIGIN_ZONE:
+                origin_requires_consultation = True
+                consultation_reasons.append(
+                    f"Origen fuera del corredor automático (zona {origin_zone_id}): presupuesto aparte"
+                )
 
         town_name = str(line.get("town", "")).strip()
         zone_id = TOWN_TO_ZONE.get(normalize_town(town_name))
@@ -140,23 +165,33 @@ def calculate_pallet_quote(lines):
             line.get("weight_kg"), f"Peso por palé, línea {index}", Decimal("1"),
         )
         if weight > Decimal("1300"):
-            consultation_required = True
+            consultation_reasons.append("Más de 1.300 kg por palé")
             factor = None
             billed = None
             subtotal = None
         else:
             factor = next(multiplier for limit, multiplier in WEIGHT_FACTORS if weight <= limit)
             billed = pallets * factor
-            try:
-                subtotal = _money(billed * Decimal(str(zone["price"])))
-            except InvalidOperation:
-                raise ValueError(f"El importe de la línea {index} es demasiado grande para calcularlo.")
+            if origin_requires_consultation:
+                subtotal = None
+            else:
+                try:
+                    subtotal = _money(billed * Decimal(str(zone["price"])))
+                except InvalidOperation:
+                    raise ValueError(f"El importe de la línea {index} es demasiado grande para calcularlo.")
+        if consultation_reasons:
+            consultation_required = True
+        if billed is not None:
             billable_pallets += billed
+        if subtotal is not None:
             total += subtotal
 
         input_pallets += pallets
         calculated.append({
             "origin": origin,
+            "origin_zone": origin_zone_id,
+            "origin_requires_consultation": origin_requires_consultation,
+            "consultation_reasons": consultation_reasons,
             "destination": next(
                 town for town in zone["towns"].split("|")
                 if normalize_town(town) == normalize_town(town_name)
@@ -169,15 +204,16 @@ def calculate_pallet_quote(lines):
             "factor": json_number(factor, f"Factor de la línea {index}") if factor is not None else None,
             "billable_pallets": json_number(billed, f"Palés facturables, línea {index}") if billed is not None else None,
             "subtotal": json_number(subtotal, f"Subtotal de la línea {index}") if subtotal is not None else None,
-            "consultation_required": weight > Decimal("1300"),
+            "consultation_required": bool(consultation_reasons),
         })
 
+    priced_lines = [line for line in calculated if line["subtotal"] is not None]
     return {
         "lines": calculated,
         "line_count": len(calculated),
         "input_pallets": json_number(input_pallets, "Total de palés"),
         "billable_pallets": json_number(billable_pallets, "Total de palés facturables"),
-        "total": json_number(_money(total), "Total"),
+        "total": json_number(_money(total), "Total") if priced_lines else None,
         "consultation_required": consultation_required,
         "currency": "EUR",
         "maximum_weight_kg_per_pallet": 1300,
@@ -190,7 +226,7 @@ def describe_pallet_quote(quote, comments=""):
         amount = (
             f"{line['subtotal']:.2f} €"
             if line["subtotal"] is not None
-            else "CONSULTAR (>1.300 kg/palé)"
+            else "CONSULTAR (" + "; ".join(line["consultation_reasons"]) + ")"
         )
         factor = line["factor"] if line["factor"] is not None else "consultar"
         billed = line["billable_pallets"] if line["billable_pallets"] is not None else "—"
@@ -202,7 +238,7 @@ def describe_pallet_quote(quote, comments=""):
         )
     if quote["consultation_required"]:
         details.append(
-            "Incluye línea(s) pendientes de valoración manual; el total mostrado no las incluye."
+            "Incluye línea(s) pendientes de valoración manual; el total parcial mostrado no las incluye."
         )
     details.append(
         f"Palés introducidos: {quote['input_pallets']:g}; "

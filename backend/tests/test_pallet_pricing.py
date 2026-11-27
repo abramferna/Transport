@@ -10,17 +10,20 @@ PRICING = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(PRICING)
 
 
-def line(destination="Girona", pallets=1, weight_kg=500, origin=""):
+def line(destination="Girona", pallets=1, weight_kg=500, origin="Girona", origin_manual=False):
     return {
         "origin": origin,
+        "origin_manual": origin_manual,
         "town": destination,
         "pallets": pallets,
         "weight_kg": weight_kg,
     }
 
 
-def price(destination="Girona", pallets=1, weight_kg=500, origin=""):
-    return PRICING.calculate_pallet_quote([line(destination, pallets, weight_kg, origin)])
+def price(destination="Girona", pallets=1, weight_kg=500, origin="Girona", origin_manual=False):
+    return PRICING.calculate_pallet_quote([
+        line(destination, pallets, weight_kg, origin, origin_manual)
+    ])
 
 
 def test_attached_tariff_has_five_zone_rates_and_258_towns():
@@ -63,7 +66,7 @@ def test_overweight_line_requires_review_and_is_not_added_to_total():
     assert result["consultation_required"] is True
     assert result["lines"][0]["subtotal"] is None
     assert result["billable_pallets"] == 0
-    assert result["total"] == 0
+    assert result["total"] is None
 
 
 def test_fractional_pallets_apply_weight_factor_and_round_to_cents():
@@ -90,8 +93,47 @@ def test_accents_and_case_are_ignored_for_town_lookup():
     assert price("la bisbal d'emporda")["lines"][0]["unit_price"] == 44
 
 
-def test_origin_is_optional_and_does_not_affect_price():
-    assert price(origin="")["total"] == price(origin="Barcelona")["total"]
+def test_origins_inside_zones_one_to_three_use_automatic_price():
+    assert price(origin="Girona")["total"] == price(origin="Barcelona")["total"]
+
+
+def test_every_delivery_town_is_selectable_as_origin_and_outside_zones_are_manual():
+    for town in PRICING.public_towns():
+        result = price(origin=town["name"])
+        requires_quote = town["zone"] > PRICING.MAX_AUTOMATIC_ORIGIN_ZONE
+        assert result["lines"][0]["origin"] == town["name"]
+        assert result["lines"][0]["origin_requires_consultation"] is requires_quote
+        assert result["consultation_required"] is requires_quote
+
+
+@pytest.mark.parametrize(("origin", "zone"), [("Lleida", 4), ("Tarragona", 5)])
+def test_origins_outside_corridor_are_kept_as_manual_quotes(origin, zone):
+    result = price(origin=origin, pallets=2)
+    line_result = result["lines"][0]
+    assert line_result["origin_zone"] == zone
+    assert line_result["origin_requires_consultation"] is True
+    assert line_result["subtotal"] is None
+    assert result["consultation_required"] is True
+    assert result["billable_pallets"] == 2
+    assert result["total"] is None
+
+
+def test_manual_origin_can_be_entered_but_never_gets_an_automatic_price():
+    result = price(origin="Sant Jaume dels Domenys", origin_manual=True, pallets=2)
+    assert result["consultation_required"] is True
+    assert result["lines"][0]["origin"] == "Sant Jaume dels Domenys"
+    assert result["lines"][0]["subtotal"] is None
+    assert result["total"] is None
+
+
+def test_unknown_origin_must_be_explicitly_marked_for_manual_quote():
+    with pytest.raises(ValueError, match="elegirse de la lista"):
+        price(origin="Sant Jaume dels Domenys")
+
+
+def test_origin_is_required_for_a_corridor_price():
+    with pytest.raises(ValueError, match="Selecciona el origen"):
+        price(origin="")
 
 
 def test_town_not_in_the_automatic_tariff_is_rejected_for_manual_quote():

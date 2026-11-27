@@ -33,11 +33,23 @@ export const Label = ({ children, htmlFor, optional }) => (
   </label>
 );
 
-function TownPicker({ value, towns, onChange, lineIndex, selectedPrice }) {
+function TownPicker({
+  value,
+  towns,
+  onChange,
+  lineIndex,
+  field,
+  label,
+  selectedPrice,
+  isOrigin,
+  manual,
+  onManualChange,
+}) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState(value);
   const editing = useRef(false);
   const rootRef = useRef(null);
+  const inputId = `${field}-${lineIndex}`;
   const matches = useMemo(() => {
     const needle = normalize(query);
     if (!needle) return towns.slice(0, 8);
@@ -60,21 +72,53 @@ function TownPicker({ value, towns, onChange, lineIndex, selectedPrice }) {
     return () => document.removeEventListener("pointerdown", closeOnOutsideClick);
   }, [open]);
 
+  if (manual) {
+    return (
+      <div>
+        <Label htmlFor={inputId}>{label}</Label>
+        <input
+          id={inputId}
+          className={fieldClass}
+          autoComplete="address-level2"
+          value={value}
+          maxLength={160}
+          placeholder="Escribe el municipio de recogida"
+          onChange={(event) => onChange(event.target.value)}
+          aria-label={`Origen fuera del corredor, línea ${lineIndex}`}
+        />
+        <div className="mt-1 flex flex-wrap items-center justify-between gap-2">
+          <span className="text-[10px] font-semibold text-amber-800">Presupuesto aparte · sin tarifa automática</span>
+          <button
+            type="button"
+            onClick={() => {
+              onChange("");
+              onManualChange(false);
+              setQuery("");
+            }}
+            className="text-[10px] font-bold text-[#087a98] underline"
+          >
+            Elegir un pueblo de la lista
+          </button>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div ref={rootRef} className="relative">
-      <Label htmlFor={`destination-${lineIndex}`}>Destino</Label>
+      <Label htmlFor={inputId}>{label}</Label>
       <div className="relative mt-1.5">
         <MapPinIcon size={17} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" aria-hidden="true" />
         <input
-          id={`destination-${lineIndex}`}
+          id={inputId}
           autoComplete="off"
           role="combobox"
           aria-expanded={open}
-          aria-controls={`destination-options-${lineIndex}`}
+          aria-controls={`${field}-options-${lineIndex}`}
           aria-autocomplete="list"
-          aria-label={`Población de destino, línea ${lineIndex}`}
-          placeholder="Busca una población…"
-          className={`${fieldClass} pl-9 pr-16`}
+          aria-label={`${label}, línea ${lineIndex}`}
+          placeholder={isOrigin ? "Busca el origen…" : "Busca una población…"}
+          className={`${fieldClass} pl-9 ${selectedPrice != null ? "pr-16" : "pr-3"}`}
           value={query}
           onFocus={() => setOpen(true)}
           onChange={(event) => {
@@ -91,6 +135,11 @@ function TownPicker({ value, towns, onChange, lineIndex, selectedPrice }) {
               setQuery(matches[0].name);
               editing.current = false;
               setOpen(false);
+            } else if (event.key === "Enter" && isOrigin && query.trim() && matches.length === 0) {
+              event.preventDefault();
+              onChange(query.trim());
+              onManualChange(true);
+              setOpen(false);
             }
           }}
         />
@@ -102,7 +151,7 @@ function TownPicker({ value, towns, onChange, lineIndex, selectedPrice }) {
       </div>
       {open && (
         <ul
-          id={`destination-options-${lineIndex}`}
+          id={`${field}-options-${lineIndex}`}
           role="listbox"
           className="absolute inset-x-0 top-full z-30 mt-1 max-h-60 overflow-y-auto border border-slate-200 bg-white py-1 shadow-xl"
         >
@@ -122,12 +171,31 @@ function TownPicker({ value, towns, onChange, lineIndex, selectedPrice }) {
               >
                 <span className="font-semibold text-[#163443]">{town.name}</span>
                 <span className="text-xs text-slate-500">
-                  Zona {town.zone} · {formatEuro(town.price)}/palé
+                  {isOrigin
+                    ? town.zone <= 3 ? `Zona ${town.zone} · corredor` : `Zona ${town.zone} · presupuesto aparte`
+                    : `Zona ${town.zone} · ${formatEuro(town.price)}/palé`}
                 </span>
               </button>
             </li>
           )) : (
-            <li className="px-3.5 py-3 text-sm text-slate-500">No está en la tarifa automática. Contacta para consultar.</li>
+            <li className="px-3.5 py-3 text-sm text-slate-500">
+              {isOrigin && query.trim() ? (
+                <div className="space-y-2">
+                  <p>Este origen no está en la lista automática.</p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      onChange(query.trim());
+                      onManualChange(true);
+                      setOpen(false);
+                    }}
+                    className="font-bold text-[#087a98] underline"
+                  >
+                    Solicitar presupuesto aparte para «{query.trim()}»
+                  </button>
+                </div>
+              ) : "No está en la tarifa automática. Contacta para consultar."}
+            </li>
           )}
         </ul>
       )}
@@ -137,8 +205,12 @@ function TownPicker({ value, towns, onChange, lineIndex, selectedPrice }) {
 
 export default function PalletShipmentLine({ line, index, towns, result, onChange, onRemove, canRemove }) {
   const destination = towns.find((town) => town.name === line.town);
+  const originTown = towns.find((town) => town.name === line.origin);
   const lineResult = result?.lines?.[index];
   const palletsValue = decimalInput(line.pallets);
+  const palletsLabel = palletsValue == null
+    ? "—"
+    : `${formatNumber(palletsValue)} ${palletsValue === 1 ? "marcado" : "marcados"}`;
   const weightValue = decimalInput(line.weight_kg);
   const overWeight = weightValue > 1300;
   const invalidPallets = line.pallets.trim() !== "" && (palletsValue == null || palletsValue < 0.1);
@@ -165,15 +237,22 @@ export default function PalletShipmentLine({ line, index, towns, result, onChang
 
       <div className="grid gap-x-5 gap-y-4 p-4 sm:grid-cols-2 sm:p-5 lg:grid-cols-12 lg:items-end">
         <div className="sm:col-span-2 lg:col-span-3">
-          <Label htmlFor={`origin-${index}`} optional>Origen</Label>
-          <input
-            id={`origin-${index}`}
-            className={fieldClass}
+          <TownPicker
             value={line.origin}
-            maxLength={160}
-            placeholder="Población o dirección"
-            onChange={(event) => onChange({ origin: event.target.value })}
+            towns={towns}
+            onChange={(origin) => onChange({ origin })}
+            lineIndex={index + 1}
+            field="origin"
+            label="Origen"
+            isOrigin
+            manual={line.origin_manual}
+            onManualChange={(origin_manual) => onChange({ origin_manual })}
           />
+          {!line.origin_manual && originTown && originTown.zone > 3 && (
+            <p className="mt-1 text-[10px] font-semibold text-amber-800">
+              Fuera del corredor · presupuesto aparte
+            </p>
+          )}
         </div>
 
         <div className="sm:col-span-2 lg:col-span-4">
@@ -182,12 +261,16 @@ export default function PalletShipmentLine({ line, index, towns, result, onChang
             towns={towns}
             onChange={(town) => onChange({ town })}
             lineIndex={index + 1}
+            field="destination"
+            label="Destino"
             selectedPrice={destination?.price}
           />
         </div>
 
         <div className="lg:col-span-2">
-          <Label htmlFor={`pallets-${index}`}>N.º de palés</Label>
+          <Label htmlFor={`pallets-${index}`}>
+            N.º de palés · <span className="normal-case font-bold tracking-normal text-[#087a98]">{palletsLabel}</span>
+          </Label>
           <div className="mt-1.5 flex h-12 border border-slate-300 bg-white">
             <button
               type="button"
@@ -238,16 +321,62 @@ export default function PalletShipmentLine({ line, index, towns, result, onChang
           {invalidWeight && <p className="mt-1 text-[10px] text-red-700">El peso mínimo es 1 kg por palé.</p>}
         </div>
 
+        <div className="sm:col-span-2 lg:col-span-12" role="group" aria-label={`Seleccionar número de palés, línea ${index + 1}`}>
+          <div className="mb-1.5 flex items-center justify-between gap-2 text-[10px] font-bold uppercase tracking-[.1em] text-slate-500">
+            <span>Marca la cantidad</span>
+            <span className="normal-case font-medium tracking-normal">Pulsa un número · máximo visual 18</span>
+          </div>
+          <div className="grid grid-cols-9 gap-1 sm:grid-cols-[repeat(18,minmax(0,1fr))]">
+            {Array.from({ length: 18 }, (_, number) => {
+              const quantity = number + 1;
+              const marked = (palletsValue ?? 0) >= quantity;
+              return (
+                <button
+                  key={quantity}
+                  type="button"
+                  aria-label={`Seleccionar ${quantity} ${quantity === 1 ? "palé" : "palés"}`}
+                  aria-pressed={palletsValue === quantity}
+                  onClick={() => onChange({ pallets: String(quantity) })}
+                  className={`flex min-h-8 items-center justify-center border text-xs font-bold transition ${
+                    marked
+                      ? "border-[#092c3a] bg-[#092c3a] text-white"
+                      : "border-slate-300 bg-white text-slate-600 hover:border-[#087a98] hover:bg-slate-50"
+                  }`}
+                >
+                  {quantity}
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
         {overWeight ? (
           <div className="sm:col-span-2 lg:col-span-12 border-l-2 border-amber-500 bg-amber-50 px-3 py-2 text-xs leading-relaxed text-amber-900" role="status">
             Más de 1.300 kg por palé: esta línea requiere una valoración personalizada.
           </div>
         ) : lineResult ? (
           <div className="sm:col-span-2 lg:col-span-12 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-3 text-xs text-slate-600">
-            <span>
-              Zona {lineResult.zone} · factor ×{formatNumber(lineResult.factor, 1)} · {formatNumber(lineResult.billable_pallets, 2)} palés facturables
-            </span>
-            <strong className="text-sm text-[#143746]">{formatEuro(lineResult.subtotal)}</strong>
+            <div>
+              <p className="font-bold text-[#163744]">
+                Zona {lineResult.zone} · {formatEuro(lineResult.unit_price)} por palé
+              </p>
+              <p className="mt-0.5">
+                {formatNumber(lineResult.weight_kg_per_pallet)} kg/palé → factor ×{formatNumber(lineResult.factor, 1)}
+              </p>
+              <p className="mt-0.5">
+                {formatNumber(lineResult.pallets)} palés × factor {formatNumber(lineResult.factor, 1)} = {formatNumber(lineResult.billable_pallets)} facturables
+              </p>
+              {lineResult.consultation_required && (
+                <p className="mt-1 font-bold text-amber-800">
+                  {lineResult.consultation_reasons?.join(" · ") || "Requiere presupuesto aparte"}
+                </p>
+              )}
+            </div>
+            <strong className="text-sm text-[#143746]">
+              {lineResult.subtotal == null
+                ? "Presupuesto aparte"
+                : `${formatNumber(lineResult.billable_pallets)} × ${formatEuro(lineResult.unit_price)} = ${formatEuro(lineResult.subtotal)}`}
+            </strong>
           </div>
         ) : null}
       </div>

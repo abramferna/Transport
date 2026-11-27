@@ -566,7 +566,7 @@ def handle_post(path, body):
             if body.get("consent") is not True:
                 return _err("Debes aceptar la confirmación para enviar la solicitud.", 400)
             if body.get("quote_accepted") is True and quote["consultation_required"]:
-                return _err("Las líneas de más de 1.300 kg por palé requieren valoración.", 400)
+                return _err("Las líneas marcadas para presupuesto aparte o valoración no se pueden aceptar como precio cerrado.", 400)
 
             description = describe_pallet_quote(quote, comments)
 

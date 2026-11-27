@@ -27,7 +27,7 @@ export default function PalletQuoteCalculator() {
   const [towns, setTowns] = useState([]);
   const [ratesLoading, setRatesLoading] = useState(true);
   const [ratesError, setRatesError] = useState("");
-  const [lines, setLines] = useState([{ id: 1, origin: "", town: "", pallets: "1", weight_kg: "500" }]);
+  const [lines, setLines] = useState([{ id: 1, origin: "", origin_manual: false, town: "", pallets: "1", weight_kg: "500" }]);
   const [quote, setQuote] = useState(null);
   const [calculating, setCalculating] = useState(false);
   const [calculationError, setCalculationError] = useState("");
@@ -57,6 +57,7 @@ export default function PalletQuoteCalculator() {
 
   const townByName = useMemo(() => new Map(towns.map((town) => [town.name, town])), [towns]);
   const readyLines = useMemo(() => lines.every((line) => (
+    (line.origin_manual ? Boolean(line.origin.trim()) : townByName.has(line.origin)) &&
     townByName.has(line.town) &&
     (decimalInput(line.pallets) ?? 0) >= 0.1 &&
     (decimalInput(line.weight_kg) ?? 0) >= 1
@@ -75,8 +76,9 @@ export default function PalletQuoteCalculator() {
       setCalculating(true);
       setCalculationError("");
       api.post("/pallet-calculate", {
-        lines: lines.map(({ origin, town, pallets, weight_kg }) => ({
+        lines: lines.map(({ origin, origin_manual, town, pallets, weight_kg }) => ({
           origin: origin.slice(0, 160),
+          origin_manual,
           town,
           pallets,
           weight_kg,
@@ -119,7 +121,7 @@ export default function PalletQuoteCalculator() {
     setQuote(null);
     setLines((current) => [
       ...current,
-      { id: nextId.current++, origin: "", town: "", pallets: "1", weight_kg: "500" },
+      { id: nextId.current++, origin: "", origin_manual: false, town: "", pallets: "1", weight_kg: "500" },
     ]);
   };
 
@@ -133,14 +135,22 @@ export default function PalletQuoteCalculator() {
     if (!quote) return "";
     const rows = quote.lines.map((line, index) => (
       `${index + 1}. ${line.origin || "Origen sin especificar"} → ${line.destination} · ` +
-      `Zona ${line.zone} · ${formatNumber(line.pallets)} palés · ` +
-      `${formatNumber(line.weight_kg_per_pallet)} kg/palé · ` +
-      `${line.consultation_required ? "Consultar" : `${formatEuro(line.subtotal)} (${formatNumber(line.billable_pallets)} palés facturables)`}`
+      `Zona ${line.zone} · ${formatEuro(line.unit_price)}/palé · ${formatNumber(line.pallets)} palés · ` +
+      `${formatNumber(line.weight_kg_per_pallet)} kg/palé → factor ×${line.factor == null ? "consultar" : formatNumber(line.factor, 1)} · ` +
+      `${line.consultation_required
+        ? "Consultar"
+        : `${formatNumber(line.pallets)} × ${formatNumber(line.factor, 1)} = ${formatNumber(line.billable_pallets)} palés facturables; ${formatNumber(line.billable_pallets)} × ${formatEuro(line.unit_price)} = ${formatEuro(line.subtotal)}`}`
     ));
     rows.push(`Palés introducidos: ${formatNumber(quote.input_pallets)}`);
     rows.push(`Palés facturables: ${formatNumber(quote.billable_pallets)}`);
-    rows.push(`${consultationRequired ? "TOTAL PARCIAL" : "TOTAL PRESUPUESTO"}: ${formatEuro(quote.total)}`);
-    if (consultationRequired) rows.push("Las líneas de más de 1.300 kg por palé requieren valoración.");
+    rows.push(quote.total == null
+      ? quote.lines.some((line) => line.origin_requires_consultation)
+        ? "PRESUPUESTO APARTE: el origen está fuera del corredor automático."
+        : "PRESUPUESTO PENDIENTE DE VALORACIÓN: hay una línea no calculable automáticamente."
+      : `${consultationRequired ? "TOTAL PARCIAL" : "TOTAL PRESUPUESTO"}: ${formatEuro(quote.total)}`);
+    if (consultationRequired) {
+      rows.push("Hay líneas que requieren presupuesto aparte o valoración manual; no están incluidas en el total.");
+    }
     return rows.join("\n");
   };
 
@@ -164,6 +174,7 @@ export default function PalletQuoteCalculator() {
       const { data } = await api.post("/pallet-quotes", {
         lines: quote.lines.map((line) => ({
           origin: line.origin,
+          origin_manual: line.origin_manual,
           town: line.destination,
           pallets: line.pallets,
           weight_kg: line.weight_kg_per_pallet,
@@ -199,7 +210,7 @@ export default function PalletQuoteCalculator() {
               </h1>
             </div>
             <p className="max-w-[390px] text-sm leading-relaxed text-[#5c7079]">
-              Origen sin coste, destino con zona automática. Añade líneas y el total se actualiza.
+              Elige origen y destino. Fuera del corredor, el envío pasa a presupuesto aparte.
             </p>
           </div>
 
@@ -217,7 +228,7 @@ export default function PalletQuoteCalculator() {
                     <PackageIcon size={18} className="text-[#087a98]" aria-hidden="true" />
                     {lines.length === 1 ? "Presupuesto · 1 línea" : `Presupuesto · ${lines.length} líneas`}
                   </div>
-                  <span className="text-[11px] text-slate-500">Escribe sin acentos o elige el destino de la lista</span>
+                  <span className="text-[11px] text-slate-500">Busca y selecciona origen y destino de la lista</span>
                 </div>
 
                 {lines.map((line, index) => (
@@ -270,7 +281,7 @@ export default function PalletQuoteCalculator() {
                 )}
 
                 <p className="text-[11px] leading-relaxed text-slate-500">
-                  El origen solo se solicita como referencia y no modifica el precio. Los destinos fuera de la lista deben consultarse.
+                  Los municipios de zonas 1–3 permiten calcular el envío automáticamente. Un origen de zonas 4–5 o fuera de la lista se envía como presupuesto aparte.
                   El importe reproduce la tarifa por palé proporcionada; no desglosa el IVA.
                 </p>
               </div>
@@ -291,27 +302,32 @@ export default function PalletQuoteCalculator() {
                 <div className="mt-5 border-b border-white/15 pb-5">
                   <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
                     <span className="text-[clamp(2.6rem,7vw,3.6rem)] font-black leading-none tracking-[-.07em] text-white" aria-live="polite">
-                      {calculating ? "…" : quote ? formatEuro(quote.total) : "—"}
+                      {calculating ? "…" : quote ? quote.total == null ? "Aparte" : formatEuro(quote.total) : "—"}
                     </span>
                     <span className="text-xs text-[#a9bdc4]">
-                      {consultationRequired ? "total parcial · consultar" : "presupuesto"}
+                      {quote?.total == null && quote
+                        ? quote.lines.some((line) => line.origin_requires_consultation) ? "fuera del corredor" : "requiere valoración"
+                        : consultationRequired ? "total parcial · consultar" : "presupuesto"}
                     </span>
                   </div>
                   {quote?.consultation_required && (
                     <p className="mt-2 text-xs leading-relaxed text-amber-200">
-                      Los palés que superan 1.300 kg no están incluidos en el total y requieren valoración.
+                      Algunas líneas requieren presupuesto aparte o valoración y no están incluidas en el total.
                     </p>
                   )}
                 </div>
 
                 <div className="mt-4 space-y-2 text-xs text-[#d0dce0]">
-                  <div className="flex justify-between gap-3"><span>Distancia</span><span>No se cobra por km</span></div>
-                  {quote?.lines.map((line, index) => (
+                  {quote?.lines.length ? quote.lines.map((line, index) => (
                     <div key={`${line.destination}-${index}`} className="flex justify-between gap-3">
-                      <span className="min-w-0 truncate">Línea {index + 1} · Zona {line.zone}</span>
+                      <span className="min-w-0 truncate">Línea {index + 1} · Z{line.zone} · {formatEuro(line.unit_price)}/palé</span>
                       <strong>{line.subtotal == null ? "Consultar" : formatEuro(line.subtotal)}</strong>
                     </div>
-                  ))}
+                  )) : (
+                    <p className="leading-relaxed text-[#d0dce0]">
+                      Precio = palés facturables × tarifa de la zona de destino. El peso determina el factor aplicado.
+                    </p>
+                  )}
                 </div>
 
                 <button
@@ -320,11 +336,13 @@ export default function PalletQuoteCalculator() {
                   disabled={!quote || calculating}
                   className="mt-6 flex min-h-12 w-full items-center justify-between gap-3 bg-[#f6bb26] px-4 text-sm font-black text-[#102c38] transition hover:bg-[#ffd04d] disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  {consultationRequired ? "Solicitar valoración" : "Aceptar pedido"}
+                  {!quote
+                    ? calculating ? "Calculando…" : "Completa el envío"
+                    : consultationRequired ? "Solicitar valoración" : "Aceptar pedido"}
                   <ArrowRightIcon size={18} weight="bold" aria-hidden="true" />
                 </button>
                 <p className="mt-3 text-[10px] leading-relaxed text-[#a9bdc4]">
-                  Precio automático por destino y palé facturable. Los destinos fuera de zona requieren presupuesto personalizado.
+                  La tarifa automática se aplica con origen dentro del corredor. Los demás orígenes pasan a presupuesto aparte.
                 </p>
                 <button
                   type="button"
@@ -355,7 +373,7 @@ export default function PalletQuoteCalculator() {
                     </h2>
                     <p className="mt-1 text-sm text-emerald-900">
                       {submission.consultation_required
-                        ? "Revisaremos las líneas que requieren valoración y te contactaremos para confirmar el precio."
+                        ? "Revisaremos las líneas pendientes de valoración y te contactaremos para confirmar el precio."
                         : "Hemos recibido el presupuesto aceptado. Te enviaremos la confirmación por email."}
                     </p>
                   </div>
@@ -411,7 +429,7 @@ export default function PalletQuoteCalculator() {
                     />
                     <span>
                       {consultationRequired
-                        ? "Solicito la valoración de las líneas marcadas para consultar y acepto enviar estos datos para que ViaNordTrans pueda gestionar mi solicitud."
+                        ? "Solicito presupuesto aparte o valoración de las líneas marcadas para consultar y acepto enviar estos datos para que ViaNordTrans pueda gestionar mi solicitud."
                         : "He revisado y acepto este presupuesto y autorizo el envío de mis datos para tramitar el pedido."}
                       {" "}Consulta la{" "}
                       <a href="/privacidad" target="_blank" rel="noreferrer" className="font-bold text-[#087a98] underline">política de privacidad</a>.

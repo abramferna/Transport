@@ -1,7 +1,7 @@
 const QUESTIONS = [
   {
     question: "¿Cómo se calcula el precio de cada línea?",
-    answer: "Se multiplica el precio por palé de la zona de destino por los palés facturables. El origen se recoge como referencia y no tiene coste en esta tarifa.",
+    answer: "Se multiplica el precio por palé de la zona de destino por los palés facturables. Selecciona el origen: las zonas 1–3 se calculan automáticamente; las zonas 4–5 y los orígenes no incluidos se envían como presupuesto aparte.",
   },
   {
     question: "¿Qué significa “palés facturables”?",
@@ -13,7 +13,7 @@ const QUESTIONS = [
   },
   {
     question: "¿Puedo incluir destinos y orígenes distintos?",
-    answer: "Sí. Añade una línea por cada destino y señala su origen. El presupuesto suma las líneas que están dentro de la tarifa automática.",
+    answer: "Sí. Añade una línea por cada destino y elige un origen en el mismo buscador de municipios. Los orígenes fuera del corredor se marcan para presupuesto aparte y no reciben una tarifa automática.",
   },
   {
     question: "¿Y si mi destino no aparece en la lista?",

@@ -687,7 +687,7 @@ async def create_pallet_quote(payload: PalletQuoteCreate):
     if payload.quote_accepted and calculated["consultation_required"]:
         raise HTTPException(
             status_code=400,
-            detail="Las líneas de más de 1.300 kg por palé requieren valoración.",
+            detail="Las líneas marcadas para presupuesto aparte o valoración no se pueden aceptar como precio cerrado.",
         )
 
     origins = list(dict.fromkeys(line["origin"] for line in calculated["lines"]))
